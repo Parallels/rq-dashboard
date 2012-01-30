@@ -1,0 +1,4 @@
+Flask
+redis
+rq
+simplejson
