@@ -1,0 +1,95 @@
+{% extends "skeletons/base.html" %}
+
+
+
+{% block content %}
+
+<h1>Queues</h1>
+<p>This list below contains all the registered queues with the number of jobs currently in the queue.  Select a queue from above to view all jobs currently pending on the queue.</p>
+
+<a class="btn" href="#">Reload</a> <span class="loading" style="display:none">Loading...</span>
+
+<table id="queues">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Jobs</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-role="loading-placeholder">
+            <td colspan="2">Loading...</td>
+        </tr>
+    </tbody>
+</table>
+
+<script name="queue-row" type="text/template">
+    <tr data-role="queue">
+        <td><%= name %></td>
+        <td><%= count %></td>
+    </tr>
+</script>
+
+{% endblock %}
+
+
+
+{% block inline_js %}
+
+require(['jquery', 'api'], function($, api) {
+
+    var reload_table = function(done) {
+        var $raw_tpl = $('script[name=queue-row]').html();
+        var template = _.template($raw_tpl);
+
+        var $tbody = $('table#queues tbody');
+
+        $('tr[data-role=loading-placeholder]', $tbody).show();
+
+        // Fetch the available queues
+        api.getQueues(function(queues) {
+            $tbody.empty();
+
+            var $fq;
+            $.each(queues, function(i, queue) {
+                var html = template(queue);
+                var $el = $(html);
+
+                // Special markup for the failure queue
+                if (queue.name === 'failure' && queue.count > 0) {
+                    $el.addClass('failure');
+                    $fq = $el;
+                    return;
+                }
+
+                $tbody.append($el);
+            });
+
+            // Append the failure queue at the end, since it's a special queue
+            if ($fq !== undefined) {
+                $tbody.append($fq);
+            }
+
+            if (done !== undefined) {
+                done();
+            }
+        });
+    };
+
+    var refresh_table = function() {
+        $('span.loading').show();
+        reload_table(function() {
+            $('span.loading').hide();
+        });
+    };
+
+    $(document).ready(function() {
+
+        reload_table();
+        $('.btn').click(refresh_table);
+        setInterval(refresh_table, 2000);
+
+    });
+});
+
+{% endblock %}

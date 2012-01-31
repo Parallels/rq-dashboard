@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1.0">
+  <title>{{ subtitle }}{% if subtitle %} - {% endif %}RQ-web</title>
+
+  {#- Le HTML5 shim, for IE6-8 support of HTML elements #}
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+  {# Le styles -#}
+  <link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
+  <link href="/static/css/main.css" rel="stylesheet">
+  {# {% block extra_css %}{% endblock -%} #}
+  {#
+  <style type="text/css">
+    {%- block inline_css %}{% endblock -%}
+  </style>
+  #}
+
+  {#-
+  <!-- Le fav and touch icons -->
+  <link rel="shortcut icon" href="/static/img/favicon.ico">
+  <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/static/img/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/static/img/apple-touch-icon-114x114.png">
+  -#}
+</head>
+
+<body>
+
+<div class="container">
+
+    <div id="topbar" class="row">
+        <div class="span16">
+            <ul class="tabs">
+            {% for tabname in ['overview', 'workers', 'queues', 'stats'] %}
+            <li {%- if tabname == tab %} class="active"{% endif %}><a href="{{ url_for('.' + tabname) }}">{{ tabname|capitalize() }}</a></li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    {#- This container is the main area for the page's content -#}
+    <div id="content" class="row">
+        <div class="span16">
+
+            <img id="ribbon" src="/static/img/ribbon.png" />
+
+            {% block content %}{% endblock %}
+
+        </div>
+    </div>
+
+</div>
+
+{#- JavaScripts are loaded at the end -#}
+
+{#- Custom JS -#}
+<script src="/static/js/libs/require-jquery.js" type="text/javascript"></script>
+<script src="/static/js/libs/underscore-min.js" type="text/javascript"></script>
+<script type="text/javascript" charset="utf-8">
+require.config({
+    baseUrl: '/static/js',
+    paths: {
+        'jquery': 'libs/require-jquery'
+    }
+});
+</script>
+<script type="text/javascript">
+{% block inline_js %}{% endblock %}
+</script>
+
+</body>
+</html>

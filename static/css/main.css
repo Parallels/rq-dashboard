@@ -1,0 +1,74 @@
+/* @override http://localhost:9181/static/css/main.css */
+
+body {	
+	background-color: black;
+}
+
+.container {
+	background: white;
+}
+
+div#topbar {
+    background-color: black;
+    color: white;
+    display: block;
+}
+
+img#ribbon {
+	position: relative;
+	float: right;
+	margin-right: 20px;
+	margin-top: -84px;
+}
+
+div#topbar ul li a {
+	color: white;
+}
+
+div#topbar ul li.active a {
+    color: red;
+}
+
+.tabs {
+    font-size: 1.25em;
+    margin: 20px 0 0 0;
+}
+
+.tabs > li > a:hover {
+    color: #655 !important;
+}
+
+#content {
+	margin: 2em 0 0 0;
+}
+
+h1 {
+    color: red;
+}
+
+p {
+    color: #888;
+    font-size: 0.85em;
+}
+
+table, table tr, table tr td {
+	background-color: snow;
+}
+
+table#queues {
+	width: 300px;
+}
+
+table tr.failure {
+	color: red;
+    border-top: 2px solid red;
+}
+
+table tr.failure td {
+	background-color: lightgoldenrodyellow;
+}
+
+span.loading {
+    font-size: .8em;
+    color: #555;
+}

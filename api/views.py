@@ -8,5 +8,6 @@ app = Blueprint('api', __name__)
 @app.route('/queues')
 @jsonify
 def list_queues():
-    queues = [dict(name=q.name, count=q.count) for q in Queue.all()]
+    import random
+    queues = [dict(name=q.name, count=random.randint(0, 59)) for q in sorted(Queue.all())]
     return dict(queues=queues)
