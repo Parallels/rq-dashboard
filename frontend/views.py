@@ -10,7 +10,7 @@ def overview():
 
 @app.route('/workers')
 def workers():
-    return render_template('skeletons/base.html', subtitle='Workers',
+    return render_template('frontend/workers.html', subtitle='Workers',
             tab='workers')
 
 @app.route('/queues')

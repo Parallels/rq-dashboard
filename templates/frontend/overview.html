@@ -7,7 +7,7 @@
 <h1>Queues</h1>
 <p>This list below contains all the registered queues with the number of jobs currently in the queue.  Select a queue from above to view all jobs currently pending on the queue.</p>
 
-<a class="btn" href="#">Reload</a> <span class="loading" style="display:none">Loading...</span>
+<a id="refresh-button" class="btn" href="#">Refresh</a> <span class="loading" style="display:none">Loading...</span>
 
 <table id="queues">
     <thead>
@@ -27,6 +27,12 @@
     <tr data-role="queue">
         <td><%= name %></td>
         <td><%= count %></td>
+    </tr>
+</script>
+
+<script name="no-queues-row" type="text/template">
+    <tr>
+        <td colspan="3">No queues.</td>
     </tr>
 </script>
 
@@ -50,24 +56,29 @@ require(['jquery', 'api'], function($, api) {
         api.getQueues(function(queues) {
             $tbody.empty();
 
-            var $fq;
-            $.each(queues, function(i, queue) {
-                var html = template(queue);
-                var $el = $(html);
+            if (queues.length > 0) {
+                var $fq;
+                $.each(queues, function(i, queue) {
+                    var html = template(queue);
+                    var $el = $(html);
 
-                // Special markup for the failure queue
-                if (queue.name === 'failure' && queue.count > 0) {
-                    $el.addClass('failure');
-                    $fq = $el;
-                    return;
+                    // Special markup for the failure queue
+                    if (queue.name === 'failure' && queue.count > 0) {
+                        $el.addClass('failure');
+                        $fq = $el;
+                        return;
+                    }
+
+                    $tbody.append($el);
+                });
+
+                // Append the failure queue at the end, since it's a special queue
+                if ($fq !== undefined) {
+                    $tbody.append($fq);
                 }
-
-                $tbody.append($el);
-            });
-
-            // Append the failure queue at the end, since it's a special queue
-            if ($fq !== undefined) {
-                $tbody.append($fq);
+            } else {
+                var html = $('script[name=no-queues-row]').html();
+                $tbody.append(html);
             }
 
             if (done !== undefined) {
@@ -77,16 +88,16 @@ require(['jquery', 'api'], function($, api) {
     };
 
     var refresh_table = function() {
-        $('span.loading').show();
+        $('span.loading').fadeIn('fast');
         reload_table(function() {
-            $('span.loading').hide();
+            $('span.loading').fadeOut('fast');
         });
     };
 
     $(document).ready(function() {
 
         reload_table();
-        $('.btn').click(refresh_table);
+        $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, 2000);
 
     });

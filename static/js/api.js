@@ -7,8 +7,16 @@ define(['jquery'], function($) {
         });
     };
 
+    var getWorkers = function(cb) {
+        $.getJSON('/api/workers', function(data) {
+            var workers = data.workers;
+            cb(workers);
+        });
+    };
+
     return {
-        'getQueues': getQueues
+        'getQueues': getQueues,
+        'getWorkers': getWorkers
     };
 
 });

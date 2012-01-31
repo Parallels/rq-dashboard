@@ -1,0 +1,92 @@
+{% extends "skeletons/base.html" %}
+
+{% block content %}
+
+<h1>Workers</h1>
+<p>This list below contains all the registered workers with the queues they are listening on.</p>
+
+<a id="refresh-button" class="btn" href="#">Refresh</a> <span class="loading" style="display:none">Loading...</span>
+
+<table id="workers">
+    <thead>
+        <tr>
+            <th style="width:48px">State</th>
+            <th>Worker</th>
+            <th>Queues</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr data-role="loading-placeholder">
+            <td colspan="3">Loading...</td>
+        </tr>
+    </tbody>
+</table>
+
+<script name="worker-row" type="text/template">
+    <tr data-role="worker">
+        <td><img src="/static/img/<%= state %>.png" /></td>
+        <td><%= name %></td>
+        <td><%= queues.join(', ') %></td>
+    </tr>
+</script>
+
+<script name="no-workers-row" type="text/template">
+    <tr>
+        <td colspan="3">No workers.</td>
+    </tr>
+</script>
+
+{% endblock %}
+
+
+
+{% block inline_js %}
+
+require(['jquery', 'api'], function($, api) {
+
+    var reload_table = function(done) {
+        var $tbody = $('table#workers tbody');
+
+        $('tr[data-role=loading-placeholder]', $tbody).show();
+
+        // Fetch the available workers
+        api.getWorkers(function(workers) {
+            $tbody.empty();
+
+            if (workers.length > 0) {
+                var $raw_tpl = $('script[name=worker-row]').html();
+                var template = _.template($raw_tpl);
+
+                $.each(workers, function(i, worker) {
+                    var html = template(worker);
+                    var $el = $(html);
+                    $tbody.append($el);
+                });
+            } else {
+                var html = $('script[name=no-workers-row]').html();
+                $tbody.append(html);
+            }
+
+            if (done !== undefined) {
+                done();
+            }
+        });
+    };
+
+    var refresh_table = function() {
+        $('span.loading').fadeIn('fast');
+        reload_table(function() {
+            $('span.loading').fadeOut('fast');
+        });
+    };
+
+    $(document).ready(function() {
+
+        reload_table();
+        $('#refresh-button').click(refresh_table);
+        setInterval(refresh_table, 2000);
+
+    });
+});
+
+{% endblock %}
