@@ -36,7 +36,7 @@
     <div id="topbar" class="row">
         <div class="span16">
             <ul class="tabs">
-            {% for tabname in ['overview', 'workers', 'queues', 'stats'] %}
+            {% for tabname in ['overview', 'workers', 'stats'] %}
             <li {%- if tabname == tab %} class="active"{% endif %}><a href="{{ url_for('.' + tabname) }}">{{ tabname|capitalize() }}</a></li>
             {% endfor %}
             </ul>

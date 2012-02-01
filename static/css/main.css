@@ -59,6 +59,10 @@ table#queues {
     width: 300px;
 }
 
+table#jobs {
+    width: 600px;
+}
+
 table#workers {
     width: 600px;
 }
@@ -70,6 +74,14 @@ table td {
 table tr.failure {
     color: red;
     border-top: 2px solid red;
+}
+
+table tr.failure a {
+    color: red;
+}
+
+table tr.error {
+    color: red;
 }
 
 table tr.failure td {

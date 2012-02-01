@@ -7,6 +7,13 @@ define(['jquery'], function($) {
         });
     };
 
+    var getJobs = function(queue_name, cb) {
+        $.getJSON('/api/jobs/' + encodeURIComponent(queue_name), function(data) {
+            var jobs = data.jobs;
+            cb(jobs);
+        });
+    };
+
     var getWorkers = function(cb) {
         $.getJSON('/api/workers', function(data) {
             var workers = data.workers;
@@ -16,6 +23,7 @@ define(['jquery'], function($) {
 
     return {
         'getQueues': getQueues,
+        'getJobs': getJobs,
         'getWorkers': getWorkers
     };
 
