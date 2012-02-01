@@ -13,14 +13,14 @@ help:
 # Runtime stuff
 
 run:
-	foreman start
+	python runserver.py
 
 open:
 	open $(DEV_URL)
 
 go:
-	(sleep 1; make open) &
-	make run
+	(sleep 1; $(MAKE) open) &
+	$(MAKE) run
 
 clean:
 	find . -name '*.pyc' -print0 | xargs -0 rm -r
