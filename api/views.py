@@ -1,3 +1,4 @@
+from pytz import timezone
 from flask import Blueprint
 from . import jsonify
 from rq import Queue, Worker
@@ -11,8 +12,10 @@ def serialize_queues(queues):
     return [dict(name=q.name, count=q.count) for q in queues]
 
 def serialize_date(dt):
+    local_timezone = timezone('Europe/Amsterdam')
+    local_time = local_timezone.localize(dt)
     fmt = '%Y-%m-%d %H:%M:%S%z'
-    return dt.strftime(fmt)
+    return local_time.strftime(fmt)
 
 def serialize_job(job):
     return dict(
