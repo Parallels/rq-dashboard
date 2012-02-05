@@ -12,14 +12,14 @@ def get_version():
 setup(
     name='rq-web',
     version=get_version(),
-    url='https://github.com/nvie/rq-web/',
+    url='https://github.com/nvie/rq-web',
     license='BSD',
     author='Vincent Driessen',
     author_email='vincent@3rdcloud.com',
     description='rq-web is a general purpose, lightweight, web interface to '
                 'monitor your RQ queues, jobs, and workers in realtime.',
     long_description=__doc__,
-    packages=['rq-web'],
+    packages=['rqweb'],
     include_package_data=True,
     zip_safe=False,
     platforms='any',
@@ -52,4 +52,3 @@ setup(
         'Topic :: System :: Monitoring',
     ]
 )
-
