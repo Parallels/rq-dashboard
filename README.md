@@ -1,13 +1,14 @@
-RQ-web is a [Flask][flask]-based web front-end to watch and control the jobs
-enqueued with [RQ][rq].
-
+`rq-web` is a general purpose, lightweight, [Flask][flask]-based web front-end
+to monitor your RQ queues, jobs, and workers in realtime.
 
 ## Getting started
 
 Run `rq-web` like any other [Flask][flask] app:
 
-    $ rqweb
-    Running on http://localhost:9181/
+    $ rq-web
+    * Running on http://127.0.0.1:9181/
+    * Restarting with reloader
+    ...
 
 
 [flask]: http://flask.pocoo.org/
