@@ -13,7 +13,3 @@ def overview(queue_name):
             workers=all_workers(),
             queue=Queue(queue_name),
             queues=all_queues())
-
-@app.route('/stats')
-def stats():
-    return render_template('skeletons/base.html', subtitle='Stats', tab='stats')
