@@ -9,7 +9,7 @@ app = Blueprint('frontend', __name__)
 @app.route('/', defaults={'queue_name': 'default'})
 @app.route('/<queue_name>')
 def overview(queue_name):
-    return render_template('frontend/overview.html',
+    return render_template('frontend/dashboard.html',
             workers=all_workers(),
             queue=Queue(queue_name),
             queues=all_queues())
