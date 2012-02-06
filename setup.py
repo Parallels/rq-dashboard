@@ -3,28 +3,28 @@ from setuptools import setup
 
 def get_version():
     basedir = os.path.dirname(__file__)
-    with open(os.path.join(basedir, 'rqweb/version.py')) as f:
+    with open(os.path.join(basedir, 'rq_dashboard/version.py')) as f:
         VERSION = None
         exec(f.read())
         return VERSION
     raise RuntimeError('No version info found.')
 
 setup(
-    name='rq-web',
+    name='rq-dashboard',
     version=get_version(),
-    url='https://github.com/nvie/rq-web',
+    url='https://github.com/nvie/rq-dashboard',
     license='BSD',
     author='Vincent Driessen',
     author_email='vincent@3rdcloud.com',
-    description='rq-web is a general purpose, lightweight, web interface to '
+    description='rq-dashboard is a general purpose, lightweight, web interface to '
                 'monitor your RQ queues, jobs, and workers in realtime.',
     long_description=__doc__,
-    packages=['rqweb'],
+    packages=['rq_dashboard'],
     include_package_data=True,
     zip_safe=False,
     platforms='any',
     install_requires=['rq', 'Flask', 'redis', 'simplejson', 'times'],
-    scripts=['bin/rq-web'],
+    scripts=['bin/rq-dashboard'],
     classifiers=[
         # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers
         #'Development Status :: 1 - Planning',
