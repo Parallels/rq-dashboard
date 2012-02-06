@@ -31,7 +31,12 @@ p.fixed.intro {
 h1 {
     font-family: 'Helvetica Neue', helvetica, sans-serif;
     font-weight: 300;
-    color: red;
+    color: steelblue;
+    text-shadow: 0 -1px #229;
+}
+
+h1 strong {
+    font-weight: 500;
 }
 
 table, table tr, table tr td {
@@ -42,7 +47,19 @@ table tbody tr td.narrow {
     width: 100px;
 }
 
-table td {
+table#queues {
+    /*width: 300px;*/
+}
+
+table#jobs {
+    /*width: 400px;*/
+}
+
+table#workers {
+    /*width: 600px;*/
+}
+
+table tbody tr td {
     vertical-align: middle;
 }
 

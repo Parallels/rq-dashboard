@@ -27,7 +27,7 @@
 
             <script name="queue-row" type="text/template">
                 <tr data-role="queue">
-                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="/queue/<%= name %>"><%= name %></a></td>
+                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="/<%= name %>"><%= name %></a></td>
                     <td class="narrow"><%= count %></td>
                 </tr>
             </script>
@@ -84,14 +84,17 @@
     <div class="span12">
         <div class="section">
 
-        <h1>Jobs</h1>
-        <p class="intro">This list below contains all the registered jobs on the queue, sorted by age (oldest on top).</p>
+        <h1>Jobs on <strong>{{ queue.name }}</strong></h1>
+        <p class="intro">
+        <a href="#" class="btn btn-danger" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
+        This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>
 
         <table id="jobs" class="table table-bordered">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Age</th>
+                    <th class="narrow">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -103,8 +106,14 @@
 
         <script name="job-row" type="text/template">
             <tr data-role="job">
-                <td><%= description %></td>
+                <td>
+                    <i class="icon-file" style="opacity: .5;"></i>
+                    <%= description %>
+                </td>
                 <td><%= created_at %></td>
+                <td class="narrow">
+                    <a href="#" class="btn"><i class="icon-retweet"></i> Requeue</a>
+                </td>
             </tr>
         </script>
 
