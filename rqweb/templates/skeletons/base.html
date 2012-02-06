@@ -34,8 +34,8 @@
 <div class="container">
 
     <div id="topbar" class="row">
-        <div class="span16">
-            <ul class="tabs">
+        <div class="span12">
+            <ul class="nav nav-tabs">
             {% for tabname in ['overview', 'workers', 'stats'] %}
             <li {%- if tabname == tab %} class="active"{% endif %}><a href="{{ url_for('.' + tabname) }}">{{ tabname|capitalize() }}</a></li>
             {% endfor %}
@@ -45,7 +45,7 @@
 
     {#- This container is the main area for the page's content -#}
     <div id="content" class="row">
-        <div class="span16">
+        <div class="span12">
 
             <img id="ribbon" src="/static/img/ribbon.png" />
 

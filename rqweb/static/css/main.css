@@ -29,12 +29,12 @@ div#topbar ul li.active a {
     color: red;
 }
 
-.tabs {
+.nav-tabs {
     font-size: 1.25em;
     margin: 20px 0 0 0;
 }
 
-.tabs > li > a:hover {
+.nav-tabs > li > a:hover {
     color: #655 !important;
 }
 
