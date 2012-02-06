@@ -23,7 +23,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=['rq'],
+    install_requires=['rq', 'Flask', 'redis', 'simplejson', 'times'],
     scripts=['bin/rq-web'],
     classifiers=[
         # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers

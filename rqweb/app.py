@@ -1,5 +1,4 @@
 from flask import Flask
-#from environment import redis
 from redis import Redis
 from rq import conn
 

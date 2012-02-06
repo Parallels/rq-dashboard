@@ -1,5 +1,5 @@
 Flask
 redis
-rq
+-e git+git@github.com:nvie/rq.git#egg=rq
 simplejson
 times
