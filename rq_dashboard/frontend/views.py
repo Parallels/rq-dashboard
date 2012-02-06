@@ -1,24 +1,17 @@
 from flask import Blueprint
 from flask import render_template
 from rq import Queue
+from .models import all_queues, all_workers
 
 
 app = Blueprint('frontend', __name__)
 
 @app.route('/')
 def overview():
-    return render_template('frontend/overview.html', tab='overview')
-
-@app.route('/workers')
-def workers():
-    return render_template('frontend/workers.html', subtitle='Workers',
-            tab='workers')
-
-@app.route('/queue/<queue_name>')
-def queue(queue_name):
-    queue = Queue(queue_name)
-    return render_template('frontend/queue.html', queue=queue,
-            subtitle='Queue %s' % queue_name, tab='queue')
+    return render_template('frontend/overview.html',
+            workers=all_workers(),
+            queue=Queue(),
+            queues=all_queues())
 
 @app.route('/stats')
 def stats():

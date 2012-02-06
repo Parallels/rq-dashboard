@@ -6,65 +6,40 @@ body {
 
 .container {
     background: white;
-}
-
-div#topbar {
-    background-color: black;
-    color: white;
-    display: block;
-}
-
-img#ribbon {
-    position: relative;
-    float: right;
-    margin-right: 20px;
-    margin-top: -84px;
-}
-
-div#topbar ul li a {
-    color: white;
-}
-
-div#topbar ul li.active a {
-    color: red;
-}
-
-.nav-tabs {
-    font-size: 1.25em;
-    margin: 20px 0 0 0;
-}
-
-.nav-tabs > li > a:hover {
-    color: #655 !important;
+    margin-top: 3em;
 }
 
 #content {
-    margin: 2em 0 0 0;
+    background: yellow;
+}
+
+.section
+{
+    padding: 2em;
+}
+
+p.intro {
+    min-height: 2em;
+    padding-top: .8em;
+    color: #888;
+}
+
+p.fixed.intro {
+    height: 5em;
 }
 
 h1 {
+    font-family: 'Helvetica Neue', helvetica, sans-serif;
+    font-weight: 300;
     color: red;
-}
-
-p {
-    color: #888;
-    font-size: 0.85em;
 }
 
 table, table tr, table tr td {
     background-color: snow;
 }
 
-table#queues {
-    width: 300px;
-}
-
-table#jobs {
-    width: 600px;
-}
-
-table#workers {
-    width: 600px;
+table tbody tr td.narrow {
+    width: 100px;
 }
 
 table td {

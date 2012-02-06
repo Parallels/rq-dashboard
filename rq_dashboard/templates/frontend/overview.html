@@ -4,37 +4,119 @@
 
 {% block content %}
 
-<h1>Queues</h1>
-<p>This list below contains all the registered queues with the number of jobs currently in the queue.  Select a queue from above to view all jobs currently pending on the queue.</p>
+<div class="row">
+    <div class="span6">
+        <div class="section">
 
-<a id="refresh-button" class="btn" href="#">Refresh</a> <span class="loading" style="display:none">Loading...</span>
+            <h1>Queues</h1>
+            <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently in the queue.  Select a queue from above to view all jobs currently pending on the queue.</p>
 
-<table id="queues" class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Jobs</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr data-role="loading-placeholder">
-            <td colspan="2">Loading...</td>
-        </tr>
-    </tbody>
-</table>
+            <table id="queues" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Queue</th>
+                        <th class="narrow">Jobs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-role="loading-placeholder">
+                        <td colspan="2">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
 
-<script name="queue-row" type="text/template">
-    <tr data-role="queue">
-        <td><a href="/queue/<%= name %>"><%= name %></a></td>
-        <td><%= count %></td>
-    </tr>
-</script>
+            <script name="queue-row" type="text/template">
+                <tr data-role="queue">
+                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="/queue/<%= name %>"><%= name %></a></td>
+                    <td class="narrow"><%= count %></td>
+                </tr>
+            </script>
 
-<script name="no-queues-row" type="text/template">
-    <tr>
-        <td colspan="3">No queues.</td>
-    </tr>
-</script>
+            <script name="no-queues-row" type="text/template">
+                <tr>
+                    <td colspan="3">No queues.</td>
+                </tr>
+            </script>
+
+        </div>
+    </div>
+
+    <div class="span6">
+        <div class="section">
+
+        <h1>Workers</h1>
+        <p class="fixed intro">This list below contains all the registered workers.</p>
+
+        <table id="workers" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th style="width:48px">State</th>
+                    <th>Worker</th>
+                    <th>Queues</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="3">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script name="worker-row" type="text/template">
+            <tr data-role="worker">
+                <td><i class="icon-<%= state %>"></i></td>
+                <td><%= name %></td>
+                <td><%= queues.join(', ') %></td>
+            </tr>
+        </script>
+
+        <script name="no-workers-row" type="text/template">
+            <tr>
+                <td colspan="3">No workers.</td>
+            </tr>
+        </script>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span12">
+        <div class="section">
+
+        <h1>Jobs</h1>
+        <p class="intro">This list below contains all the registered jobs on the queue, sorted by age (oldest on top).</p>
+
+        <table id="jobs" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="2">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script name="job-row" type="text/template">
+            <tr data-role="job">
+                <td><%= description %></td>
+                <td><%= created_at %></td>
+            </tr>
+        </script>
+
+        <script name="no-jobs-row" type="text/template">
+            <tr>
+                <td colspan="3">No jobs.</td>
+            </tr>
+        </script>
+
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -103,4 +185,115 @@ require(['jquery', 'api'], function($, api) {
     });
 });
 
+require(['jquery', 'api'], function($, api) {
+
+    var reload_table = function(done) {
+        var $tbody = $('table#workers tbody');
+
+        $('tr[data-role=loading-placeholder]', $tbody).show();
+
+        // Fetch the available workers
+        api.getWorkers(function(workers) {
+            $tbody.empty();
+
+            if (workers.length > 0) {
+                var $raw_tpl = $('script[name=worker-row]').html();
+                var template = _.template($raw_tpl);
+
+                $.each(workers, function(i, worker) {
+                    if (worker.state === 'busy') {
+                        worker.state = 'play';
+                    } else {
+                        worker.state = 'pause';
+                    }
+                    var html = template(worker);
+                    var $el = $(html);
+                    $tbody.append($el);
+                });
+            } else {
+                var html = $('script[name=no-workers-row]').html();
+                $tbody.append(html);
+            }
+
+            if (done !== undefined) {
+                done();
+            }
+        });
+    };
+
+    var refresh_table = function() {
+        $('span.loading').fadeIn('fast');
+        reload_table(function() {
+            $('span.loading').fadeOut('fast');
+        });
+    };
+
+    $(document).ready(function() {
+
+        reload_table();
+        $('#refresh-button').click(refresh_table);
+        setInterval(refresh_table, 2000);
+
+    });
+});
+
+require(['jquery', 'api'], function($, api) {
+
+    var reload_table = function(done) {
+        var $raw_tpl = $('script[name=job-row]').html();
+        var template = _.template($raw_tpl);
+
+        var $tbody = $('table#jobs tbody');
+
+        $('tr[data-role=loading-placeholder]', $tbody).show();
+
+        // Fetch the available jobs on the queue
+        api.getJobs('{{ queue.name }}', function(jobs) {
+            $tbody.empty();
+
+            if (jobs.length > 0) {
+                $.each(jobs, function(i, job) {
+                    var is_err = job.error !== undefined;
+                    if (is_err) {
+                        job.description = job.error;
+                        job.created_at = '';
+                    } else {
+                        job.created_at = Date.create(job.created_at).relative();
+                        job.description = '<code>' + job.description + '</code>';
+                    }
+                    var html = template(job);
+                    var $el = $(html);
+
+                    if (is_err) {
+                        $el.addClass('error');
+                    }
+
+                    $tbody.append($el);
+                });
+            } else {
+                var html = $('script[name=no-jobs-row]').html();
+                $tbody.append(html);
+            }
+
+            if (done !== undefined) {
+                done();
+            }
+        });
+    };
+
+    var refresh_table = function() {
+        $('span.loading').fadeIn('fast');
+        reload_table(function() {
+            $('span.loading').fadeOut('fast');
+        });
+    };
+
+    $(document).ready(function() {
+
+        reload_table();
+        $('#refresh-button').click(refresh_table);
+        setInterval(refresh_table, 2000);
+
+    });
+});
 {% endblock %}

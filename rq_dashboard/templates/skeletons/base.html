@@ -33,26 +33,8 @@
 
 <div class="container">
 
-    <div id="topbar" class="row">
-        <div class="span12">
-            <ul class="nav nav-tabs">
-            {% for tabname in ['overview', 'workers', 'stats'] %}
-            <li {%- if tabname == tab %} class="active"{% endif %}><a href="{{ url_for('.' + tabname) }}">{{ tabname|capitalize() }}</a></li>
-            {% endfor %}
-            </ul>
-        </div>
-    </div>
-
     {#- This container is the main area for the page's content -#}
-    <div id="content" class="row">
-        <div class="span12">
-
-            <img id="ribbon" src="/static/img/ribbon.png" />
-
-            {% block content %}{% endblock %}
-
-        </div>
-    </div>
+    {% block content %}{% endblock %}
 
 </div>
 
