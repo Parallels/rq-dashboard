@@ -16,9 +16,12 @@ def serialize_date(dt):
 
 def serialize_job(job):
     return dict(
+        id=job.id,
         created_at=serialize_date(job.created_at),
         enqueued_at=serialize_date(job.enqueued_at),
+        ended_at=serialize_date(job.ended_at),
         origin=job.origin,
+        result=job.result,
         exc_info=job.exc_info,
         description=job.description)
 

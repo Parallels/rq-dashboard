@@ -55,6 +55,12 @@ table#jobs {
     /*width: 400px;*/
 }
 
+table#jobs small {
+    font-size: 80%;
+    color: gray;
+    margin-left: 24px;
+}
+
 table#workers {
     /*width: 600px;*/
 }
