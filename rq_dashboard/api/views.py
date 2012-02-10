@@ -2,8 +2,6 @@ import times
 from flask import Blueprint
 from . import jsonify
 from rq import Queue, Worker
-from rq.job import Job
-from rq.exceptions import UnpickleError
 
 
 app = Blueprint('api', __name__)
@@ -12,6 +10,8 @@ def serialize_queues(queues):
     return [dict(name=q.name, count=q.count) for q in queues]
 
 def serialize_date(dt):
+    if dt is None:
+        return None
     return times.format(dt, 'Europe/Amsterdam')
 
 def serialize_job(job):
@@ -20,7 +20,7 @@ def serialize_job(job):
         enqueued_at=serialize_date(job.enqueued_at),
         origin=job.origin,
         exc_info=job.exc_info,
-        description=job.call_string)
+        description=job.description)
 
 
 @app.route('/queues')
@@ -34,18 +34,7 @@ def list_queues():
 @jsonify
 def list_jobs(queue_name):
     queue = Queue(queue_name)
-    messages = queue.messages
-    jobs = []
-    for msg in messages:
-        try:
-            job = Job.unpickle(msg)
-            jobs.append(serialize_job(job))
-        except UnpickleError as e:
-            jobs.append(dict(
-                error='Unknown or unreadable job.',
-                exc_info=unicode(e)
-                ))
-
+    jobs = [serialize_job(job) for job in queue.jobs]
     return dict(name=queue.name, jobs=jobs)
 
 
