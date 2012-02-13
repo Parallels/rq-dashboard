@@ -154,9 +154,9 @@ require(['jquery', 'api'], function($, api) {
                     var html = template(queue);
                     var $el = $(html);
 
-                    // Special markup for the failure queue
-                    if (queue.name === 'failure' && queue.count > 0) {
-                        $el.addClass('failure');
+                    // Special markup for the failed queue
+                    if (queue.name === 'failed' && queue.count > 0) {
+                        $el.addClass('failed');
                         $fq = $el;
                         return;
                     }
@@ -164,7 +164,7 @@ require(['jquery', 'api'], function($, api) {
                     $tbody.append($el);
                 });
 
-                // Append the failure queue at the end, since it's a special queue
+                // Append the failed queue at the end, since it's a special queue
                 if ($fq !== undefined) {
                     $tbody.append($fq);
                 }

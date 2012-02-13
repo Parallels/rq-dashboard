@@ -6,13 +6,16 @@ from rq import Queue, Worker
 
 app = Blueprint('api', __name__)
 
+
 def serialize_queues(queues):
     return [dict(name=q.name, count=q.count) for q in queues]
+
 
 def serialize_date(dt):
     if dt is None:
         return None
     return times.format(dt, 'Europe/Amsterdam')
+
 
 def serialize_job(job):
     return dict(
@@ -21,7 +24,7 @@ def serialize_job(job):
         enqueued_at=serialize_date(job.enqueued_at),
         ended_at=serialize_date(job.ended_at),
         origin=job.origin,
-        result=job.result,
+        result=job._result,
         exc_info=job.exc_info,
         description=job.description)
 

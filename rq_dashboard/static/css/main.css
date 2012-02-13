@@ -69,12 +69,12 @@ table tbody tr td {
     vertical-align: middle;
 }
 
-table tr.failure {
+table tr.failed {
     color: red;
     border-top: 2px solid red;
 }
 
-table tr.failure a {
+table tr.failed a {
     color: red;
 }
 
@@ -82,7 +82,7 @@ table tr.error {
     color: red;
 }
 
-table tr.failure td {
+table tr.failed td {
     background-color: lightgoldenrodyellow;
 }
 
