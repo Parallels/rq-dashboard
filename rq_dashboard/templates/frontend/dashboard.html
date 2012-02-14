@@ -83,7 +83,7 @@
     <div class="span12">
         <div class="section">
 
-        <h1>Jobs on <strong>{{ queue.name }}</strong></h1>
+        <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
         <p class="intro">
         <a href="{{ url_for('api.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
         This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>

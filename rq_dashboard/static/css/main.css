@@ -39,6 +39,11 @@ h1 strong {
     font-weight: 500;
 }
 
+h1 strong.failed {
+    color: red;
+    text-shadow: 0 -1px #922;
+}
+
 table, table tr, table tr td {
     background-color: snow;
 }
