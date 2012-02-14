@@ -143,6 +143,8 @@
 
 {% block inline_js %}
 
+var POLL_INTERVAL = 2500;
+
 var toRelative = function(universal_date_string) {
     var tzo = new Date().getTimezoneOffset();
     var d = Date.create(universal_date_string).rewind({ minutes: tzo });
@@ -205,7 +207,7 @@ require(['jquery', 'api'], function($, api) {
 
         reload_table();
         $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, 2000);
+        setInterval(refresh_table, POLL_INTERVAL);
 
     });
 });
@@ -257,7 +259,7 @@ require(['jquery', 'api'], function($, api) {
 
         reload_table();
         $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, 2000);
+        setInterval(refresh_table, POLL_INTERVAL);
 
     });
 });
@@ -309,7 +311,7 @@ require(['jquery', 'api'], function($, api) {
 
         reload_table();
         $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, 2000);
+        setInterval(refresh_table, POLL_INTERVAL);
 
     });
 
