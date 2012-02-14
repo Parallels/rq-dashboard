@@ -86,7 +86,7 @@
 
         <h1>Jobs on <strong>{{ queue.name }}</strong></h1>
         <p class="intro">
-        <a href="#" class="btn btn-danger" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
+        <a href="{{ url_for('api.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
         This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>
 
         <table id="jobs" class="table table-bordered">
@@ -108,8 +108,11 @@
             <tr data-role="job">
                 <td>
                     <i class="icon-file" style="opacity: .5;"></i>
-                    <%= description %><br />
-                    <small><%= id %></small>
+                    <span class="description"><%= description %></span>
+                    <div class="job_id"><%= id %></div>
+                    <% if (exc_info) { %>
+                        <pre class="exc_info"><%= exc_info %></pre>
+                    <% } %>
                 </td>
                 <td><%= created_at %></td>
                 <td class="narrow">
@@ -269,7 +272,6 @@ require(['jquery', 'api'], function($, api) {
                         job.created_at = '';
                     } else {
                         job.created_at = Date.create(job.created_at).relative();
-                        job.description = '<code>' + job.description + '</code>';
                     }
                     var html = template(job);
                     var $el = $(html);
@@ -305,5 +307,23 @@ require(['jquery', 'api'], function($, api) {
         setInterval(refresh_table, 2000);
 
     });
+
+
+    // Enable the AJAX behaviour of the empty button
+    $('#empty-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        $.post($this.attr('href'), function(data) {
+            reload_table();
+            }).error(function(x, y, z) {
+                alert('oops?');
+            })
+            ;
+
+        return false;
+    });
+
 });
 {% endblock %}

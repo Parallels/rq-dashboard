@@ -51,13 +51,19 @@ table#queues {
     /*width: 300px;*/
 }
 
-table#jobs {
-    /*width: 400px;*/
+table#jobs span.description {
+    color: steelblue;
 }
 
-table#jobs small {
-    font-size: 80%;
+table#jobs div.job_id {
+    font-size: 70%;
     color: gray;
+    margin-left: 24px;
+}
+
+table#jobs pre.exc_info {
+    font-size: 80%;
+    color: #555;
     margin-left: 24px;
 }
 

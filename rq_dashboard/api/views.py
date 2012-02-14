@@ -29,6 +29,14 @@ def serialize_job(job):
         description=job.description)
 
 
+@app.route('/queue/<queue_name>/empty', methods=['POST'])
+@jsonify
+def empty_queue(queue_name):
+    q = Queue(queue_name)
+    q.empty()
+    return dict(status='OK')
+
+
 @app.route('/queues')
 @jsonify
 def list_queues():
