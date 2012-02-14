@@ -143,6 +143,12 @@
 
 {% block inline_js %}
 
+var toRelative = function(universal_date_string) {
+    var tzo = new Date().getTimezoneOffset();
+    var d = Date.create(universal_date_string).rewind({ minutes: tzo });
+    return d.relative();
+};
+
 require(['jquery', 'api'], function($, api) {
 
     var reload_table = function(done) {
@@ -272,9 +278,9 @@ require(['jquery', 'api'], function($, api) {
 
             if (jobs.length > 0) {
                 $.each(jobs, function(i, job) {
-                    job.created_at = Date.create(job.created_at).relative();
+                    job.created_at = toRelative(Date.create(job.created_at));
                     if (job.ended_at !== undefined) {
-                        job.ended_at = Date.create(job.ended_at).relative();
+                        job.ended_at = toRelative(Date.create(job.ended_at));
                     }
                     var html = template(job);
                     var $el = $(html);
@@ -325,12 +331,13 @@ require(['jquery', 'api'], function($, api) {
         e.preventDefault();
         e.stopPropagation();
 
-        var $this = $(this);
-        var job_id = $this.closest('tr').data('job-id');
+        var $this = $(this),
+            $row = $this.closest('tr'),
+            job_id = $row.data('job-id'),
+            url = '/api/job/' + job_id + '/cancel';
 
-        var url = '/api/job/' + job_id + '/cancel';
         $.post(url, function(data) {
-            reload_table();
+            $row.fadeOut('fast', function() { $row.delete(); });
         });
 
         return false;

@@ -15,7 +15,7 @@ def serialize_queues(queues):
 def serialize_date(dt):
     if dt is None:
         return None
-    return times.format(dt, 'Europe/Amsterdam')
+    return times.format(dt, 'UTC')
 
 
 def serialize_job(job):
