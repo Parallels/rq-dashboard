@@ -46,6 +46,14 @@ def empty_queue(queue_name):
     return dict(status='OK')
 
 
+@app.route('/queue/<queue_name>/compact', methods=['POST'])
+@jsonify
+def compact_queue(queue_name):
+    q = Queue(queue_name)
+    q.compact()
+    return dict(status='OK')
+
+
 @app.route('/queues')
 @jsonify
 def list_queues():

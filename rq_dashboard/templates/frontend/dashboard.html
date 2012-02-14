@@ -85,7 +85,8 @@
 
         <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
         <p class="intro">
-        <a href="{{ url_for('api.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
+        <a href="{{ url_for('api.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
+        <a href="{{ url_for('api.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-resize-small"></i> Compact</a>
         This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>
 
         <table id="jobs" class="table table-bordered">
@@ -324,6 +325,16 @@ require(['jquery', 'api'], function($, api) {
         $.post($this.attr('href'), function(data) {
             reload_table();
         });
+
+        return false;
+    });
+
+    $('#compact-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        $.post($this.attr('href'), function(data) {});
 
         return false;
     });
