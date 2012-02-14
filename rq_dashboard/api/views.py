@@ -2,6 +2,7 @@ import times
 from flask import Blueprint
 from . import jsonify
 from rq import Queue, Worker
+from rq.job import Job
 
 
 app = Blueprint('api', __name__)
@@ -27,6 +28,14 @@ def serialize_job(job):
         result=job._result,
         exc_info=job.exc_info,
         description=job.description)
+
+
+@app.route('/job/<job_id>/cancel', methods=['POST'])
+@jsonify
+def cancel_job(job_id):
+    job = Job(job_id)
+    job.cancel()
+    return dict(status='OK')
 
 
 @app.route('/queue/<queue_name>/empty', methods=['POST'])

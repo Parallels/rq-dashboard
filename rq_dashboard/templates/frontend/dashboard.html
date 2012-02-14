@@ -1,7 +1,6 @@
 {% extends "skeletons/base.html" %}
 
 
-
 {% block content %}
 
 <div class="row">
@@ -105,7 +104,7 @@
         </table>
 
         <script name="job-row" type="text/template">
-            <tr data-role="job" id="job-<%= id %>">
+            <tr data-role="job" data-job-id="<%= id %>">
                 <td>
                     <i class="icon-file" style="opacity: .5;"></i>
                     <span class="description"><%= description %></span>
@@ -123,7 +122,7 @@
                     <% if (exc_info) { %>
                         <a href="#" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
                     <% } %>
-                    <a href="#" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
+                    <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
                 </td>
             </tr>
         </script>
@@ -308,7 +307,6 @@ require(['jquery', 'api'], function($, api) {
 
     });
 
-
     // Enable the AJAX behaviour of the empty button
     $('#empty-btn').click(function(e) {
         e.preventDefault();
@@ -317,10 +315,23 @@ require(['jquery', 'api'], function($, api) {
         var $this = $(this);
         $.post($this.attr('href'), function(data) {
             reload_table();
-            }).error(function(x, y, z) {
-                alert('oops?');
-            })
-            ;
+        });
+
+        return false;
+    });
+
+    // Enable the AJAX behaviour of the empty button
+    $('[data-role=cancel-job-btn]').live('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        var job_id = $this.closest('tr').data('job-id');
+
+        var url = '/api/job/' + job_id + '/cancel';
+        $.post(url, function(data) {
+            reload_table();
+        });
 
         return false;
     });
