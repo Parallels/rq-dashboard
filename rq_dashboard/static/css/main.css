@@ -51,8 +51,18 @@ table#queues {
     /*width: 300px;*/
 }
 
+table#jobs td.actions a {
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
 table#jobs span.description {
-    color: steelblue;
+    color: #555;
+    font-weight: 600;
+}
+
+table#jobs span.origin {
+    color: #888;
 }
 
 table#jobs div.job_id {
@@ -64,6 +74,17 @@ table#jobs div.job_id {
 table#jobs pre.exc_info {
     font-size: 80%;
     color: #555;
+    margin-left: 24px;
+    border-left: 2px solid darkorange;
+    background-color: lightgoldenrodyellow;
+}
+
+table#jobs span.creation_date {
+    font-size: 80%;
+}
+
+table#jobs span.end_date {
+    font-size: 80%;
     margin-left: 24px;
 }
 
@@ -81,10 +102,6 @@ table tr.failed {
 }
 
 table tr.failed a {
-    color: red;
-}
-
-table tr.error {
     color: red;
 }
 

@@ -105,18 +105,25 @@
         </table>
 
         <script name="job-row" type="text/template">
-            <tr data-role="job">
+            <tr data-role="job" id="job-<%= id %>">
                 <td>
                     <i class="icon-file" style="opacity: .5;"></i>
                     <span class="description"><%= description %></span>
+                    <% if (exc_info) { %>
+                        <span class="origin">from <strong><%= origin %></strong></span>
+                    <% } %>
                     <div class="job_id"><%= id %></div>
                     <% if (exc_info) { %>
+                        <span class="end_date">Failed <%= ended_at %></span>
                         <pre class="exc_info"><%= exc_info %></pre>
                     <% } %>
                 </td>
-                <td><%= created_at %></td>
-                <td class="narrow">
-                    <a href="#" class="btn"><i class="icon-retweet"></i> Requeue</a>
+                <td><span class="creation_date"><%= created_at %></span></td>
+                <td class="actions narrow">
+                    <% if (exc_info) { %>
+                        <a href="#" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
+                    <% } %>
+                    <a href="#" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
                 </td>
             </tr>
         </script>
@@ -266,19 +273,12 @@ require(['jquery', 'api'], function($, api) {
 
             if (jobs.length > 0) {
                 $.each(jobs, function(i, job) {
-                    var is_err = job.error !== undefined;
-                    if (is_err) {
-                        job.description = job.error;
-                        job.created_at = '';
-                    } else {
-                        job.created_at = Date.create(job.created_at).relative();
+                    job.created_at = Date.create(job.created_at).relative();
+                    if (job.ended_at !== undefined) {
+                        job.ended_at = Date.create(job.ended_at).relative();
                     }
                     var html = template(job);
                     var $el = $(html);
-
-                    if (is_err) {
-                        $el.addClass('error');
-                    }
 
                     $tbody.append($el);
                 });
