@@ -87,6 +87,7 @@
         <p class="intro">
         <a href="{{ url_for('api.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
         <a href="{{ url_for('api.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-resize-small"></i> Compact</a>
+        <a href="{{ url_for('api.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
         This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>
 
         <table id="jobs" class="table table-bordered">
@@ -121,7 +122,7 @@
                 <td><span class="creation_date"><%= created_at %></span></td>
                 <td class="actions narrow">
                     <% if (exc_info) { %>
-                        <a href="#" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
+                        <a href="#" data-role="requeue-job-btn" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
                     <% } %>
                     <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
                 </td>
@@ -339,6 +340,16 @@ require(['jquery', 'api'], function($, api) {
         return false;
     });
 
+    $('#requeue-all-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        $.post($this.attr('href'), function(data) {});
+
+        return false;
+    });
+
     // Enable the AJAX behaviour of the empty button
     $('[data-role=cancel-job-btn]').live('click', function(e) {
         e.preventDefault();
@@ -348,6 +359,23 @@ require(['jquery', 'api'], function($, api) {
             $row = $this.closest('tr'),
             job_id = $row.data('job-id'),
             url = '/api/job/' + job_id + '/cancel';
+
+        $.post(url, function(data) {
+            $row.fadeOut('fast', function() { $row.delete(); });
+        });
+
+        return false;
+    });
+
+    // Enable the AJAX behaviour of the requeue button
+    $('[data-role=requeue-job-btn]').live('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this),
+            $row = $this.closest('tr'),
+            job_id = $row.data('job-id'),
+            url = '/api/job/' + job_id + '/requeue';
 
         $.post(url, function(data) {
             $row.fadeOut('fast', function() { $row.delete(); });

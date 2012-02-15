@@ -1,7 +1,7 @@
 import times
 from flask import Blueprint
 from . import jsonify
-from rq import Queue, Worker
+from rq import Queue, FailedQueue, Worker
 from rq.job import Job
 
 
@@ -36,6 +36,24 @@ def cancel_job(job_id):
     job = Job(job_id)
     job.cancel()
     return dict(status='OK')
+
+
+@app.route('/job/<job_id>/requeue', methods=['POST'])
+@jsonify
+def requeue_job(job_id):
+    FailedQueue().requeue(job_id)
+    return dict(status='OK')
+
+
+@app.route('/requeue-all', methods=['GET', 'POST'])
+@jsonify
+def requeue_all():
+    fq = FailedQueue()
+    job_ids = fq.job_ids
+    count = len(job_ids)
+    for job_id in job_ids:
+        fq.requeue(job_id)
+    return dict(status='OK', count=count)
 
 
 @app.route('/queue/<queue_name>/empty', methods=['POST'])
