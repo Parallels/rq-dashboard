@@ -1,6 +1,7 @@
 import os
 from setuptools import setup
 
+
 def get_version():
     basedir = os.path.dirname(__file__)
     with open(os.path.join(basedir, 'rq_dashboard/version.py')) as f:
@@ -16,8 +17,8 @@ setup(
     license='BSD',
     author='Vincent Driessen',
     author_email='vincent@3rdcloud.com',
-    description='rq-dashboard is a general purpose, lightweight, web interface to '
-                'monitor your RQ queues, jobs, and workers in realtime.',
+    description='rq-dashboard is a general purpose, lightweight, web interface'
+                ' to monitor your RQ queues, jobs, and workers in realtime.',
     long_description=__doc__,
     packages=['rq_dashboard'],
     include_package_data=True,
