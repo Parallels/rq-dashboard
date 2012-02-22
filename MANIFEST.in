@@ -1,0 +1,2 @@
+recursive-include rq_dashboard/templates *
+recursive-include rq_dashboard/static *
