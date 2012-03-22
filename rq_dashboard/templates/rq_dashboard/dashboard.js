@@ -2,9 +2,9 @@ var POLL_INTERVAL = 2500;
 
 var url_for = function(name, param) {
     var url = '';
-    if (name == 'queues') { url = 'queues'; }
-    else if (name == 'jobs') { url = 'jobs/' + encodeURIComponent(param); }
-    else if (name == 'workers') { url = 'workers'; }
+    if (name == 'queues') { url = 'queues.json'; }
+    else if (name == 'jobs') { url = 'jobs/' + encodeURIComponent(param) + '.json'; }
+    else if (name == 'workers') { url = 'workers.json'; }
     else if (name == 'cancel_job') { url = 'job/' + encodeURIComponent(param) + '/cancel'; }
     else if (name == 'requeue_job') { url = 'job/' + encodeURIComponent(param) + '/requeue'; }
     return url;
