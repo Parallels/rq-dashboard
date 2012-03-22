@@ -1,5 +1,15 @@
 var POLL_INTERVAL = 2500;
 
+var url_for = function(name, param) {
+    var base_url = '', url = '/';
+    if (name == 'queues') { url = '/queues'; }
+    else if (name == 'jobs') { url = '/jobs/' + encodeURIComponent(param); }
+    else if (name == 'workers') { url = '/workers'; }
+    else if (name == 'cancel_job') { url = '/job/' + encodeURIComponent(param) + '/cancel'; }
+    else if (name == 'requeue_job') { url = '/job/' + encodeURIComponent(param) + '/requeue'; }
+    return base_url + url;
+};
+
 var toRelative = function(universal_date_string) {
     var tzo = new Date().getTimezoneOffset();
     var d = Date.create(universal_date_string).rewind({ minutes: tzo });
@@ -8,29 +18,32 @@ var toRelative = function(universal_date_string) {
 
 var api = {
     getQueues: function(cb) {
-        $.getJSON('/queues', function(data) { // TODO: Fix static URL
+        $.getJSON(url_for('queues'), function(data) {
             var queues = data.queues;
             cb(queues);
         });
     },
 
     getJobs: function(queue_name, cb) {
-        $.getJSON('/jobs/' + encodeURIComponent(queue_name), function(data) { // TODO: Fix static URL
+        $.getJSON(url_for('jobs', queue_name), function(data) {
             var jobs = data.jobs;
             cb(jobs);
         });
     },
 
     getWorkers: function(cb) {
-        $.getJSON('/workers', function(data) { // TODO: Fix static URL
+        $.getJSON(url_for('workers'), function(data) {
             var workers = data.workers;
             cb(workers);
         });
     }
 };
 
-(function($) {
 
+//
+// QUEUES
+//
+(function($) {
     var reload_table = function(done) {
         var $raw_tpl = $('script[name=queue-row]').html();
         var template = _.template($raw_tpl);
@@ -90,8 +103,11 @@ var api = {
     });
 })($);
 
-(function($) {
 
+//
+// WORKERS
+//
+(function($) {
     var reload_table = function(done) {
         var $tbody = $('table#workers tbody');
 
@@ -142,8 +158,11 @@ var api = {
     });
 })($);
 
-(function($) {
 
+//
+// JOBS
+//
+(function($) {
     var reload_table = function(done) {
         var $raw_tpl = $('script[name=job-row]').html();
         var template = _.template($raw_tpl);
@@ -234,7 +253,7 @@ var api = {
         var $this = $(this),
             $row = $this.closest('tr'),
             job_id = $row.data('job-id'),
-            url = '/job/' + job_id + '/cancel'; // TODO: Fix static URL
+            url = url_for('cancel_job', job_id);
 
         $.post(url, function(data) {
             $row.fadeOut('fast', function() { $row.delete(); });
@@ -251,7 +270,7 @@ var api = {
         var $this = $(this),
             $row = $this.closest('tr'),
             job_id = $row.data('job-id'),
-            url = '/job/' + job_id + '/requeue'; // TODO: Fix static URL
+            url = url_for('requeue_job', job_id);
 
         $.post(url, function(data) {
             $row.fadeOut('fast', function() { $row.delete(); });
