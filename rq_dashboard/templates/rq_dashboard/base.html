@@ -22,14 +22,14 @@
 {#- JavaScripts are loaded at the end -#}
 
 {#- Custom JS -#}
-<script src="{{ url_for('static', filename='rq_dashboard/js/libs/require-jquery.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('static', filename='rq_dashboard/js/libs/underscore-min.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('static', filename='rq_dashboard/js/libs/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='rq_dashboard/js/require-jquery.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='rq_dashboard/js/underscore-min.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='rq_dashboard/js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
 <script type="text/javascript" charset="utf-8">
 require.config({
     baseUrl: '{{ url_for('static', filename='rq_dashboard/js') }}',
     paths: {
-        'jquery': 'libs/require-jquery'
+        'jquery': 'require-jquery'
     }
 });
 </script>
