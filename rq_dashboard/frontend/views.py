@@ -19,7 +19,7 @@ def overview(queue_name):
     else:
         queue = Queue(queue_name)
 
-    return render_template('frontend/dashboard.html',
+    return render_template('rq_dashboard/dashboard.html',
             workers=Worker.all(),
             queue=queue,
             queues=Queue.all())
