@@ -14,7 +14,6 @@
 
 <div class="container">
 
-    {#- This container is the main area for the page's content -#}
     {% block content %}{% endblock %}
 
 </div>
@@ -22,17 +21,9 @@
 {#- JavaScripts are loaded at the end -#}
 
 {#- Custom JS -#}
-<script src="{{ url_for('static', filename='rq_dashboard/js/require-jquery.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='rq_dashboard/js/jquery.min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='rq_dashboard/js/underscore-min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('static', filename='rq_dashboard/js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
-<script type="text/javascript" charset="utf-8">
-require.config({
-    baseUrl: '{{ url_for('static', filename='rq_dashboard/js') }}',
-    paths: {
-        'jquery': 'require-jquery'
-    }
-});
-</script>
 <script type="text/javascript">
 {% block inline_js %}{% endblock %}
 </script>
