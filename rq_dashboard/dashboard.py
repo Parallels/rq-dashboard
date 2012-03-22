@@ -1,12 +1,30 @@
+from functools import wraps
 import times
 from flask import Blueprint
-from . import jsonify
+from flask import current_app
+from flask import render_template
 from rq import Queue, Worker
 from rq import cancel_job, requeue_job
 from rq import get_failed_queue
 
 
-app = Blueprint('api', __name__)
+dashboard = Blueprint('rq_dashboard', __name__)
+
+
+def jsonify(f):
+    @wraps(f)
+    def _wrapped(*args, **kwargs):
+        from flask import jsonify as flask_jsonify
+        try:
+            result_dict = f(*args, **kwargs)
+        except Exception as e:
+            result_dict = dict(status='error')
+            if current_app.config['DEBUG']:
+                result_dict['reason'] = e.message
+                from traceback import format_exc
+                result_dict['exc_info'] = format_exc(e)
+        return flask_jsonify(**result_dict)
+    return _wrapped
 
 
 def serialize_queues(queues):
@@ -31,21 +49,40 @@ def serialize_job(job):
         description=job.description)
 
 
-@app.route('/job/<job_id>/cancel', methods=['POST'])
+@dashboard.route('/', defaults={'queue_name': None})
+@dashboard.route('/<queue_name>')
+def overview(queue_name):
+    if queue_name is None:
+        # Show the failed queue by default if it contains any jobs
+        failed = Queue('failed')
+        if not failed.is_empty():
+            queue = failed
+        else:
+            queue = Queue()
+    else:
+        queue = Queue(queue_name)
+
+    return render_template('rq_dashboard/dashboard.html',
+            workers=Worker.all(),
+            queue=queue,
+            queues=Queue.all())
+
+
+@dashboard.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
     cancel_job(job_id)
     return dict(status='OK')
 
 
-@app.route('/job/<job_id>/requeue', methods=['POST'])
+@dashboard.route('/job/<job_id>/requeue', methods=['POST'])
 @jsonify
 def requeue_job_view(job_id):
     requeue_job(job_id)
     return dict(status='OK')
 
 
-@app.route('/requeue-all', methods=['GET', 'POST'])
+@dashboard.route('/requeue-all', methods=['GET', 'POST'])
 @jsonify
 def requeue_all():
     fq = get_failed_queue()
@@ -56,7 +93,7 @@ def requeue_all():
     return dict(status='OK', count=count)
 
 
-@app.route('/queue/<queue_name>/empty', methods=['POST'])
+@dashboard.route('/queue/<queue_name>/empty', methods=['POST'])
 @jsonify
 def empty_queue(queue_name):
     q = Queue(queue_name)
@@ -64,7 +101,7 @@ def empty_queue(queue_name):
     return dict(status='OK')
 
 
-@app.route('/queue/<queue_name>/compact', methods=['POST'])
+@dashboard.route('/queue/<queue_name>/compact', methods=['POST'])
 @jsonify
 def compact_queue(queue_name):
     q = Queue(queue_name)
@@ -72,14 +109,14 @@ def compact_queue(queue_name):
     return dict(status='OK')
 
 
-@app.route('/queues')
+@dashboard.route('/queues')
 @jsonify
 def list_queues():
     queues = serialize_queues(sorted(Queue.all()))
     return dict(queues=queues)
 
 
-@app.route('/jobs/<queue_name>')
+@dashboard.route('/jobs/<queue_name>')
 @jsonify
 def list_jobs(queue_name):
     queue = Queue(queue_name)
@@ -87,7 +124,7 @@ def list_jobs(queue_name):
     return dict(name=queue.name, jobs=jobs)
 
 
-@app.route('/workers')
+@dashboard.route('/workers')
 @jsonify
 def list_workers():
     def serialize_queue_names(worker):

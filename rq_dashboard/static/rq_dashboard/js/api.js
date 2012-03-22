@@ -1,21 +1,21 @@
 define(['jquery'], function($) {
 
     var getQueues = function(cb) {
-        $.getJSON('/api/queues', function(data) {
+        $.getJSON('/queues', function(data) { // TODO: Fix static URL
             var queues = data.queues;
             cb(queues);
         });
     };
 
     var getJobs = function(queue_name, cb) {
-        $.getJSON('/api/jobs/' + encodeURIComponent(queue_name), function(data) {
+        $.getJSON('/jobs/' + encodeURIComponent(queue_name), function(data) { // TODO: Fix static URL
             var jobs = data.jobs;
             cb(jobs);
         });
     };
 
     var getWorkers = function(cb) {
-        $.getJSON('/api/workers', function(data) {
+        $.getJSON('/workers', function(data) { // TODO: Fix static URL
             var workers = data.workers;
             cb(workers);
         });
