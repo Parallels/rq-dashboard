@@ -1,7 +1,6 @@
 from flask import Blueprint
 from flask import render_template
-from rq import Queue
-from .models import all_queues, all_workers
+from rq import Queue, Worker
 
 
 app = Blueprint('frontend', __name__)
@@ -21,6 +20,6 @@ def overview(queue_name):
         queue = Queue(queue_name)
 
     return render_template('frontend/dashboard.html',
-            workers=all_workers(),
+            workers=Worker.all(),
             queue=queue,
-            queues=all_queues())
+            queues=Queue.all())
