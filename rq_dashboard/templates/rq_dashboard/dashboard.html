@@ -358,7 +358,7 @@ require(['jquery', 'api'], function($, api) {
         var $this = $(this),
             $row = $this.closest('tr'),
             job_id = $row.data('job-id'),
-            url = '/api/job/' + job_id + '/cancel';
+            url = '/job/' + job_id + '/cancel'; // TODO: Fix static URL
 
         $.post(url, function(data) {
             $row.fadeOut('fast', function() { $row.delete(); });
@@ -375,7 +375,7 @@ require(['jquery', 'api'], function($, api) {
         var $this = $(this),
             $row = $this.closest('tr'),
             job_id = $row.data('job-id'),
-            url = '/api/job/' + job_id + '/requeue';
+            url = '/job/' + job_id + '/requeue'; // TODO: Fix static URL
 
         $.post(url, function(data) {
             $row.fadeOut('fast', function() { $row.delete(); });
