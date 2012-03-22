@@ -11,5 +11,5 @@ app.config['DEBUG'] = True
 use_redis()
 
 # Modules/blueprints
-from .dashboard import dashboard
-app.register_blueprint(dashboard)
+from . import init_app
+init_app(app, '')  # register it under '/'
