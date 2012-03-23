@@ -1,5 +1,6 @@
 from flask import Flask
-from rq import use_redis
+from redis import Redis
+from rq import use_connection
 
 
 app = Flask(__name__)
@@ -8,7 +9,7 @@ app = Flask(__name__)
 app.config['DEBUG'] = True
 
 # Globally setup RQ
-use_redis()
+use_connection(Redis())
 
 # Modules/blueprints
 from . import init_app
