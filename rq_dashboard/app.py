@@ -1,4 +1,5 @@
 from flask import Flask
+from rq_dashboard import RQDashboard
 
 
 app = Flask(__name__)
@@ -6,6 +7,4 @@ app = Flask(__name__)
 # Override config
 app.config['DEBUG'] = True
 
-# Modules/blueprints
-from . import init_app
-init_app(app, '')  # register it under '/'
+RQDashboard(app, '')
