@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def get_version():
@@ -20,12 +20,15 @@ setup(
     description='rq-dashboard is a general purpose, lightweight, web interface'
                 ' to monitor your RQ queues, jobs, and workers in realtime.',
     long_description=__doc__,
-    packages=['rq_dashboard'],
+    packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     platforms='any',
     install_requires=['rq', 'Flask', 'redis', 'simplejson', 'times'],
-    scripts=['bin/rq-dashboard'],
+    entry_points='''\
+    [console_scripts]
+    rq-dashboard = rq_dashboard.scripts.rq_dashboard:main
+    ''',
     classifiers=[
         # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers
         #'Development Status :: 1 - Planning',

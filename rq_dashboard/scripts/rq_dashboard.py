@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import sys
-from rq_dashboard.app import app
+from ..app import app
 
-def main(argv):
+
+def main():
     host = '127.0.0.1'
     port = 9181
     app.run(host=host, port=port)
