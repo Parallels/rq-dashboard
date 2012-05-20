@@ -3,7 +3,7 @@ from rq import push_connection
 from functools import wraps
 import times
 from flask import Blueprint
-from flask import current_app
+from flask import current_app, url_for
 from flask import render_template
 from rq import Queue, Worker
 from rq import cancel_job, requeue_job
@@ -39,7 +39,8 @@ def jsonify(f):
 
 
 def serialize_queues(queues):
-    return [dict(name=q.name, count=q.count) for q in queues]
+    return [dict(name=q.name, count=q.count, url=url_for('.overview',
+        queue_name=q.name)) for q in queues]
 
 
 def serialize_date(dt):
