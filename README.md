@@ -11,7 +11,7 @@ front-end to monitor your [RQ][rq] queues, jobs, and workers in realtime.
 ## Installing
 
 ```console
-$ pip install rq_dashboard
+$ pip install rq-dashboard
 ```
 
 ## Running the dashboard
