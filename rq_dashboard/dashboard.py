@@ -10,7 +10,10 @@ from rq import cancel_job, requeue_job
 from rq import get_failed_queue
 
 
-dashboard = Blueprint('rq_dashboard', __name__)
+dashboard = Blueprint('rq_dashboard', __name__,
+        template_folder='templates',
+        static_folder='static',
+        )
 
 
 @dashboard.before_app_first_request
