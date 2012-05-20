@@ -1,3 +1,5 @@
+from redis import Redis
+from rq import push_connection
 from functools import wraps
 import times
 from flask import Blueprint
@@ -9,6 +11,12 @@ from rq import get_failed_queue
 
 
 dashboard = Blueprint('rq_dashboard', __name__)
+
+
+@dashboard.before_app_first_request
+def setup_rq_connection():
+    redis_conn = Redis()
+    push_connection(redis_conn)
 
 
 def jsonify(f):
