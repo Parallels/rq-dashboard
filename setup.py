@@ -48,7 +48,7 @@ setup(
         'Operating System :: MacOS',
         'Operating System :: Unix',
         'Programming Language :: Python',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Internet',
         'Topic :: Scientific/Engineering',
         'Topic :: System :: Distributed Computing',
