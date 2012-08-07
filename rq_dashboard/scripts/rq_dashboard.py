@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 import sys
 from ..app import app
+from ..version import VERSION
 
 
 def main():
     host = '127.0.0.1'
     port = 9181
+    print 'RQ Dashboard, version %s' % VERSION
     app.run(host=host, port=port)
 
 if __name__ == '__main__':
