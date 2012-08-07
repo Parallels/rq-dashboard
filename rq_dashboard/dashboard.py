@@ -18,7 +18,8 @@ dashboard = Blueprint('rq_dashboard', __name__,
 
 @dashboard.before_app_first_request
 def setup_rq_connection():
-    redis_conn = Redis()
+    redis_conn = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
+                       port=current_app.config.get('REDIS_PORT', 6379))
     push_connection(redis_conn)
 
 
