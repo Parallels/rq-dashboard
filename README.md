@@ -57,9 +57,7 @@ RQDashboard(app, url_prefix='/some/other/url')
 
 ## Maturity notes
 
-The RQ dashboard is currently being developed and is in beta stage.  It is
-currently not possible to run RQ dashboard against anything but the default
-(localhost) Redis connections.  (Patches welcome :))
+The RQ dashboard is currently being developed and is in beta stage.
 
 
 
