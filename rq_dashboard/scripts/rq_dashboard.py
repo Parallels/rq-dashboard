@@ -25,6 +25,9 @@ def main():
     parser.add_option('-D', '--redis-database', dest='redis_database', type='int',
                       metavar='DB',
                       help='database of Redis server')
+    parser.add_option('-u', '--redis_url', dest='redis_url_connection', 
+                      metavar='REDIS_URL', 
+                      help='redis url connection')
     (options, args) = parser.parse_args()
 
     # Populate app.config from options, defaulting to app.config's original
@@ -42,6 +45,8 @@ def main():
         app.config['REDIS_PASSWORD'] = options.redis_password
     if options.redis_database:
         app.config['REDIS_DB'] = options.redis_database
+    
+    app.config['REDIS_URL'] = options.redis_url_connection or None
 
     if len(args) > 0:
         parser.print_help()
