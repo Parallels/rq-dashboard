@@ -1,4 +1,5 @@
 from redis import Redis
+from redis import from_url
 from rq import push_connection
 from functools import wraps
 import times
@@ -18,7 +19,10 @@ dashboard = Blueprint('rq_dashboard', __name__,
 
 @dashboard.before_app_first_request
 def setup_rq_connection():
-    redis_conn = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
+    if current_app.config.get('REDIS_URL'):
+        redis_conn = from_url(current_app.config.get('REDIS_URL'))
+    else:
+        redis_conn = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
                        port=current_app.config.get('REDIS_PORT', 6379),
                        password=current_app.config.get('REDIS_PASSWORD', None),
                        db=current_app.config.get('REDIS_DB', 0))
