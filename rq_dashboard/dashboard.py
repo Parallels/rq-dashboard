@@ -9,6 +9,7 @@ from flask import render_template
 from rq import Queue, Worker
 from rq import cancel_job, requeue_job
 from rq import get_failed_queue
+import os
 
 
 dashboard = Blueprint('rq_dashboard', __name__,
@@ -19,7 +20,11 @@ dashboard = Blueprint('rq_dashboard', __name__,
 
 @dashboard.before_app_first_request
 def setup_rq_connection():
-    if current_app.config.get('REDIS_URL'):
+    # 'RQ_DASHBOARD_REDIS_URL' environmental variable takes priority;
+    #   otherwise, we look at the Flask app's config for the redis information.
+    if os.environ.get('RQ_DASHBOARD_REDIS_URL', None):
+        redis_conn = from_url(os.environ.get('RQ_DASHBOARD_REDIS_URL'))
+    elif current_app.config.get('REDIS_URL'):
         redis_conn = from_url(current_app.config.get('REDIS_URL'))
     else:
         redis_conn = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
