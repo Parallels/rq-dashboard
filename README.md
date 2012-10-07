@@ -54,6 +54,20 @@ use a different URL root, use the following:
 RQDashboard(app, url_prefix='/some/other/url')
 ```
 
+## Setting the Redis URL
+
+RQ dashboard defaults to the following settings:
+
+```python
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_PASSWORD = None
+REDIS_DB = 0
+```
+
+To change this, you can set these values or the value of `REDIS_URL` in your Flask app's `app.config`.
+
+Alternatively, you can set an environmental variable `RQ_DASHBOARD_REDIS_URL` to the full Redis URL, including authentication and port.  Please note that this will override anything that you set it your `app.config`, so if you decide to stop using this method, make sure you remove that environmental variable.
 
 ## Maturity notes
 
