@@ -1,4 +1,3 @@
-var POLL_INTERVAL = 2500;
 
 var url_for = function(name, param) {
     var url = '';
