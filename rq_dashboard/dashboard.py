@@ -152,3 +152,8 @@ def list_workers():
     workers = [dict(name=worker.name, queues=serialize_queue_names(worker),
         state=worker.state) for worker in Worker.all()]
     return dict(workers=workers)
+
+@dashboard.context_processor
+def inject_interval():
+    interval = current_app.config.get('RQ_POLL_INTERVAL', 2500)
+    return dict(poll_interval=interval)
