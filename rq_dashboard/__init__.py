@@ -3,8 +3,28 @@ from .dashboard import dashboard
 
 
 class RQDashboard(object):
-    def __init__(self, app, url_prefix='/rq'):
-        self.init_app(app, url_prefix)
+    def __init__(self, app=None, url_prefix='/rq', **kwargs):
+        self.url_prefix = url_prefix
+        if app is not None:
+            self.init_app(app, **kwargs)
+        else:
+            self.app = None
 
-    def init_app(self, app, url_prefix='/rq'):
-        app.register_blueprint(dashboard, url_prefix=url_prefix)
+    def init_app(self, app, **kwargs):
+        """Initializes the RQ-Dashboard for the specified application.
+
+        :param app: The application.
+        """
+
+        if not hasattr(app, 'extensions'):
+            app.extensions = {}
+
+        if self.app is not None:
+            raise Exception('RQ-dashboard is already associated with an application.')
+
+        self.app = app
+        app.extensions['rq-dashboard'] = self
+
+        app.register_blueprint(dashboard, url_prefix=self.url_prefix)
+
+
