@@ -11,7 +11,7 @@ class RQDashboard(object):
             self.app = None
 
     def init_app(self, app, **kwargs):
-        """Initializes the Flask-Gravata extension for the specified application.
+        """Initializes the RQ-Dashboard for the specified application.
 
         :param app: The application.
         """
