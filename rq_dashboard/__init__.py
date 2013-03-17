@@ -13,7 +13,4 @@ class RQDashboard(object):
 
     def init_app(self, app):
         """Initializes the RQ-Dashboard for the specified application."""
-        if self.app is not None:
-            raise Exception('RQ-dashboard is already associated with an application.')
-
         app.register_blueprint(dashboard, url_prefix=self.url_prefix)
