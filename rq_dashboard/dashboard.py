@@ -4,7 +4,7 @@ from rq import push_connection
 from functools import wraps
 import times
 from flask import Blueprint
-from flask import current_app, url_for
+from flask import current_app, url_for, abort
 from flask import render_template
 from rq import Queue, Worker
 from rq import cancel_job, requeue_job
@@ -16,6 +16,14 @@ dashboard = Blueprint('rq_dashboard', __name__,
         static_folder='static',
         )
 
+
+@dashboard.before_request
+def authentication_hook():
+    """ Allow the parent app to authenticate user's access to the dashboard
+        with it's own auth_handler method that must return True or False
+    """
+    if current_app.auth_handler and not current_app.auth_handler():
+        abort(401)
 
 @dashboard.before_app_first_request
 def setup_rq_connection():
