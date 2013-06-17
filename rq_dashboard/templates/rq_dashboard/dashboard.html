@@ -135,6 +135,31 @@
             </tr>
         </script>
 
+        <div id="page-selection" class="pagination pagination-centered">
+          <ul>
+          </ul>
+        </div>
+
+        <script name="no-previous-page-link" type="text/template">
+            <li class="disabled" ><a href="#" >&laquo;</a></li>
+        </script>
+
+        <script name="previous-page-link" type="text/template">
+            <li><a href="<%= url %>" >&laquo;</a></li>
+        </script>
+
+        <script name="page-link" type="text/template">
+            <li><a href="<%= url %>" ><%= number %></a></li>
+        </script>
+
+        <script name="next-page-link" type="text/template">
+            <li><a href="<%= url %>" >&raquo;</a></li>
+        </script>
+
+        <script name="no-next-page-link" type="text/template">
+            <li class="disabled" ><a href="#" >&raquo;</a></li>
+        </script>
+
         </div>
     </div>
 </div>
