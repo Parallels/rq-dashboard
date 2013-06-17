@@ -24,7 +24,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=['rq', 'Flask', 'redis', 'simplejson', 'times'],
+    install_requires=['rq>=0.3.8', 'Flask', 'redis', 'simplejson', 'times'],
     entry_points='''\
     [console_scripts]
     rq-dashboard = rq_dashboard.scripts.rq_dashboard:main
