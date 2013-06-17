@@ -9,6 +9,7 @@ from flask import render_template
 from rq import Queue, Worker
 from rq import cancel_job, requeue_job
 from rq import get_failed_queue
+from math import ceil
 
 
 dashboard = Blueprint('rq_dashboard', __name__,
@@ -76,9 +77,24 @@ def serialize_job(job):
         description=job.description)
 
 
-@dashboard.route('/', defaults={'queue_name': None})
-@dashboard.route('/<queue_name>')
-def overview(queue_name):
+def remove_none_values(input_dict):
+    return dict([ (k,v) for k,v in input_dict.iteritems() if v is not None ])
+
+
+def pagination_window(total_items, cur_page, per_page=5, window_size=10):
+    all_pages = range(1, int(ceil(total_items / float(per_page))) + 1)
+    results = all_pages
+    if (window_size >= 1):
+        pages_window_start = int(max(0, min(len(all_pages) - window_size, (cur_page-1) - ceil(window_size / 2.0))))
+        pages_window_end = int(pages_window_start + window_size)
+        result = all_pages[pages_window_start:pages_window_end]
+    return result
+
+
+@dashboard.route('/', defaults={'queue_name': None, 'page': '1'})
+@dashboard.route('/<queue_name>', defaults={'page': '1'})
+@dashboard.route('/<queue_name>/<page>')
+def overview(queue_name, page):
     if queue_name is None:
         # Show the failed queue by default if it contains any jobs
         failed = Queue('failed')
@@ -92,6 +108,7 @@ def overview(queue_name):
     return render_template('rq_dashboard/dashboard.html',
             workers=Worker.all(),
             queue=queue,
+            page=page,
             queues=Queue.all())
 
 
@@ -143,12 +160,37 @@ def list_queues():
     return dict(queues=queues)
 
 
-@dashboard.route('/jobs/<queue_name>.json')
+@dashboard.route('/jobs/<queue_name>/<page>.json')
 @jsonify
-def list_jobs(queue_name):
+def list_jobs(queue_name, page):
+    current_page = int(page)
     queue = Queue(queue_name)
-    jobs = [serialize_job(job) for job in queue.jobs]
-    return dict(name=queue.name, jobs=jobs)
+    per_page = 5
+    total_items = queue.count
+    pages_numbers_in_window = pagination_window(total_items, current_page, per_page)
+    pages_in_window = [ dict(number=p, url=url_for('.overview',
+        queue_name=queue_name, page=p)) for p in pages_numbers_in_window ]
+    last_page = int(ceil(total_items / float(per_page)))
+
+    prev_page = None
+    if current_page > 1:
+        prev_page = dict(url=url_for('.overview', queue_name=queue_name, page=(current_page-1)))
+
+    next_page = None
+    if current_page < last_page:
+        next_page = dict(url=url_for('.overview', queue_name=queue_name, page=(current_page+1)))
+
+    pagination = remove_none_values(
+        dict(pages_in_window=pages_in_window,
+            next_page=next_page,
+            prev_page=prev_page))
+
+    offset = (current_page - 1) * per_page
+    # with get_jobs changed in https://github.com/nvie/rq/pull/224 we could do this:
+    # jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page)]
+    # default for current rq
+    jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page-1)]
+    return dict(name=queue.name, jobs=jobs, pagination=pagination)
 
 
 @dashboard.route('/workers.json')

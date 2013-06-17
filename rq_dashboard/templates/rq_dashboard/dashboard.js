@@ -1,11 +1,15 @@
 
 var url_for = function(name, param) {
     var url = '';
-    if (name == 'queues') { url = 'queues.json'; }
-    else if (name == 'jobs') { url = 'jobs/' + encodeURIComponent(param) + '.json'; }
-    else if (name == 'workers') { url = 'workers.json'; }
-    else if (name == 'cancel_job') { url = 'job/' + encodeURIComponent(param) + '/cancel'; }
-    else if (name == 'requeue_job') { url = 'job/' + encodeURIComponent(param) + '/requeue'; }
+    if (name == 'queues') { url = '/queues.json'; }
+    else if (name == 'workers') { url = '/workers.json'; }
+    else if (name == 'cancel_job') { url = '/job/' + encodeURIComponent(param) + '/cancel'; }
+    else if (name == 'requeue_job') { url = '/job/' + encodeURIComponent(param) + '/requeue'; }
+    return url;
+};
+
+var url_for_jobs = function(param, page) {
+    var url = '/jobs/' + encodeURIComponent(param) + '/' + page + '.json';
     return url;
 };
 
@@ -23,10 +27,11 @@ var api = {
         });
     },
 
-    getJobs: function(queue_name, cb) {
-        $.getJSON(url_for('jobs', queue_name), function(data) {
+    getJobs: function(queue_name, page, cb) {
+        $.getJSON(url_for_jobs(queue_name, page), function(data) {
             var jobs = data.jobs;
-            cb(jobs);
+            var pagination = data.pagination;
+            cb(jobs, pagination);
         });
     },
 
@@ -170,8 +175,12 @@ var api = {
 
         $('tr[data-role=loading-placeholder]', $tbody).show();
 
+        var $raw_tpl_page = $('script[name=page-link]').html();
+        var template_page = _.template($raw_tpl_page);
+        var $ul = $('div#page-selection ul');
+
         // Fetch the available jobs on the queue
-        api.getJobs('{{ queue.name }}', function(jobs) {
+        api.getJobs('{{ queue.name }}', '{{ page }}', function(jobs, pagination) {
             $tbody.empty();
 
             if (jobs.length > 0) {
@@ -188,6 +197,45 @@ var api = {
             } else {
                 var html = $('script[name=no-jobs-row]').html();
                 $tbody.append(html);
+            }
+
+
+            $ul.empty();
+
+            // prev page
+            if (pagination.prev_page !== undefined ) {
+                var $raw_tpl_prev_page = $('script[name=previous-page-link]').html();
+                var template_prev_page = _.template($raw_tpl_prev_page);
+                var html = template_prev_page(pagination.prev_page);
+                var $el = $(html);
+                $ul.append($el);
+            } else {
+                var html = $('script[name=no-previous-page-link]').html();
+                $ul.append(html);
+            }
+
+            $.each(pagination.pages_in_window, function(i, page) {
+                var html = template_page(page);
+                var $el = $(html);
+
+                // Special markup for the active page
+                if (page.number === {{ page }} ) {
+                    $el.addClass('active');
+                }
+
+                $ul.append($el);
+            });
+
+            // next page
+            if (pagination.next_page !== undefined ) {
+                var $raw_tpl_next_page = $('script[name=next-page-link]').html();
+                var template_next_page = _.template($raw_tpl_next_page);
+                var html = template_next_page(pagination.next_page);
+                var $el = $(html);
+                $ul.append($el);
+            } else {
+                var html = $('script[name=no-next-page-link]').html();
+                $ul.append(html);
             }
 
             if (done !== undefined) {
