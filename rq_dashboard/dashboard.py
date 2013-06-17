@@ -186,10 +186,7 @@ def list_jobs(queue_name, page):
             prev_page=prev_page))
 
     offset = (current_page - 1) * per_page
-    # with get_jobs changed in https://github.com/nvie/rq/pull/224 we could do this:
-    # jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page)]
-    # default for current rq
-    jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page-1)]
+    jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page)]
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
 
 
