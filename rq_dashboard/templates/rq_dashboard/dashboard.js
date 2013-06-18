@@ -103,6 +103,7 @@ var api = {
         reload_table();
         $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
+        $('[data-toggle=tooltip]').tooltip();
 
     });
 })($);
