@@ -71,7 +71,7 @@
 
         <script name="worker-row-grouped" type="text/template">
             <tr data-role="worker">
-                <td><i class="icon-play"></i> <%= busy_count %><br/><i class="icon-pause"></i> <%= idle_count %></td>
+                <td style="width:70px;"><i class="icon-play"></i>&nbsp;<%= busy_count %> &nbsp;<i class="icon-pause"></i>&nbsp;<%= idle_count %></td>
                 <td colspan="2"><%= queues.join(', ') %></td>
             </tr>
         </script>

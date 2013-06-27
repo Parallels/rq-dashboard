@@ -127,7 +127,7 @@ var api = {
                     var template_grouped = _.template($raw_tpl_grouped);
 
                     // Group by queue list
-                    worker_groups = {};
+                    var worker_groups = {};
 
                     $.each(workers, function(i, worker) {
                         var q = worker.queues.join(', ');
