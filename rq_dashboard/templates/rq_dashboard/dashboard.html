@@ -117,7 +117,7 @@
                 <td>
                     <i class="icon-file" style="opacity: .5;"></i>
                     <span class="description"><%= $('<div/>').text(description).html() %></span>
-                    <% if (exc_info) { %>
+                    <% if (exc_info || result) { %>
                         <span class="origin">from <strong><%= origin %></strong></span>
                     <% } %>
                     <div class="job_id"><%= id %></div>
@@ -125,6 +125,12 @@
                         <span class="end_date">Failed <%= ended_at %></span>
                         <pre class="exc_info"><%= $('<div/>').text(exc_info).html() %></pre>
                     <% } %>
+                    {% if show_results %}
+                        <% if (result) { %>
+                            <span class="end_date">Finished <%= ended_at %></span>
+                            <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(result, null, 3)).html() %></pre>
+                        <% } %>
+                    {% endif %}
                 </td>
                 <td><span class="creation_date"><%= created_at %></span></td>
                 <td class="actions narrow">

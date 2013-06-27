@@ -211,5 +211,6 @@ def inject_config():
 
     return dict(
         poll_interval=current_app.config.get('RQ_POLL_INTERVAL', 2500),
+        show_results=current_app.config.get('RQ_DASHBOARD_SHOW_RESULTS', False),
         group_workers=group_workers
     )
