@@ -69,6 +69,13 @@
             </tr>
         </script>
 
+        <script name="worker-row-grouped" type="text/template">
+            <tr data-role="worker">
+                <td><i class="icon-play"></i> <%= busy_count %><br/><i class="icon-pause"></i> <%= idle_count %></td>
+                <td colspan="2"><%= queues.join(', ') %></td>
+            </tr>
+        </script>
+
         <script name="no-workers-row" type="text/template">
             <tr>
                 <td colspan="3">No workers.</td>
@@ -177,5 +184,6 @@
 
 {% block inline_js %}
 var POLL_INTERVAL = {{ poll_interval }};
+var GROUP_WORKERS = {{ group_workers }};
 {% include "rq_dashboard/dashboard.js" %}
 {% endblock %}

@@ -122,19 +122,51 @@ var api = {
             $tbody.empty();
 
             if (workers.length > 0) {
-                var $raw_tpl = $('script[name=worker-row]').html();
-                var template = _.template($raw_tpl);
+                if (GROUP_WORKERS) {
+                    var $raw_tpl_grouped = $('script[name=worker-row-grouped]').html();
+                    var template_grouped = _.template($raw_tpl_grouped);
 
-                $.each(workers, function(i, worker) {
-                    if (worker.state === 'busy') {
-                        worker.state = 'play';
-                    } else {
-                        worker.state = 'pause';
-                    }
-                    var html = template(worker);
-                    var $el = $(html);
-                    $tbody.append($el);
-                });
+                    // Group by queue list
+                    worker_groups = {};
+
+                    $.each(workers, function(i, worker) {
+                        var q = worker.queues.join(', ');
+                        if (!worker_groups[q]) {
+                            worker_groups[q] = {
+                                "busy_count": 0,
+                                "idle_count": 0,
+                                "queues": worker.queues
+                            };
+                        }
+                        if (worker.state === 'busy') {
+                            worker_groups[q]["busy_count"]++;
+                        } else {
+                            worker_groups[q]["idle_count"]++;
+                        }
+                    });
+
+                    $.each(worker_groups, function(q, worker) {
+                        var html = template_grouped(worker);
+                        var $el = $(html);
+                        $tbody.append($el);
+                    });
+
+                } else {
+                    var $raw_tpl = $('script[name=worker-row]').html();
+                    var template = _.template($raw_tpl);
+
+                    $.each(workers, function(i, worker) {
+                        if (worker.state === 'busy') {
+                            worker.state = 'play';
+                        } else {
+                            worker.state = 'pause';
+                        }
+                        var html = template(worker);
+                        var $el = $(html);
+                        $tbody.append($el);
+                    });
+                }
+
             } else {
                 var html = $('script[name=no-workers-row]').html();
                 $tbody.append(html);

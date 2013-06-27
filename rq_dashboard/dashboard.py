@@ -165,7 +165,7 @@ def list_queues():
 def list_jobs(queue_name, page):
     current_page = int(page)
     queue = Queue(queue_name)
-    per_page = 5
+    per_page = current_app.config.get('RQ_DASHBOARD_JOBS_PER_PAGE', 5)
     total_items = queue.count
     pages_numbers_in_window = pagination_window(total_items, current_page, per_page)
     pages_in_window = [ dict(number=p, url=url_for('.overview',
@@ -200,7 +200,16 @@ def list_workers():
         state=worker.state) for worker in Worker.all()]
     return dict(workers=workers)
 
+
 @dashboard.context_processor
-def inject_interval():
-    interval = current_app.config.get('RQ_POLL_INTERVAL', 2500)
-    return dict(poll_interval=interval)
+def inject_config():
+
+    if current_app.config.get('RQ_DASHBOARD_GROUP_WORKERS', False):
+        group_workers = "true"
+    else:
+        group_workers = "false"
+
+    return dict(
+        poll_interval=current_app.config.get('RQ_POLL_INTERVAL', 2500),
+        group_workers=group_workers
+    )
