@@ -7,6 +7,7 @@ from flask import Blueprint
 from flask import current_app, url_for, abort
 from flask import render_template
 from rq import Queue, Worker
+from rq.job import Job
 from rq import cancel_job, requeue_job
 from rq import get_failed_queue
 from math import ceil
@@ -113,6 +114,20 @@ def overview(queue_name, page):
             queues=Queue.all())
 
 
+@dashboard.route('/job/<job_id>', methods=['GET'])
+def job_view(job_id):
+
+    return render_template('rq_dashboard/job.html',
+                           job_id=job_id)
+
+
+@dashboard.route('/job/<job_id>/data.json', methods=['GET'])
+@jsonify
+def get_one_job(job_id):
+    job = Job.fetch(job_id)
+    return serialize_job(job)
+
+
 @dashboard.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
@@ -159,7 +174,6 @@ def compact_queue(queue_name):
 def list_queues():
     queues = serialize_queues(sorted(Queue.all()))
     return dict(queues=queues)
-
 
 @dashboard.route('/jobs/<queue_name>/<page>.json')
 @jsonify

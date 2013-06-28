@@ -120,7 +120,7 @@
                     <% if (exc_info || result) { %>
                         <span class="origin">from <strong><%= origin %></strong></span>
                     <% } %>
-                    <div class="job_id"><%= id %></div>
+                    <div class="job_id"><a href="{{ base_url }}job/<%= id %>"><%= id %></a></div>
                     <% if (exc_info) { %>
                         <span class="end_date">Failed <%= ended_at %></span>
                         <pre class="exc_info"><%= $('<div/>').text(exc_info).html() %></pre>

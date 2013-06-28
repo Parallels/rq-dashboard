@@ -1,0 +1,87 @@
+{% extends "rq_dashboard/base.html" %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="span12">
+        <div class="section">
+
+        <table id="jobs" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th class="narrow">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="2">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script name="job-row" type="text/template">
+            <tr data-role="job" data-job-id="<%= id %>">
+                <td>
+                    <i class="icon-file" style="opacity: .5;"></i>
+                    <span class="description"><%= $('<div/>').text(description).html() %></span>
+                    <% if (exc_info || result) { %>
+                        <span class="origin">from <strong><%= origin %></strong></span>
+                    <% } %>
+                    <div class="job_id"><%= id %></div>
+                    <% if (exc_info) { %>
+                        <span class="end_date">Failed <%= ended_at %></span>
+                        <pre class="exc_info"><%= $('<div/>').text(exc_info).html() %></pre>
+                    <% } %>
+                    {% if show_results %}
+                        <% if (result) { %>
+                            <span class="end_date">Finished <%= ended_at %></span>
+                            <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(result, null, 3)).html() %></pre>
+                        <% } %>
+                    {% endif %}
+                    {% if show_logs %}
+                        <% if (typeof meta == "object" && meta.logs) { %>
+                            <span class="end_date">Logs</span>
+                            <pre class="exc_info"><%= $('<div/>').text(meta.logs).html() %></pre>
+                        <% } %>
+                    {% endif %}
+                </td>
+                <td><span class="creation_date"><%= created_at %></span></td>
+                <td class="actions narrow">
+                    <% if (exc_info) { %>
+                        <a href="#" data-role="requeue-job-btn" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
+                    <% } %>
+                    <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
+                </td>
+            </tr>
+        </script>
+
+        <script name="no-jobs-row" type="text/template">
+            <tr>
+                <td colspan="3">Unknown job.</td>
+            </tr>
+        </script>
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="span12">
+        <div class="section">
+            <p class="intro"><a href="{{ base_url }}" id="home-btn" class="btn btn-small" style="float: left"><i class="icon-arrow-left"></i> Home</a></p>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+{% block inline_js %}
+var POLL_INTERVAL = {{ poll_interval }};
+var GROUP_WORKERS = {{ group_workers }};
+var BASE_URL = {{ base_url|tojson }};
+{% include "rq_dashboard/job.js" %}
+{% endblock %}
