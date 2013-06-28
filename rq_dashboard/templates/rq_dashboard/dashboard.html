@@ -131,6 +131,12 @@
                             <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(result, null, 3)).html() %></pre>
                         <% } %>
                     {% endif %}
+                    {% if show_logs %}
+                        <% if (typeof meta == "object" && meta.logs) { %>
+                            <span class="end_date">Logs</span>
+                            <pre class="exc_info"><%= $('<div/>').text(meta.logs).html() %></pre>
+                        <% } %>
+                    {% endif %}
                 </td>
                 <td><span class="creation_date"><%= created_at %></span></td>
                 <td class="actions narrow">

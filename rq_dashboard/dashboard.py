@@ -74,7 +74,8 @@ def serialize_job(job):
         origin=job.origin,
         result=job._result,
         exc_info=job.exc_info,
-        description=job.description)
+        description=job.description,
+        meta=job.meta)
 
 
 def remove_none_values(input_dict):
@@ -212,5 +213,6 @@ def inject_config():
     return dict(
         poll_interval=current_app.config.get('RQ_POLL_INTERVAL', 2500),
         show_results=current_app.config.get('RQ_DASHBOARD_SHOW_RESULTS', False),
+        show_logs=current_app.config.get('RQ_DASHBOARD_SHOW_LOGS', False),
         group_workers=group_workers
     )
