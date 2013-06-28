@@ -185,7 +185,7 @@
 <div class="row">
     <div class="span12">
         <div class="section">
-            <p class="intro"><a href="/" id="home-btn" class="btn btn-small" style="float: left"><i class="icon-arrow-left"></i> Home</a></p>
+            <p class="intro"><a href="{{ base_url }}" id="home-btn" class="btn btn-small" style="float: left"><i class="icon-arrow-left"></i> Home</a></p>
         </div>
     </div>
 </div>
@@ -197,5 +197,6 @@
 {% block inline_js %}
 var POLL_INTERVAL = {{ poll_interval }};
 var GROUP_WORKERS = {{ group_workers }};
+var BASE_URL = {{ base_url|tojson }};
 {% include "rq_dashboard/dashboard.js" %}
 {% endblock %}
