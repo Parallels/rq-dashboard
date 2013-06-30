@@ -1,10 +1,10 @@
 
 var url_for = function(name, param) {
     var url = BASE_URL;
-    if (name == 'queues') { url = 'queues.json'; }
-    else if (name == 'workers') { url = 'workers.json'; }
-    else if (name == 'cancel_job') { url = 'job/' + encodeURIComponent(param) + '/cancel'; }
-    else if (name == 'requeue_job') { url = 'job/' + encodeURIComponent(param) + '/requeue'; }
+    if (name == 'queues') { url += 'queues.json'; }
+    else if (name == 'workers') { url += 'workers.json'; }
+    else if (name == 'cancel_job') { url += 'job/' + encodeURIComponent(param) + '/cancel'; }
+    else if (name == 'requeue_job') { url += 'job/' + encodeURIComponent(param) + '/requeue'; }
     return url;
 };
 
