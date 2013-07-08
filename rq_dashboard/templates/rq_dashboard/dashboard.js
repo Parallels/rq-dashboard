@@ -57,40 +57,52 @@ var api = {
 //
 (function($) {
     var reload_table = function(done) {
-        var $raw_tpl = $('script[name=queue-row]').html();
-        var template = _.template($raw_tpl);
+        var $raw_queue_tpl = $('script[name=queue-row]').html();
+        var $raw_job_name_tpl = $('script[name=job-name-row]').html();
+        var queue_template = _.template($raw_queue_tpl);
+        var job_name_template = _.template($raw_job_name_tpl);
 
-        var $tbody = $('table#queues tbody');
+        var $queues_tbody = $('table#queues tbody');
+        var $jobs_names_tbody = $('table#jobs-names tbody');
 
-        $('tr[data-role=loading-placeholder]', $tbody).show();
+        $('tr[data-role=loading-placeholder]', $queues_tbody, $jobs_names_tbody).show();
 
         // Fetch the available queues
         api.getQueues(function(queues) {
-            $tbody.empty();
+            $queues_tbody.empty();
+            $jobs_names_tbody.empty();
 
             if (queues.length > 0) {
                 var $fq;
                 $.each(queues, function(i, queue) {
-                    var html = template(queue);
-                    var $el = $(html);
 
+                  var html, $tbody;
+                    if (queue.name.match(/^tasks/)) {
+                      html = job_name_template(queue);
+                      $tbody = $jobs_names_tbody;
+                    } else {
+                      html = queue_template(queue);
+                      $tbody = $queues_tbody;
+                    }
+                    var $el = $(html);
                     // Special markup for the failed queue
                     if (queue.name === 'failed' && queue.count > 0) {
                         $el.addClass('failed');
                         $fq = $el;
                         return;
                     }
-
                     $tbody.append($el);
                 });
 
                 // Append the failed queue at the end, since it's a special queue
                 if ($fq !== undefined) {
-                    $tbody.append($fq);
+                  $queues_tbody.append($fq);
                 }
             } else {
                 var html = $('script[name=no-queues-row]').html();
-                $tbody.append(html);
+                $queues_tbody.append(html);
+                html = $('script[name=no-jobs-names-row]').html();
+                $jobs_names_tbody.append(html);
             }
 
             if (done !== undefined) {
@@ -225,6 +237,7 @@ var api = {
 
             if (jobs.length > 0) {
                 $.each(jobs, function(i, job) {
+                    console.log(job);
                     job.created_at = toRelative(Date.create(job.created_at));
                     if (job.ended_at !== undefined) {
                         job.ended_at = toRelative(Date.create(job.ended_at));
@@ -254,40 +267,15 @@ var api = {
                 $ul.append(html);
             }
 
-            $.each(pagination.pages_in_window, function(i, page) {
-                var html = template_page(page);
-                var $el = $(html);
+            $("pre.exc_info").click(function(e){ $(this).toggleClass("full"); });
 
-                // Special markup for the active page
-                if (page.number === {{ page }} ) {
-                    $el.addClass('active');
-                }
-
-                $ul.append($el);
-            });
-
-            // next page
-            if (pagination.next_page !== undefined ) {
-                var $raw_tpl_next_page = $('script[name=next-page-link]').html();
-                var template_next_page = _.template($raw_tpl_next_page);
-                var html = template_next_page(pagination.next_page);
-                var $el = $(html);
-                $ul.append($el);
-            } else {
-                var html = $('script[name=no-next-page-link]').html();
-                $ul.append(html);
-            }
-
-            if (done !== undefined) {
-                done();
-            }
         });
     };
 
     var refresh_table = function() {
         $('span.loading').fadeIn('fast');
         reload_table(function() {
-            $('span.loading').fadeOut('fast');
+          $('span.loading').fadeOut('fast');
         });
     };
 
@@ -296,6 +284,8 @@ var api = {
         reload_table();
         $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
+
+        $("#toggle-json-jobs").click(function(){ $("table#jobs").toggleClass("enlarge"); });
 
     });
 
@@ -366,44 +356,4 @@ var api = {
         return false;
     });
 
-})($);
-
-
-
-//
-// JOBS NAMES FILTER
-//
-(function($) {
-    var reload_select = function(done) {
-        var $raw_tpl = $('script[name=job-name-option]').html();
-        var template = _.template($raw_tpl);
-
-        var $select = $('select#jobs-names optgroup');
-
-        // Fetch all the unique jobs names on the queue
-        api.getJobsNames('{{ queue.name }}', function(jobsNames) {
-            $select.empty();
-
-            if (jobsNames.length > 0) {
-                $.each(jobsNames, function(i, jobName) {
-                    var html = template({"name": jobName});
-                    var $el = $(html);
-                    $select.append($el);
-                });
-            }
-
-            if (done !== undefined) {
-                done();
-            }
-        });
-    };
-
-    $(document).ready(function() {
-      reload_select()
-      setInterval(reload_select, POLL_INTERVAL);
-
-      $("select#jobs-names").change(function(e){
-        var jobName = $(e.target).val();
-      });
-    });
 })($);
