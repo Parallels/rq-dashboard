@@ -168,6 +168,14 @@ def requeue_all():
     return dict(status='OK', count=count)
 
 
+@dashboard.route('/empty-all-queues', methods=['POST'])
+@jsonify
+def empty_all_queues():
+    for queue in Queue.all():
+        queue.empty()
+    return dict(status='OK')
+
+
 @dashboard.route('/queue/<queue_name>/empty', methods=['POST'])
 @jsonify
 def empty_queue(queue_name):

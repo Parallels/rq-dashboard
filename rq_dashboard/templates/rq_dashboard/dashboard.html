@@ -8,6 +8,7 @@
         <div class="section">
 
             <h1>Queues</h1>
+            <a href="{{ url_for('rq_dashboard.empty_all_queues') }}" id="empty-all-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty all</a>
 
             <table id="queues" class="table table-bordered">
                 <thead>

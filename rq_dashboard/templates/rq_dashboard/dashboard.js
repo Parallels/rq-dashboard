@@ -120,6 +120,19 @@ var api = {
 
     $(document).ready(function() {
 
+
+        $('#empty-all-btn').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var $this = $(this);
+            $.post($this.attr('href'), function(data) {
+                reload_table();
+            });
+
+            return false;
+        });
+
         reload_table();
         $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
