@@ -11,6 +11,8 @@ from rq.job import Job
 from rq import cancel_job, requeue_job
 from rq import get_failed_queue
 from math import ceil
+import re
+from ast import literal_eval
 
 
 dashboard = Blueprint('rq_dashboard', __name__,
@@ -67,6 +69,7 @@ def serialize_date(dt):
 
 
 def serialize_job(job):
+    extra = parse_job(job)
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
@@ -76,7 +79,9 @@ def serialize_job(job):
         result=job._result,
         exc_info=job.exc_info,
         description=job.description,
-        meta=job.meta)
+        meta=job.meta,
+        name=extra["name"],
+        args=extra["args"])
 
 
 def remove_none_values(input_dict):
@@ -91,6 +96,15 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
         pages_window_end = int(pages_window_start + window_size)
         result = all_pages[pages_window_start:pages_window_end]
     return result
+
+
+def parse_job(job):
+  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', {(.*)}", job.description)
+  if match:
+    return {"name": match.group(1), "args": literal_eval("{%s}" % match.group(2))}
+  else:
+    print "could not parse %s" % job.description
+    return {"name": job.description, "args": ""}
 
 
 @dashboard.route('/', defaults={'queue_name': None, 'page': '1'})
@@ -183,8 +197,8 @@ def list_jobs(queue_name, page):
     per_page = current_app.config.get('RQ_DASHBOARD_JOBS_PER_PAGE', 5)
     total_items = queue.count
     pages_numbers_in_window = pagination_window(total_items, current_page, per_page)
-    pages_in_window = [ dict(number=p, url=url_for('.overview',
-        queue_name=queue_name, page=p)) for p in pages_numbers_in_window ]
+    pages_in_window = [dict(number=p, url=url_for('.overview',
+                       queue_name=queue_name, page=p)) for p in pages_numbers_in_window]
     last_page = int(ceil(total_items / float(per_page)))
 
     prev_page = None

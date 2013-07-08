@@ -1,12 +1,7 @@
 /* @override http://localhost:9181/static/css/main.css */
 
-body {
-    background-color: black;
-}
-
-.container {
+.container-fluid {
     background: white;
-    margin-top: 3em;
 }
 
 #content {

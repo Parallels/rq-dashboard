@@ -5,6 +5,7 @@ var url_for = function(name, param) {
     else if (name == 'workers') { url += 'workers.json'; }
     else if (name == 'cancel_job') { url += 'job/' + encodeURIComponent(param) + '/cancel'; }
     else if (name == 'requeue_job') { url += 'job/' + encodeURIComponent(param) + '/requeue'; }
+    else if (name == 'jobs_names') { url += 'jobs-names/' + encodeURIComponent(param) + '.json'; }
     return url;
 };
 
@@ -32,6 +33,13 @@ var api = {
             var jobs = data.jobs;
             var pagination = data.pagination;
             cb(jobs, pagination);
+        });
+    },
+
+    getJobsNames: function(queue_name, cb) {
+        $.getJSON(url_for("jobs_names", queue_name), function(data) {
+            var jobsNames = data.jobs_names || [];
+            cb(jobsNames);
         });
     },
 
@@ -358,4 +366,44 @@ var api = {
         return false;
     });
 
+})($);
+
+
+
+//
+// JOBS NAMES FILTER
+//
+(function($) {
+    var reload_select = function(done) {
+        var $raw_tpl = $('script[name=job-name-option]').html();
+        var template = _.template($raw_tpl);
+
+        var $select = $('select#jobs-names optgroup');
+
+        // Fetch all the unique jobs names on the queue
+        api.getJobsNames('{{ queue.name }}', function(jobsNames) {
+            $select.empty();
+
+            if (jobsNames.length > 0) {
+                $.each(jobsNames, function(i, jobName) {
+                    var html = template({"name": jobName});
+                    var $el = $(html);
+                    $select.append($el);
+                });
+            }
+
+            if (done !== undefined) {
+                done();
+            }
+        });
+    };
+
+    $(document).ready(function() {
+      reload_select()
+      setInterval(reload_select, POLL_INTERVAL);
+
+      $("select#jobs-names").change(function(e){
+        var jobName = $(e.target).val();
+      });
+    });
 })($);

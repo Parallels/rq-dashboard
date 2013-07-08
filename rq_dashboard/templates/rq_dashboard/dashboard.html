@@ -3,12 +3,11 @@
 
 {% block content %}
 
-<div class="row">
+<div class="row-fluid">
     <div class="span6">
         <div class="section">
 
             <h1>Queues</h1>
-            <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently in the queue.  Select a queue from above to view all jobs currently pending on the queue.</p>
 
             <table id="queues" class="table table-bordered">
                 <thead>
@@ -44,7 +43,6 @@
         <div class="section">
 
         <h1>Workers</h1>
-        <p class="fixed intro">This list below contains all the registered workers.</p>
 
         <table id="workers" class="table table-bordered">
             <thead>
@@ -86,21 +84,21 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row-fluid">
     <div class="span12">
         <div class="section">
 
         <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
-        <p class="intro">
+
         <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
         <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-resize-small"></i> Compact</a>
         <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
-        This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>
 
         <table id="jobs" class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th style='width:600px'>Name</th>
+                    <th>Args</th>
                     <th>Age</th>
                     <th class="narrow">Actions</th>
                 </tr>
@@ -116,7 +114,9 @@
             <tr data-role="job" data-job-id="<%= id %>">
                 <td>
                     <i class="icon-file" style="opacity: .5;"></i>
-                    <span class="description"><%= $('<div/>').text(description).html() %></span>
+                    <span class="description">
+                      <%= $('<div/>').text(name).html() %>
+                    </span>
                     <% if (exc_info || result) { %>
                         <span class="origin">from <strong><%= origin %></strong></span>
                     <% } %>
@@ -137,6 +137,9 @@
                             <pre class="exc_info"><%= $('<div/>').text(meta.logs).html() %></pre>
                         <% } %>
                     {% endif %}
+                </td>
+                <td>
+                  <pre><%= $('<div/>').text(JSON.stringify(args, undefined, 2)).html() %></pre>
                 </td>
                 <td><span class="creation_date"><%= created_at %></span></td>
                 <td class="actions narrow">
@@ -182,7 +185,7 @@
         </div>
     </div>
 </div>
-<div class="row">
+<div class="row-fluid">
     <div class="span12">
         <div class="section">
             <p class="intro"><a href="{{ base_url }}" id="home-btn" class="btn btn-small" style="float: left"><i class="icon-arrow-left"></i> Home</a></p>
