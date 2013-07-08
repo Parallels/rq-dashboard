@@ -120,7 +120,6 @@ var api = {
 
     $(document).ready(function() {
 
-
         $('#empty-all-btn').click(function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -250,7 +249,6 @@ var api = {
 
             if (jobs.length > 0) {
                 $.each(jobs, function(i, job) {
-                    console.log(job);
                     job.created_at = toRelative(Date.create(job.created_at));
                     if (job.ended_at !== undefined) {
                         job.ended_at = toRelative(Date.create(job.ended_at));
@@ -265,7 +263,6 @@ var api = {
                 $tbody.append(html);
             }
 
-
             $ul.empty();
 
             // prev page
@@ -279,6 +276,30 @@ var api = {
                 var html = $('script[name=no-previous-page-link]').html();
                 $ul.append(html);
             }
+
+            $.each(pagination.pages_in_window, function(i, page) {
+               var html = template_page(page);
+               var $el = $(html);
+
+               // Special markup for the active page
+               if (page.number === {{ page }} ) {
+                   $el.addClass('active');
+               }
+
+               $ul.append($el);
+           });
+
+           // next page
+           if (pagination.next_page !== undefined ) {
+               var $raw_tpl_next_page = $('script[name=next-page-link]').html();
+               var template_next_page = _.template($raw_tpl_next_page);
+               var html = template_next_page(pagination.next_page);
+               var $el = $(html);
+               $ul.append($el);
+           } else {
+               var html = $('script[name=no-next-page-link]').html();
+               $ul.append(html);
+           }
 
             $("pre.exc_info").click(function(e){ $(this).toggleClass("full"); });
 
