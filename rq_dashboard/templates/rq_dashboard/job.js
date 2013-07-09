@@ -70,11 +70,10 @@ var api = {
     };
 
     $(document).ready(function() {
-
         reload_table();
         $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
-
+        $("#toggle-json-jobs").click(function(){ $("table#jobs").toggleClass("enlarge"); });
     });
 
     // Enable the AJAX behaviour of the empty button

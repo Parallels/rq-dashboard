@@ -1,6 +1,11 @@
 {% extends "rq_dashboard/base.html" %}
 
 
+{% block jobs_table_title %}
+    <a id="toggle-json-jobs" class="btn btn-small" style="float: right; margin-right: 8px;">View all logs</a>
+{% endblock %}
+
+
 {% block inline_js %}
 var POLL_INTERVAL = {{ poll_interval }};
 var GROUP_WORKERS = {{ group_workers }};
