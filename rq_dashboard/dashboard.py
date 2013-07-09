@@ -184,6 +184,18 @@ def empty_queue(queue_name):
     return dict(status='OK')
 
 
+@dashboard.route("/queue/<queue_name>/cancelall", methods=["POST"])
+@jsonify
+def cancel_all(queue_name):
+  queue = Queue.from_queue_key(queue_name)
+  count = 0
+  for job_id in queue.get_job_ids():
+    if Job.exists(job_id, queue.connection):
+      cancel_job(job_id)
+      count += 1
+    return dict(status='OK', count=count)
+
+
 @dashboard.route('/queue/<queue_name>/compact', methods=['POST'])
 @jsonify
 def compact_queue(queue_name):
