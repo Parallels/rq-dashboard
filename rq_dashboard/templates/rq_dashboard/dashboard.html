@@ -125,10 +125,25 @@
 {% block jobs_table_title %}
     <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
 
-    <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
-    <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-resize-small"></i> Compact</a>
-    <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
-    <a href="{{ url_for('rq_dashboard.cancel_all', queue_name=queue.name) }}" id="cancel-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-trash"></i> Cancel All</a>
+    <a href="{{ url_for('rq_dashboard.cancel_all', queue_name=queue.name) }}"
+       id="cancel-all-btn" class="btn btn-danger btn-small" style="float: right"
+       title="removes the items in the queue AND the associated jobs">
+       <i class="icon-white icon-trash"></i><i class="icon-white icon-trash"></i> Cancel all
+    </a>
+    <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}"
+       id="empty-btn" class="btn btn-danger btn-small" style="float: right; margin-right: 8px;"
+       title="removes the items in the queue only">
+       <i class="icon-trash icon-white"></i> Empty
+    </a>
+    <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}"
+       id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"
+       title="removes the items for which the associated job does not exist anymore">
+       <i class="icon-resize-small"></i> Compact
+    </a>
+    <a href="{{ url_for('rq_dashboard.requeue_all') }}"
+       id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;">
+       <i class="icon-retweet"></i> Requeue all failed jobs
+    </a>
     <a id="toggle-json-jobs" class="btn btn-small" style="float: right; margin-right: 8px;">View all logs</a>
 {% endblock %}
 

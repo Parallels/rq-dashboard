@@ -100,11 +100,10 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 
 
 def parse_job(job):
-  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', [{\[](.*)[\]}]", job.description)
+  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', (.*)", job.description)
   if match:
-    return {"name": match.group(1), "args": literal_eval("{%s}" % match.group(2))}
+    return {"name": match.group(1), "args": match.group(2)}
   else:
-    print "could not parse %s" % job.description
     return {"name": job.description, "args": ""}
 
 
@@ -184,16 +183,17 @@ def empty_queue(queue_name):
     return dict(status='OK')
 
 
-@dashboard.route("/queue/<queue_name>/cancelall", methods=["POST"])
+@dashboard.route("/queue/<queue_name>/cancel-all", methods=["POST"])
 @jsonify
 def cancel_all(queue_name):
-  queue = Queue.from_queue_key(queue_name)
+  queue = Queue(queue_name)
   count = 0
   for job_id in queue.get_job_ids():
     if Job.exists(job_id, queue.connection):
       cancel_job(job_id)
       count += 1
-    return dict(status='OK', count=count)
+
+  return dict(status='OK', count=count)
 
 
 @dashboard.route('/queue/<queue_name>/compact', methods=['POST'])

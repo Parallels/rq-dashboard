@@ -324,40 +324,22 @@ var api = {
 
     });
 
-    // Enable the AJAX behaviour of the empty button
-    $('#empty-btn').click(function(e) {
+    // Enable the AJAX behaviour of the buttons
+    $('#empty-btn, #compact-btn, #requeue-all-btn, #cancel-all-btn').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
 
         var $this = $(this);
+        $this.attr("disabled", "disabled");
         $.post($this.attr('href'), function(data) {
-            reload_table();
+          reload_table();
+          $this.removeAttr("disabled");
         });
 
         return false;
     });
 
-    $('#compact-btn').click(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this);
-        $.post($this.attr('href'), function(data) {});
-
-        return false;
-    });
-
-    $('#requeue-all-btn').click(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this);
-        $.post($this.attr('href'), function(data) {});
-
-        return false;
-    });
-
-    // Enable the AJAX behaviour of the empty button
+    // Enable the AJAX behaviour of the cancel job button
     $('[data-role=cancel-job-btn]').live('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
