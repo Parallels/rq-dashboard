@@ -119,94 +119,20 @@
     </div>
 </div>
 
-<div class="row-fluid">
-    <div class="span12">
-        <div class="section">
+{% endblock %}
 
-        <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
 
-        <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
-        <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-resize-small"></i> Compact</a>
-        <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
-        <a id="toggle-json-jobs" class="btn btn-small" style="float: right; margin-right: 8px;">View all logs</a>
+{% block jobs_table_title %}
+    <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
 
-        <table id="jobs" class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Queue</th>
-                    <th style='width:600px'>Args, logs, results</th>
-                    <th>Status</th>
-                    <th class="narrow">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr data-role="loading-placeholder">
-                    <td colspan="2">Loading...</td>
-                </tr>
-            </tbody>
-        </table>
+    <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
+    <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-resize-small"></i> Compact</a>
+    <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
+    <a id="toggle-json-jobs" class="btn btn-small" style="float: right; margin-right: 8px;">View all logs</a>
+{% endblock %}
 
-        <script name="job-row" type="text/template">
-            <tr data-role="job" data-job-id="<%= id %>">
-                <td>
-                  <a href="{{ base_url }}job/<%= id %>"><%= $('<div/>').text(name).html() %></a>
-                </td>
-                <td>
-                  <% if (exc_info || result) { %>
-                    <%= origin %>
-                  <% } %>
-                </td>
-                <td>
-                  Args :
-                  <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(args, undefined, 2)).html() %></pre>
-                  {% if show_logs %}
-                    <% if (typeof meta == "object" && meta.logs) { %>
-                      Logs
-                      <pre class="exc_info"><%= $('<div/>').text(meta.logs).html() %></pre>
-                    <% } %>
-                  {% endif %}
-                  {% if show_results %}
-                    <% if (result) { %>
-                      Results
-                      <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(result, null, 3)).html() %></pre>
-                    <% } %>
-                  {% endif %}
-                  <% if (exc_info) { %>
-                    <span style='color:red'>Exception :</span>
-                    <pre class="exc_info"><%= $('<div/>').text(exc_info).html() %></pre>
-                  <% } %>
-                </td>
-                <td>
-                  <div><span class="creation_date">Created <%= created_at %></span></div>
-                  <% if (ended_at) { %>
-                    <div><span class="end_date">Finished <%= ended_at %></span></div>
-                  <% } %>
-                  <div>
-                    <% if (status == "failed") { %>
-                      <div><span class='label label-important'>failed</span></div>
-                    <% } else if (status=="finished") { %>
-                      <div><span class='label label-success'>finished</span></div>
-                    <% } else if (status=="started") { %>
-                      <div><span class='label label-warning'>started</span></div>
-                    <% } %>
-                  </div>
-                </td>
-                <td class="actions narrow">
-                    <% if (exc_info) { %>
-                        <a href="#" data-role="requeue-job-btn" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
-                    <% } %>
-                    <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
-                </td>
-            </tr>
-        </script>
 
-        <script name="no-jobs-row" type="text/template">
-            <tr>
-                <td colspan="3">No jobs.</td>
-            </tr>
-        </script>
-
+{% block jobs_table_pagination %}
         <div id="page-selection" class="pagination pagination-centered">
           <ul>
           </ul>
@@ -231,21 +157,7 @@
         <script name="no-next-page-link" type="text/template">
             <li class="disabled" ><a href="#" >&raquo;</a></li>
         </script>
-
-        </div>
-    </div>
-</div>
-<div class="row-fluid">
-    <div class="span12">
-        <div class="section">
-            <p class="intro"><a href="{{ base_url }}" id="home-btn" class="btn btn-small" style="float: left"><i class="icon-arrow-left"></i> Home</a></p>
-        </div>
-    </div>
-</div>
-
-
 {% endblock %}
-
 
 {% block inline_js %}
 var POLL_INTERVAL = {{ poll_interval }};

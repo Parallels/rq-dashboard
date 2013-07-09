@@ -74,6 +74,7 @@ var api = {
 
             if (queues.length > 0) {
                 var $fq;
+                queues.sort(function(a, b){ return(a.name > b.name); });
                 $.each(queues, function(i, queue) {
 
                   var html, $tbody;
