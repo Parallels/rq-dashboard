@@ -128,6 +128,7 @@
     <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right"><i class="icon-trash icon-white"></i> Empty</a>
     <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-resize-small"></i> Compact</a>
     <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
+    <a href="{{ url_for('rq_dashboard.cancel_all', queue_name=queue.name) }}" id="cancel-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-trash"></i> Cancel All</a>
     <a id="toggle-json-jobs" class="btn btn-small" style="float: right; margin-right: 8px;">View all logs</a>
 {% endblock %}
 
