@@ -100,7 +100,7 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 
 
 def parse_job(job):
-  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', {(.*)}", job.description)
+  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', [{\[](.*)[\]}]", job.description)
   if match:
     return {"name": match.group(1), "args": literal_eval("{%s}" % match.group(2))}
   else:
