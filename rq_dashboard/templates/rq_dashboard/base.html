@@ -103,7 +103,7 @@
 
     <script name="no-jobs-row" type="text/template">
         <tr>
-            <td colspan="3">Unknown job.</td>
+            <td colspan="3">No jobs.</td>
         </tr>
     </script>
 
@@ -127,6 +127,7 @@
 <script src="{{ url_for('rq_dashboard.static', filename='js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
 <script type="text/javascript">
 {% block inline_js %}{% endblock %}
+{% include "rq_dashboard/base.js" %}
 </script>
 
 </body>

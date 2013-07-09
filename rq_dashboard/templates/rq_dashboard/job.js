@@ -1,30 +1,3 @@
-
-var url_for = function(name, param) {
-    var url = BASE_URL;
-    if (name == 'queues') { url = 'queues.json'; }
-    else if (name == 'workers') { url = 'workers.json'; }
-    else if (name == 'cancel_job') { url = 'job/' + encodeURIComponent(param) + '/cancel'; }
-    else if (name == 'requeue_job') { url = 'job/' + encodeURIComponent(param) + '/requeue'; }
-    return url;
-};
-
-var toRelative = function(universal_date_string) {
-    var tzo = new Date().getTimezoneOffset();
-    var d = Date.create(universal_date_string).rewind({ minutes: tzo });
-    return d.relative();
-};
-
-var api = {
-    getJob: function(job_id, cb) {
-        $.getJSON(BASE_URL+"job/"+job_id+"/data.json", function(data) {
-            cb(data);
-        });
-    }
-};
-
-//
-// JOBS
-//
 (function($) {
     var reload_table = function(done) {
         var $raw_tpl = $('script[name=job-row]').html();
@@ -74,40 +47,6 @@ var api = {
         $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
         $("#toggle-json-jobs").click(function(){ $("table#jobs").toggleClass("enlarge"); });
-    });
-
-    // Enable the AJAX behaviour of the empty button
-    $('[data-role=cancel-job-btn]').live('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this),
-            $row = $this.closest('tr'),
-            job_id = $row.data('job-id'),
-            url = url_for('cancel_job', job_id);
-
-        $.post(url, function(data) {
-            $row.fadeOut('fast', function() { $row.delete(); });
-        });
-
-        return false;
-    });
-
-    // Enable the AJAX behaviour of the requeue button
-    $('[data-role=requeue-job-btn]').live('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this),
-            $row = $this.closest('tr'),
-            job_id = $row.data('job-id'),
-            url = url_for('requeue_job', job_id);
-
-        $.post(url, function(data) {
-            $row.fadeOut('fast', function() { $row.delete(); });
-        });
-
-        return false;
     });
 
 })($);
