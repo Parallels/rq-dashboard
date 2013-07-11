@@ -124,6 +124,16 @@
                         } else {
                             worker_groups[q]["idle_count"]++;
                         }
+
+                        worker_groups[q].href = false;
+                        if (HEROKU_WORKERS) {
+                            _.each(HEROKU_WORKERS, function(v, k) {
+                                console.log(v, k, worker.queues.join(" "));
+                                if (v==worker.queues.join(" ")) {
+                                    worker_groups[q].href = "https://dashboard.heroku.com/apps/"+k;
+                                }
+                            });
+                        }
                     });
 
                     $.each(worker_groups, function(q, worker) {

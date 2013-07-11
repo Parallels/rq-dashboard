@@ -263,6 +263,7 @@ def inject_config():
         poll_interval=current_app.config.get('RQ_POLL_INTERVAL', 2500),
         show_results=current_app.config.get('RQ_DASHBOARD_SHOW_RESULTS', False),
         show_logs=current_app.config.get('RQ_DASHBOARD_SHOW_LOGS', False),
+        heroku_workers=current_app.config.get('RQ_DASHBOARD_HEROKU_WORKERS', False),
         group_workers=group_workers,
         base_url=url_for('.overview')
     )

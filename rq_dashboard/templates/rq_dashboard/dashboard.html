@@ -71,7 +71,8 @@
 
         <script name="worker-row-grouped" type="text/template">
             <tr data-role="worker">
-                <td style="width:70px;"><i class="icon-play"></i>&nbsp;<%= busy_count %> &nbsp;<i class="icon-pause"></i>&nbsp;<%= idle_count %></td>
+
+                <td style="width:70px;"><% if (href) { %><a href="<%= href %>" target="_blank"><% } %><i class="icon-play"></i>&nbsp;<%= busy_count %> &nbsp;<i class="icon-pause"></i>&nbsp;<%= idle_count %><% if (href) { %></a><% } %></td>
                 <td colspan="2"><%= queues.join(', ') %></td>
             </tr>
         </script>
@@ -179,5 +180,6 @@
 var POLL_INTERVAL = {{ poll_interval }};
 var GROUP_WORKERS = {{ group_workers }};
 var BASE_URL = {{ base_url|tojson }};
+var HEROKU_WORKERS = {{heroku_workers|tojson }};
 {% include "rq_dashboard/dashboard.js" %}
 {% endblock %}
