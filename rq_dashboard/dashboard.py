@@ -26,7 +26,7 @@ def authentication_hook():
     if current_app.auth_handler and not current_app.auth_handler():
         abort(401)
 
-@dashboard.before_app_first_request
+@dashboard.before_request
 def setup_rq_connection():
     if current_app.config.get('REDIS_URL'):
         redis_conn = from_url(current_app.config.get('REDIS_URL'))
