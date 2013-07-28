@@ -7,6 +7,7 @@ from flask import Blueprint
 from flask import current_app, url_for, abort
 from flask import render_template
 from rq import Queue, Worker
+from rq.queue import FailedQueue
 from rq.job import Job
 from rq.exceptions import InvalidJobOperationError
 from rq import cancel_job, requeue_job
@@ -20,6 +21,11 @@ dashboard = Blueprint('rq_dashboard', __name__,
         template_folder='templates',
         static_folder='static',
         )
+
+
+class RqTimeoutQueue(FailedQueue):
+    def __init__(self, connection=None):
+        Queue.__init__(self, 'timeout', connection=connection)
 
 
 @dashboard.before_request
@@ -71,11 +77,13 @@ def serialize_date(dt):
 
 def serialize_job(job):
     extra = parse_job(job)
+
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
         enqueued_at=serialize_date(job.enqueued_at),
         ended_at=serialize_date(job.ended_at),
+        started_at=serialize_date(job.meta.get("started_at", None)),
         origin=job.origin,
         result=job._result,
         exc_info=job.exc_info,
@@ -153,22 +161,21 @@ def cancel_job_view(job_id):
 @dashboard.route('/job/<job_id>/requeue', methods=['POST'])
 @jsonify
 def requeue_job_view(job_id):
-    requeue_job(job_id)
+
+    # Just try both failed queues... don't care about efficiency for single job retries
+    timeout_queue = RqTimeoutQueue()
+    failed_queue = get_failed_queue()
+
+    try:
+        failed_queue.requeue(job_id)
+    except:
+        pass
+    try:
+        timeout_queue.requeue(job_id)
+    except:
+        pass
+
     return dict(status='OK')
-
-
-@dashboard.route('/requeue-all', methods=['GET', 'POST'])
-@jsonify
-def requeue_all():
-    fq = get_failed_queue()
-    job_ids = fq.job_ids
-    count = len(job_ids)
-    for job_id in job_ids:
-        try:
-            requeue_job(job_id)
-        except InvalidJobOperationError:
-            print "Job ID %s wasn't on the failed queue?" % job_id
-    return dict(status='OK', count=count)
 
 
 @dashboard.route('/empty-all-queues', methods=['POST'])
@@ -185,6 +192,23 @@ def empty_queue(queue_name):
     q = Queue(queue_name)
     q.empty()
     return dict(status='OK')
+
+
+@dashboard.route('/queue/<queue_name>/requeue-all', methods=['POST'])
+@jsonify
+def requeue_queue(queue_name):
+    if queue_name == "timeout":
+        fq = RqTimeoutQueue()
+    else:
+        fq = FailedQueue()
+    job_ids = fq.job_ids
+    count = len(job_ids)
+    for job_id in job_ids:
+        try:
+            fq.requeue(job_id)
+        except InvalidJobOperationError:
+            print "Job ID %s wasn't on a failed queue?" % job_id
+    return dict(status='OK', count=count)
 
 
 @dashboard.route("/queue/<queue_name>/cancel-all", methods=["POST"])

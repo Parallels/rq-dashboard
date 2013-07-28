@@ -141,9 +141,13 @@
        title="removes the items for which the associated job does not exist anymore">
        <i class="icon-resize-small"></i> Compact
     </a>
-    <a href="{{ url_for('rq_dashboard.requeue_all') }}"
+    <a href="{{ url_for('rq_dashboard.requeue_queue', queue_name='failed') }}"
        id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;">
        <i class="icon-retweet"></i> Requeue all failed jobs
+    </a>
+    <a href="{{ url_for('rq_dashboard.requeue_queue', queue_name='timeout') }}"
+       id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;">
+       <i class="icon-retweet"></i> Requeue all timeout jobs
     </a>
     <a id="toggle-json-jobs" class="btn btn-small" style="float: right; margin-right: 8px;">View all logs</a>
 {% endblock %}

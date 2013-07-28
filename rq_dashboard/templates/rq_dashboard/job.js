@@ -10,15 +10,19 @@
         // Fetch the available jobs on the queue
         api.getJob('{{ job_id }}', function(job) {
             $tbody.empty();
-
             var jobs = [job];
 
             if (job && jobs.length > 0) {
                 $.each(jobs, function(i, job) {
                     job.created_at = toRelative(Date.create(job.created_at));
-                    if (job.ended_at !== undefined) {
+
+                    if (job.ended_at) {
                         job.ended_at = toRelative(Date.create(job.ended_at));
                     }
+                    if (job.started_at) {
+                        job.started_at = toRelative(Date.create(job.started_at));
+                    }
+                    job.duration = (Date.create(job.ended_at)-Date.create(job.started_at))/1000;
                     var html = template(job);
                     var $el = $(html);
 
@@ -44,9 +48,8 @@
 
     $(document).ready(function() {
         reload_table();
-        $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
-        $("#toggle-json-jobs").click(function(){ $("table#jobs").toggleClass("enlarge"); });
+        $("table#jobs").toggleClass("enlarge");
     });
 
 })($);
