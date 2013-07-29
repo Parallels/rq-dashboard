@@ -1,0 +1,14 @@
+{% extends "rq_dashboard/base.html" %}
+
+
+{% block jobs_table_title %}
+
+{% endblock %}
+
+
+{% block inline_js %}
+var POLL_INTERVAL = {{ poll_interval }};
+var GROUP_WORKERS = {{ group_workers }};
+var BASE_URL = {{ base_url|tojson }};
+{% include "rq_dashboard/job.js" %}
+{% endblock %}

@@ -1,12 +1,7 @@
 /* @override http://localhost:9181/static/css/main.css */
 
-body {
-    background-color: black;
-}
-
-.container {
+.container-fluid {
     background: white;
-    margin-top: 3em;
 }
 
 #content {
@@ -56,6 +51,11 @@ table#queues {
     /*width: 300px;*/
 }
 
+#jobs-names-wrapper{
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 table#jobs td.actions a {
     margin-right: 8px;
     margin-bottom: 8px;
@@ -77,20 +77,17 @@ table#jobs div.job_id {
 }
 
 table#jobs pre.exc_info {
-    font-size: 80%;
-    color: #555;
-    margin-left: 24px;
-    border-left: 2px solid darkorange;
-    background-color: lightgoldenrodyellow;
+    max-height: 30px;
+    overflow: hidden;
+    cursor: pointer;
 }
 
-table#jobs span.creation_date {
-    font-size: 80%;
-}
-
-table#jobs span.end_date {
-    font-size: 80%;
-    margin-left: 24px;
+table#jobs pre.exc_info.full,
+table#jobs.enlarge pre.exc_info {
+  color: #fff;
+  background-color: black;
+  max-height: none;
+  overflow: auto;
 }
 
 table#workers {

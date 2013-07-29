@@ -1,88 +1,57 @@
 
-var url_for = function(name, param) {
-    var url = '';
-    if (name == 'queues') { url = '/queues.json'; }
-    else if (name == 'workers') { url = '/workers.json'; }
-    else if (name == 'cancel_job') { url = '/job/' + encodeURIComponent(param) + '/cancel'; }
-    else if (name == 'requeue_job') { url = '/job/' + encodeURIComponent(param) + '/requeue'; }
-    return url;
-};
-
-var url_for_jobs = function(param, page) {
-    var url = '/jobs/' + encodeURIComponent(param) + '/' + page + '.json';
-    return url;
-};
-
-var toRelative = function(universal_date_string) {
-    var tzo = new Date().getTimezoneOffset();
-    var d = Date.create(universal_date_string).rewind({ minutes: tzo });
-    return d.relative();
-};
-
-var api = {
-    getQueues: function(cb) {
-        $.getJSON(url_for('queues'), function(data) {
-            var queues = data.queues;
-            cb(queues);
-        });
-    },
-
-    getJobs: function(queue_name, page, cb) {
-        $.getJSON(url_for_jobs(queue_name, page), function(data) {
-            var jobs = data.jobs;
-            var pagination = data.pagination;
-            cb(jobs, pagination);
-        });
-    },
-
-    getWorkers: function(cb) {
-        $.getJSON(url_for('workers'), function(data) {
-            var workers = data.workers;
-            cb(workers);
-        });
-    }
-};
-
 
 //
 // QUEUES
 //
 (function($) {
     var reload_table = function(done) {
-        var $raw_tpl = $('script[name=queue-row]').html();
-        var template = _.template($raw_tpl);
+        var $raw_queue_tpl = $('script[name=queue-row]').html();
+        var $raw_job_name_tpl = $('script[name=job-name-row]').html();
+        var queue_template = _.template($raw_queue_tpl);
+        var job_name_template = _.template($raw_job_name_tpl);
 
-        var $tbody = $('table#queues tbody');
+        var $queues_tbody = $('table#queues tbody');
+        var $jobs_names_tbody = $('table#jobs-names tbody');
 
-        $('tr[data-role=loading-placeholder]', $tbody).show();
+        $('tr[data-role=loading-placeholder]', $queues_tbody, $jobs_names_tbody).show();
 
         // Fetch the available queues
         api.getQueues(function(queues) {
-            $tbody.empty();
+            $queues_tbody.empty();
+            $jobs_names_tbody.empty();
 
             if (queues.length > 0) {
                 var $fq;
+                queues.sort(function(a, b){ return(a.name > b.name); });
                 $.each(queues, function(i, queue) {
-                    var html = template(queue);
-                    var $el = $(html);
 
+                  var html, $tbody;
+                    if (queue.name.match(/^tasks/)) {
+                      html = job_name_template(queue);
+                      $tbody = $jobs_names_tbody;
+                    } else {
+                      html = queue_template(queue);
+                      $tbody = $queues_tbody;
+                    }
+                    var $el = $(html);
                     // Special markup for the failed queue
                     if (queue.name === 'failed' && queue.count > 0) {
                         $el.addClass('failed');
                         $fq = $el;
                         return;
                     }
-
                     $tbody.append($el);
                 });
 
                 // Append the failed queue at the end, since it's a special queue
                 if ($fq !== undefined) {
-                    $tbody.append($fq);
+                  $queues_tbody.append($fq);
                 }
             } else {
                 var html = $('script[name=no-queues-row]').html();
-                $tbody.append(html);
+                $queues_tbody.append(html);
+                html = $('script[name=no-jobs-names-row]').html();
+                $jobs_names_tbody.append(html);
             }
 
             if (done !== undefined) {
@@ -99,6 +68,18 @@ var api = {
     };
 
     $(document).ready(function() {
+
+        $('#empty-all-btn').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var $this = $(this);
+            $.post($this.attr('href'), function(data) {
+                reload_table();
+            });
+
+            return false;
+        });
 
         reload_table();
         $('#refresh-button').click(refresh_table);
@@ -122,19 +103,60 @@ var api = {
             $tbody.empty();
 
             if (workers.length > 0) {
-                var $raw_tpl = $('script[name=worker-row]').html();
-                var template = _.template($raw_tpl);
+                if (GROUP_WORKERS) {
+                    var $raw_tpl_grouped = $('script[name=worker-row-grouped]').html();
+                    var template_grouped = _.template($raw_tpl_grouped);
 
-                $.each(workers, function(i, worker) {
-                    if (worker.state === 'busy') {
-                        worker.state = 'play';
-                    } else {
-                        worker.state = 'pause';
-                    }
-                    var html = template(worker);
-                    var $el = $(html);
-                    $tbody.append($el);
-                });
+                    // Group by queue list
+                    var worker_groups = {};
+
+                    $.each(workers, function(i, worker) {
+                        var q = worker.queues.join(', ');
+                        if (!worker_groups[q]) {
+                            worker_groups[q] = {
+                                "busy_count": 0,
+                                "idle_count": 0,
+                                "queues": worker.queues
+                            };
+                        }
+                        if (worker.state === 'busy') {
+                            worker_groups[q]["busy_count"]++;
+                        } else {
+                            worker_groups[q]["idle_count"]++;
+                        }
+
+                        worker_groups[q].href = false;
+                        if (HEROKU_WORKERS) {
+                            _.each(HEROKU_WORKERS, function(v, k) {
+                                if (v==worker.queues.join(" ")) {
+                                    worker_groups[q].href = "https://dashboard.heroku.com/apps/"+k;
+                                }
+                            });
+                        }
+                    });
+
+                    $.each(worker_groups, function(q, worker) {
+                        var html = template_grouped(worker);
+                        var $el = $(html);
+                        $tbody.append($el);
+                    });
+
+                } else {
+                    var $raw_tpl = $('script[name=worker-row]').html();
+                    var template = _.template($raw_tpl);
+
+                    $.each(workers, function(i, worker) {
+                        if (worker.state === 'busy') {
+                            worker.state = 'play';
+                        } else {
+                            worker.state = 'pause';
+                        }
+                        var html = template(worker);
+                        var $el = $(html);
+                        $tbody.append($el);
+                    });
+                }
+
             } else {
                 var html = $('script[name=no-workers-row]').html();
                 $tbody.append(html);
@@ -185,10 +207,15 @@ var api = {
 
             if (jobs.length > 0) {
                 $.each(jobs, function(i, job) {
+                    job.duration = (Date.create(job.ended_at)-Date.create(job.started_at))/1000;
                     job.created_at = toRelative(Date.create(job.created_at));
-                    if (job.ended_at !== undefined) {
+                    if (job.ended_at) {
                         job.ended_at = toRelative(Date.create(job.ended_at));
                     }
+                    if (job.started_at) {
+                        job.started_at = toRelative(Date.create(job.started_at));
+                    }
+
                     var html = template(job);
                     var $el = $(html);
 
@@ -198,7 +225,6 @@ var api = {
                 var html = $('script[name=no-jobs-row]').html();
                 $tbody.append(html);
             }
-
 
             $ul.empty();
 
@@ -215,39 +241,38 @@ var api = {
             }
 
             $.each(pagination.pages_in_window, function(i, page) {
-                var html = template_page(page);
-                var $el = $(html);
+               var html = template_page(page);
+               var $el = $(html);
 
-                // Special markup for the active page
-                if (page.number === {{ page }} ) {
-                    $el.addClass('active');
-                }
+               // Special markup for the active page
+               if (page.number === {{ page }} ) {
+                   $el.addClass('active');
+               }
 
-                $ul.append($el);
-            });
+               $ul.append($el);
+           });
 
-            // next page
-            if (pagination.next_page !== undefined ) {
-                var $raw_tpl_next_page = $('script[name=next-page-link]').html();
-                var template_next_page = _.template($raw_tpl_next_page);
-                var html = template_next_page(pagination.next_page);
-                var $el = $(html);
-                $ul.append($el);
-            } else {
-                var html = $('script[name=no-next-page-link]').html();
-                $ul.append(html);
-            }
+           // next page
+           if (pagination.next_page !== undefined ) {
+               var $raw_tpl_next_page = $('script[name=next-page-link]').html();
+               var template_next_page = _.template($raw_tpl_next_page);
+               var html = template_next_page(pagination.next_page);
+               var $el = $(html);
+               $ul.append($el);
+           } else {
+               var html = $('script[name=no-next-page-link]').html();
+               $ul.append(html);
+           }
 
-            if (done !== undefined) {
-                done();
-            }
+            $("pre.exc_info").click(function(e){ $(this).toggleClass("full"); });
+
         });
     };
 
     var refresh_table = function() {
         $('span.loading').fadeIn('fast');
         reload_table(function() {
-            $('span.loading').fadeOut('fast');
+          $('span.loading').fadeOut('fast');
         });
     };
 
@@ -257,70 +282,20 @@ var api = {
         $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
 
+        $("#toggle-json-jobs").click(function(){ $("table#jobs").toggleClass("enlarge"); });
+
     });
 
-    // Enable the AJAX behaviour of the empty button
-    $('#empty-btn').click(function(e) {
+    // Enable the AJAX behaviour of the buttons
+    $('#empty-btn, #compact-btn, #requeue-all-btn, #cancel-all-btn').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
 
         var $this = $(this);
+        $this.attr("disabled", "disabled");
         $.post($this.attr('href'), function(data) {
-            reload_table();
-        });
-
-        return false;
-    });
-
-    $('#compact-btn').click(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this);
-        $.post($this.attr('href'), function(data) {});
-
-        return false;
-    });
-
-    $('#requeue-all-btn').click(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this);
-        $.post($this.attr('href'), function(data) {});
-
-        return false;
-    });
-
-    // Enable the AJAX behaviour of the empty button
-    $('[data-role=cancel-job-btn]').live('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this),
-            $row = $this.closest('tr'),
-            job_id = $row.data('job-id'),
-            url = url_for('cancel_job', job_id);
-
-        $.post(url, function(data) {
-            $row.fadeOut('fast', function() { $row.delete(); });
-        });
-
-        return false;
-    });
-
-    // Enable the AJAX behaviour of the requeue button
-    $('[data-role=requeue-job-btn]').live('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this),
-            $row = $this.closest('tr'),
-            job_id = $row.data('job-id'),
-            url = url_for('requeue_job', job_id);
-
-        $.post(url, function(data) {
-            $row.fadeOut('fast', function() { $row.delete(); });
+          reload_table();
+          $this.removeAttr("disabled");
         });
 
         return false;

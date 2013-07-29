@@ -7,15 +7,25 @@ from flask import Blueprint
 from flask import current_app, url_for, abort
 from flask import render_template
 from rq import Queue, Worker
+from rq.queue import FailedQueue
+from rq.job import Job
+from rq.exceptions import InvalidJobOperationError
 from rq import cancel_job, requeue_job
 from rq import get_failed_queue
 from math import ceil
+import re
+from ast import literal_eval
 
 
 dashboard = Blueprint('rq_dashboard', __name__,
         template_folder='templates',
         static_folder='static',
         )
+
+
+class RqTimeoutQueue(FailedQueue):
+    def __init__(self, connection=None):
+        Queue.__init__(self, 'timeout', connection=connection)
 
 
 @dashboard.before_request
@@ -66,15 +76,22 @@ def serialize_date(dt):
 
 
 def serialize_job(job):
+    extra = parse_job(job)
+
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
         enqueued_at=serialize_date(job.enqueued_at),
         ended_at=serialize_date(job.ended_at),
+        started_at=serialize_date(job.meta.get("started_at", None)),
         origin=job.origin,
         result=job._result,
         exc_info=job.exc_info,
-        description=job.description)
+        description=job.description,
+        meta=job.meta,
+        status=job._status,
+        name=extra["name"],
+        args=extra["args"])
 
 
 def remove_none_values(input_dict):
@@ -89,6 +106,14 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
         pages_window_end = int(pages_window_start + window_size)
         result = all_pages[pages_window_start:pages_window_end]
     return result
+
+
+def parse_job(job):
+  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', (.*)", job.description)
+  if match:
+    return {"name": match.group(1), "args": match.group(2)}
+  else:
+    return {"name": job.description, "args": ""}
 
 
 @dashboard.route('/', defaults={'queue_name': None, 'page': '1'})
@@ -112,6 +137,20 @@ def overview(queue_name, page):
             queues=Queue.all())
 
 
+@dashboard.route('/job/<job_id>', methods=['GET'])
+def job_view(job_id):
+
+    return render_template('rq_dashboard/job.html',
+                           job_id=job_id)
+
+
+@dashboard.route('/job/<job_id>/data.json', methods=['GET'])
+@jsonify
+def get_one_job(job_id):
+    job = Job.fetch(job_id)
+    return serialize_job(job)
+
+
 @dashboard.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
@@ -122,19 +161,29 @@ def cancel_job_view(job_id):
 @dashboard.route('/job/<job_id>/requeue', methods=['POST'])
 @jsonify
 def requeue_job_view(job_id):
-    requeue_job(job_id)
+
+    # Just try both failed queues... don't care about efficiency for single job retries
+    timeout_queue = RqTimeoutQueue()
+    failed_queue = get_failed_queue()
+
+    try:
+        failed_queue.requeue(job_id)
+    except:
+        pass
+    try:
+        timeout_queue.requeue(job_id)
+    except:
+        pass
+
     return dict(status='OK')
 
 
-@dashboard.route('/requeue-all', methods=['GET', 'POST'])
+@dashboard.route('/empty-all-queues', methods=['POST'])
 @jsonify
-def requeue_all():
-    fq = get_failed_queue()
-    job_ids = fq.job_ids
-    count = len(job_ids)
-    for job_id in job_ids:
-        requeue_job(job_id)
-    return dict(status='OK', count=count)
+def empty_all_queues():
+    for queue in Queue.all():
+        queue.empty()
+    return dict(status='OK')
 
 
 @dashboard.route('/queue/<queue_name>/empty', methods=['POST'])
@@ -143,6 +192,36 @@ def empty_queue(queue_name):
     q = Queue(queue_name)
     q.empty()
     return dict(status='OK')
+
+
+@dashboard.route('/queue/<queue_name>/requeue-all', methods=['POST'])
+@jsonify
+def requeue_queue(queue_name):
+    if queue_name == "timeout":
+        fq = RqTimeoutQueue()
+    else:
+        fq = FailedQueue()
+    job_ids = fq.job_ids
+    count = len(job_ids)
+    for job_id in job_ids:
+        try:
+            fq.requeue(job_id)
+        except InvalidJobOperationError:
+            print "Job ID %s wasn't on a failed queue?" % job_id
+    return dict(status='OK', count=count)
+
+
+@dashboard.route("/queue/<queue_name>/cancel-all", methods=["POST"])
+@jsonify
+def cancel_all(queue_name):
+  queue = Queue(queue_name)
+  count = 0
+  for job_id in queue.get_job_ids():
+    if Job.exists(job_id, queue.connection):
+      cancel_job(job_id)
+      count += 1
+
+  return dict(status='OK', count=count)
 
 
 @dashboard.route('/queue/<queue_name>/compact', methods=['POST'])
@@ -159,17 +238,16 @@ def list_queues():
     queues = serialize_queues(sorted(Queue.all()))
     return dict(queues=queues)
 
-
 @dashboard.route('/jobs/<queue_name>/<page>.json')
 @jsonify
 def list_jobs(queue_name, page):
     current_page = int(page)
     queue = Queue(queue_name)
-    per_page = 5
+    per_page = current_app.config.get('RQ_DASHBOARD_JOBS_PER_PAGE', 5)
     total_items = queue.count
     pages_numbers_in_window = pagination_window(total_items, current_page, per_page)
-    pages_in_window = [ dict(number=p, url=url_for('.overview',
-        queue_name=queue_name, page=p)) for p in pages_numbers_in_window ]
+    pages_in_window = [dict(number=p, url=url_for('.overview',
+                       queue_name=queue_name, page=p)) for p in pages_numbers_in_window]
     last_page = int(ceil(total_items / float(per_page)))
 
     prev_page = None
@@ -200,7 +278,20 @@ def list_workers():
         state=worker.state) for worker in Worker.all()]
     return dict(workers=workers)
 
+
 @dashboard.context_processor
-def inject_interval():
-    interval = current_app.config.get('RQ_POLL_INTERVAL', 2500)
-    return dict(poll_interval=interval)
+def inject_config():
+
+    if current_app.config.get('RQ_DASHBOARD_GROUP_WORKERS', False):
+        group_workers = "true"
+    else:
+        group_workers = "false"
+
+    return dict(
+        poll_interval=current_app.config.get('RQ_POLL_INTERVAL', 2500),
+        show_results=current_app.config.get('RQ_DASHBOARD_SHOW_RESULTS', False),
+        show_logs=current_app.config.get('RQ_DASHBOARD_SHOW_LOGS', False),
+        heroku_workers=current_app.config.get('RQ_DASHBOARD_HEROKU_WORKERS', False),
+        group_workers=group_workers,
+        base_url=url_for('.overview')
+    )
