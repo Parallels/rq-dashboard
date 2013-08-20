@@ -78,7 +78,7 @@ def serialize_job(job):
 
 
 def remove_none_values(input_dict):
-    return dict([ (k,v) for k,v in input_dict.iteritems() if v is not None ])
+    return dict([ (k,v) for k,v in input_dict.items() if v is not None ])
 
 
 def pagination_window(total_items, cur_page, per_page=5, window_size=10):
