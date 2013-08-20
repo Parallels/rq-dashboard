@@ -57,7 +57,7 @@ def main():
         parser.print_help()
         sys.exit(2)
 
-    print 'RQ Dashboard, version %s' % VERSION
+    print('RQ Dashboard, version %s' % VERSION)
     app.run(host=app.config['BIND_ADDR'], port=app.config['PORT'])
 
 if __name__ == '__main__':
