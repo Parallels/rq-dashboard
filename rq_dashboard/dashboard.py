@@ -47,9 +47,9 @@ def jsonify(f):
         except Exception as e:
             result_dict = dict(status='error')
             if current_app.config['DEBUG']:
-                result_dict['reason'] = e.message
+                result_dict['reason'] = str(e)
                 from traceback import format_exc
-                result_dict['exc_info'] = format_exc(e)
+                result_dict['exc_info'] = format_exc()
         return flask_jsonify(**result_dict)
     return _wrapped
 
