@@ -47,9 +47,9 @@ def jsonify(f):
         except Exception as e:
             result_dict = dict(status='error')
             if current_app.config['DEBUG']:
-                result_dict['reason'] = e.message
+                result_dict['reason'] = str(e)
                 from traceback import format_exc
-                result_dict['exc_info'] = format_exc(e)
+                result_dict['exc_info'] = format_exc()
         return flask_jsonify(**result_dict)
     return _wrapped
 
@@ -78,7 +78,7 @@ def serialize_job(job):
 
 
 def remove_none_values(input_dict):
-    return dict([ (k,v) for k,v in input_dict.iteritems() if v is not None ])
+    return dict([ (k,v) for k,v in input_dict.items() if v is not None ])
 
 
 def pagination_window(total_items, cur_page, per_page=5, window_size=10):
