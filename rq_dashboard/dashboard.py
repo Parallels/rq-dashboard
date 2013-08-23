@@ -17,6 +17,9 @@ dashboard = Blueprint('rq_dashboard', __name__,
         static_folder='static',
         )
 
+connections = {
+    'redis_conn': None
+}
 
 @dashboard.before_request
 def authentication_hook():
@@ -26,17 +29,25 @@ def authentication_hook():
     if current_app.auth_handler and not current_app.auth_handler():
         abort(401)
 
-@dashboard.before_request
+@dashboard.before_app_first_request
 def setup_rq_connection():
     if current_app.config.get('REDIS_URL'):
-        redis_conn = from_url(current_app.config.get('REDIS_URL'))
+        connections['redis_conn'] = from_url(current_app.config.get('REDIS_URL'))
     else:
-        redis_conn = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
+        connections['redis_conn'] = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
                        port=current_app.config.get('REDIS_PORT', 6379),
                        password=current_app.config.get('REDIS_PASSWORD', None),
                        db=current_app.config.get('REDIS_DB', 0))
-    push_connection(redis_conn)
 
+@dashboard.before_request
+def push_rq_connection():
+    print "pushing connection", connections['redis_conn']
+    push_connection(connections['redis_conn'])
+
+@dashboard.teardown_request
+def pop_rq_connection(exception=None):
+    popped = pop_connection()
+    print "popping connection", popped
 
 def jsonify(f):
     @wraps(f)
