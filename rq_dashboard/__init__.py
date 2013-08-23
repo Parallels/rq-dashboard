@@ -15,3 +15,4 @@ class RQDashboard(object):
     def init_app(self, app):
         """Initializes the RQ-Dashboard for the specified application."""
         app.register_blueprint(dashboard, url_prefix=self.url_prefix)
+        app.config['rq_url_prefix'] = self.url_prefix
