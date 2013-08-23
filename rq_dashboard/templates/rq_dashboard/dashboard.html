@@ -25,9 +25,9 @@
             </table>
 
             <script name="queue-row" type="text/template">
-                <tr data-role="queue">
-                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="<%= url %>"><%= name %></a></td>
-                    <td class="narrow"><%= count %></td>
+                <tr data-role="queue" <% if (d.name === 'failed' && d.count > 0) { %> class="failed"<% } %>>
+                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="<%= d.url %>"><%= d.name %></a></td>
+                    <td class="narrow"><%= d.count %></td>
                 </tr>
             </script>
 
@@ -63,9 +63,9 @@
 
         <script name="worker-row" type="text/template">
             <tr data-role="worker">
-                <td><i class="icon-<%= state %>"></i></td>
-                <td><%= name %></td>
-                <td><%= queues.join(', ') %></td>
+                <td><i class="icon-<%= d.state %>"></i></td>
+                <td><%= d.name %></td>
+                <td><%= d.queues.join(', ') %></td>
             </tr>
         </script>
 
@@ -106,22 +106,22 @@
         </table>
 
         <script name="job-row" type="text/template">
-            <tr data-role="job" data-job-id="<%= id %>">
+            <tr data-role="job" data-job-id="<%= d.id %>">
                 <td>
                     <i class="icon-file" style="opacity: .5;"></i>
-                    <span class="description"><%= $('<div/>').text(description).html() %></span>
-                    <% if (exc_info) { %>
-                        <span class="origin">from <strong><%= origin %></strong></span>
+                    <span class="description"><%= $('<div/>').text(d.description).html() %></span>
+                    <% if (d.exc_info) { %>
+                        <span class="origin">from <strong><%= d.origin %></strong></span>
                     <% } %>
-                    <div class="job_id"><%= id %></div>
-                    <% if (exc_info) { %>
-                        <span class="end_date">Failed <%= ended_at %></span>
-                        <pre class="exc_info"><%= $('<div/>').text(exc_info).html() %></pre>
+                    <div class="job_id"><%= d.id %></div>
+                    <% if (d.exc_info) { %>
+                        <span class="end_date">Failed <%= d.ended_at %></span>
+                        <pre class="exc_info"><%= $('<div/>').text(d.exc_info).html() %></pre>
                     <% } %>
                 </td>
-                <td><span class="creation_date"><%= created_at %></span></td>
+                <td><span class="creation_date"><%= d.created_at %></span></td>
                 <td class="actions narrow">
-                    <% if (exc_info) { %>
+                    <% if (d.exc_info) { %>
                         <a href="#" data-role="requeue-job-btn" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
                     <% } %>
                     <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
