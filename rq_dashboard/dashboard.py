@@ -1,6 +1,6 @@
 from redis import Redis
 from redis import from_url
-from rq import push_connection
+from rq import push_connection, pop_connection
 from functools import wraps
 import times
 from flask import Blueprint
@@ -41,13 +41,11 @@ def setup_rq_connection():
 
 @dashboard.before_request
 def push_rq_connection():
-    print "pushing connection", connections['redis_conn']
     push_connection(connections['redis_conn'])
 
 @dashboard.teardown_request
 def pop_rq_connection(exception=None):
     popped = pop_connection()
-    print "popping connection", popped
 
 def jsonify(f):
     @wraps(f)
