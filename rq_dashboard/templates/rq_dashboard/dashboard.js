@@ -1,15 +1,14 @@
-
 var url_for = function(name, param) {
-    var url = '{{ config.rq_url_prefix }}';
-    if (name == 'queues') { url = '{{ config.rq_url_prefix }}/queues.json'; }
-    else if (name == 'workers') { url = '{{ config.rq_url_prefix }}/workers.json'; }
-    else if (name == 'cancel_job') { url = '{{ config.rq_url_prefix }}/job/' + encodeURIComponent(param) + '/cancel'; }
-    else if (name == 'requeue_job') { url = '{{ config.rq_url_prefix }}/job/' + encodeURIComponent(param) + '/requeue'; }
+    var url = {{ rq_url_prefix|tojson|safe }};
+    if (name == 'queues') { url += '/queues.json'; }
+    else if (name == 'workers') { url += '/workers.json'; }
+    else if (name == 'cancel_job') { url += '/job/' + encodeURIComponent(param) + '/cancel'; }
+    else if (name == 'requeue_job') { url += '/job/' + encodeURIComponent(param) + '/requeue'; }
     return url;
 };
 
 var url_for_jobs = function(param, page) {
-    var url = '{{ config.rq_url_prefix }}/jobs/' + encodeURIComponent(param) + '/' + page + '.json';
+    var url = {{ rq_url_prefix|tojson|safe }} + '/jobs/' + encodeURIComponent(param) + '/' + page + '.json';
     return url;
 };
 
