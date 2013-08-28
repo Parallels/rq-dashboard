@@ -177,5 +177,5 @@
 
 {% block inline_js %}
 var POLL_INTERVAL = {{ poll_interval }};
-{% include "rq_dashboard/dashboard.js" %}
+{% include "rq_dashboard/dashboard.js" with context %}
 {% endblock %}
