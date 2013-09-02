@@ -72,7 +72,8 @@
             </td>
             <td>
               Args :
-              <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(JSON.parse(args), undefined, 2)).html() %></pre>
+              <% try{args = JSON.stringify(JSON.parse(args), undefined, 2)} catch(err){} %>
+              <pre class="exc_info"><%= $('<div/>').text(args).html() %></pre>
               {% if show_logs %}
                 <% if (typeof meta == "object" && meta.logs) { %>
                   Logs
