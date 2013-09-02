@@ -14,6 +14,7 @@
 
             if (job && jobs.length > 0) {
                 $.each(jobs, function(i, job) {
+                    job.enlarge=true;
                     job.created_at = toRelative(Date.create(job.created_at));
 
                     if (job.ended_at) {
@@ -49,7 +50,6 @@
     $(document).ready(function() {
         reload_table();
         setInterval(refresh_table, POLL_INTERVAL);
-        $("table#jobs").toggleClass("enlarge");
     });
 
 })($);

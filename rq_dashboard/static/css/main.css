@@ -76,14 +76,13 @@ table#jobs div.job_id {
     margin-left: 24px;
 }
 
-table#jobs pre.exc_info {
+pre.exc_info {
     max-height: 30px;
     overflow: hidden;
     cursor: pointer;
 }
 
-table#jobs pre.exc_info.full,
-table#jobs.enlarge pre.exc_info {
+.enlarge pre.exc_info {
   color: #fff;
   background-color: black;
   max-height: none;

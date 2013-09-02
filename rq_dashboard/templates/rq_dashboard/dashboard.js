@@ -201,12 +201,19 @@
         var template_page = _.template($raw_tpl_page);
         var $ul = $('div#page-selection ul');
 
+        // get toggle mode for all the jobs
+        var toggleStates = {};
+        $tbody.find("[data-role=job]").each(function(idx){
+          toggleStates[$(this).attr("data-job-id")] = $(this).hasClass("enlarge");
+        });
+
         // Fetch the available jobs on the queue
         api.getJobs('{{ queue.name }}', '{{ page }}', function(jobs, pagination) {
             $tbody.empty();
 
             if (jobs.length > 0) {
                 $.each(jobs, function(i, job) {
+                    job.enlarge = toggleStates[job.id];
                     job.duration = (Date.create(job.ended_at)-Date.create(job.started_at))/1000;
                     job.created_at = toRelative(Date.create(job.created_at));
                     if (job.ended_at) {
@@ -264,7 +271,7 @@
                $ul.append(html);
            }
 
-            $("pre.exc_info").click(function(e){ $(this).toggleClass("full"); });
+            $("pre.exc_info").click(function(e){ $(this).closest("tr[data-role=job]").toggleClass("enlarge"); });
 
         });
     };
@@ -283,7 +290,6 @@
         setInterval(refresh_table, POLL_INTERVAL);
 
         $("#toggle-json-jobs").click(function(){ $("table#jobs").toggleClass("enlarge"); });
-
     });
 
     // Enable the AJAX behaviour of the buttons

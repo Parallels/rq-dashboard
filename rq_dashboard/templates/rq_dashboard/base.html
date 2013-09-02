@@ -47,7 +47,7 @@
     </div>
 
     <script name="job-row" type="text/template">
-        <tr data-role="job" data-job-id="<%= id %>">
+        <tr data-role="job" data-job-id="<%= id %>" class="<%= (enlarge) ? 'enlarge' : '' %>">
             <td style='word-wrap:break-word'>
               <a href="{{ base_url }}job/<%= id %>"><%= $('<div/>').text(name).html() %></a>
               <div>
@@ -72,7 +72,7 @@
             </td>
             <td>
               Args :
-              <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(args, undefined, 2)).html() %></pre>
+              <pre class="exc_info"><%= $('<div/>').text(JSON.stringify(JSON.parse(args), undefined, 2)).html() %></pre>
               {% if show_logs %}
                 <% if (typeof meta == "object" && meta.logs) { %>
                   Logs

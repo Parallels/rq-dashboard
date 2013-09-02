@@ -15,6 +15,7 @@ from rq import get_failed_queue
 from math import ceil
 import re
 from ast import literal_eval
+import json
 
 
 dashboard = Blueprint('rq_dashboard', __name__,
@@ -109,9 +110,15 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 
 
 def parse_job(job):
-  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', (.*)", job.description)
+  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', (.*)\)", job.description)
   if match:
-    return {"name": match.group(1), "args": match.group(2)}
+    args = match.group(2)
+    try:
+      eval_args = eval(args)
+      args = json.dumps(eval_args)
+    except Exception:
+      pass
+    return {"name": match.group(1), "args": args}
   else:
     return {"name": job.description, "args": ""}
 

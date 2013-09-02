@@ -86,8 +86,6 @@ $(document).ready(function(){
             job_id = $row.data('job-id'),
             url = url_for('requeue_job', job_id);
 
-        console.log("url " + url);
-
         $.post(url, function(data) {
             $row.fadeOut('fast', function() { $row.remove(); });
         });
