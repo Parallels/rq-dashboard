@@ -26,7 +26,8 @@ def authentication_hook():
     """ Allow the parent app to authenticate user's access to the dashboard
         with it's own auth_handler method that must return True or False
     """
-    if current_app.auth_handler and not current_app.auth_handler():
+    auth_handler = current_app.extensions['rq-dashboard'].auth_handler
+    if auth_handler and not auth_handler():
         abort(401)
 
 @dashboard.before_app_first_request
@@ -115,11 +116,13 @@ def overview(queue_name, page):
     else:
         queue = Queue(queue_name)
 
+    extension = current_app.extensions['rq-dashboard']
     return render_template('rq_dashboard/dashboard.html',
             workers=Worker.all(),
             queue=queue,
             page=page,
-            queues=Queue.all())
+            queues=Queue.all(),
+            rq_url_prefix=extension.url_prefix)
 
 
 @dashboard.route('/job/<job_id>/cancel', methods=['POST'])

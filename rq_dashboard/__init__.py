@@ -10,9 +10,9 @@ class RQDashboard(object):
             self.init_app(app)
         else:
             self.app = None
-        self.app.auth_handler = auth_handler
+        self.auth_handler = auth_handler
 
     def init_app(self, app):
         """Initializes the RQ-Dashboard for the specified application."""
         app.register_blueprint(dashboard, url_prefix=self.url_prefix)
-        app.config['rq_url_prefix'] = self.url_prefix
+        app.extensions['rq-dashboard'] = self
