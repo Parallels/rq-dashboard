@@ -11,6 +11,7 @@ class RQDashboard(object):
         else:
             self.app = None
         self.auth_handler = auth_handler
+        self.redis_conn = None
 
     def init_app(self, app):
         """Initializes the RQ-Dashboard for the specified application."""
