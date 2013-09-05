@@ -16,6 +16,7 @@ from math import ceil
 import re
 from ast import literal_eval
 import json
+import cPickle as pickle
 
 
 dashboard = Blueprint('rq_dashboard', __name__,
@@ -110,18 +111,12 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 
 
 def parse_job(job):
-  match = re.match(r"start\(u?'([a-zA-Z_\.]+)', (.*)\)", job.description)
-  if match:
-    args = match.group(2)
-    try:
-      eval_args = eval(args)
-      args = json.dumps(eval_args)
-    except Exception:
-      pass
-    return {"name": match.group(1), "args": args}
-  else:
-    return {"name": job.description, "args": ""}
 
+  data = pickle.loads(job.data)
+  try:
+    return {"name": data[2][0], "args": json.dumps(data[2][1])}
+  except:
+    return {"name": data[2][0], "args": unicode(data[2][1])}
 
 @dashboard.route('/', defaults={'queue_name': None, 'page': '1'})
 @dashboard.route('/<queue_name>', defaults={'page': '1'})
