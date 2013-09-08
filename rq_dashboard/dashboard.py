@@ -112,11 +112,14 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 
 def parse_job(job):
 
-  data = pickle.loads(job.data)
-  try:
-    return {"name": data[2][0], "args": json.dumps(data[2][1])}
-  except:
-    return {"name": data[2][0], "args": unicode(data[2][1])}
+  data = json.loads(job.description)
+  return {"name": data[0], "args": json.dumps(data[1])}
+
+  # data = pickle.loads(job.data)
+  # try:
+  #   return {"name": data[2][0], "args": json.dumps(data[2][1])}
+  # except:
+  #   return {"name": data[2][0], "args": unicode(data[2][1])}
 
 @dashboard.route('/', defaults={'queue_name': None, 'page': '1'})
 @dashboard.route('/<queue_name>', defaults={'page': '1'})
