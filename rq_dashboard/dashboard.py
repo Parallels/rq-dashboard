@@ -112,8 +112,11 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 
 def parse_job(job):
 
-  data = json.loads(job.description)
-  return {"name": data[0], "args": json.dumps(data[1])}
+  try:
+    data = json.loads(job.description)
+    return {"name": data[0], "args": json.dumps(data[1])}
+  except:
+    return {"name": "JSON parse error", "args": job.description}
 
   # data = pickle.loads(job.data)
   # try:
