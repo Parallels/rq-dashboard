@@ -89,7 +89,6 @@ def serialize_job(job):
         origin=job.origin,
         result=job._result,
         exc_info=job.exc_info,
-        description=job.description,
         meta=job.meta,
         status=job._status,
         name=extra["name"],
