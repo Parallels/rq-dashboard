@@ -4,7 +4,7 @@
 {% block content %}
 
 <div class="row">
-    <div class="span6">
+    <div class="col-md-6">
         <div class="section">
 
             <h1>Queues</h1>
@@ -26,7 +26,7 @@
 
             <script name="queue-row" type="text/template">
                 <tr data-role="queue" <% if (d.name === 'failed' && d.count > 0) { %> class="failed"<% } %>>
-                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="<%= d.url %>"><%= d.name %></a></td>
+                    <td><i class="glyphicon glyphicon-inbox" style="opacity: .5;"></i> <a href="<%= d.url %>"><%= d.name %></a></td>
                     <td class="narrow"><%= d.count %></td>
                 </tr>
             </script>
@@ -40,7 +40,7 @@
         </div>
     </div>
 
-    <div class="span6">
+    <div class="col-md-6">
         <div class="section">
 
         <h1>Workers</h1>
@@ -63,7 +63,7 @@
 
         <script name="worker-row" type="text/template">
             <tr data-role="worker">
-                <td><i class="icon-<%= d.state %>"></i></td>
+                <td><i class="glyphicon glyphicon-<%= d.state %>"></i></td>
                 <td><%= d.name %></td>
                 <td><%= d.queues.join(', ') %></td>
             </tr>
@@ -80,14 +80,14 @@
 </div>
 
 <div class="row">
-    <div class="span12">
+    <div class="col-md-12">
         <div class="section">
 
         <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
         <p class="intro">
-        <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip" title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true ><i class="icon-trash icon-white"></i> Empty</a>
-        <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;" data-toggle="tooltip" title="Remove all stale jobs from this queue (non-destructive)" ><i class="icon-resize-small"></i> Compact</a>
-        <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
+        <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-default btn-danger btn-sm" style="float: right" data-toggle="tooltip" title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true ><i class="glyphicon glyphicon-trash glyphicon-white"></i> Empty</a>
+        <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-default btn-sm" style="float: right; margin-right: 8px;" data-toggle="tooltip" title="Remove all stale jobs from this queue (non-destructive)" ><i class="glyphicon glyphicon-resize-small"></i> Compact</a>
+        <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-sm btn-default" style="float: right; margin-right: 8px;"><i class="glyphicon glyphicon-retweet"></i> Requeue All</a>
         This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>
 
         <table id="jobs" class="table table-bordered">
@@ -108,7 +108,7 @@
         <script name="job-row" type="text/template">
             <tr data-role="job" data-job-id="<%= d.id %>">
                 <td>
-                    <i class="icon-file" style="opacity: .5;"></i>
+                    <i class="glyphicon glyphicon-file" style="opacity: .5;"></i>
                     <span class="description"><%= $('<div/>').text(d.description).html() %></span>
                     <% if (d.exc_info) { %>
                         <span class="origin">from <strong><%= d.origin %></strong></span>
@@ -122,9 +122,9 @@
                 <td><span class="creation_date"><%= d.created_at %></span></td>
                 <td class="actions narrow">
                     <% if (d.exc_info) { %>
-                        <a href="#" data-role="requeue-job-btn" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
+                        <a href="#" data-role="requeue-job-btn" class="btn btn-default btn-sm"><i class="glyphicon glyphicon-retweet"></i> Requeue</a>
                     <% } %>
-                    <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
+                    <a href="#" data-role="cancel-job-btn" class="btn btn-default btn-sm"><i class="glyphicon glyphicon-remove"></i> Cancel</a>
                 </td>
             </tr>
         </script>
@@ -135,8 +135,8 @@
             </tr>
         </script>
 
-        <div id="page-selection" class="pagination pagination-centered">
-          <ul>
+        <div id="page-selection">
+          <ul class="pagination ">
           </ul>
         </div>
 
@@ -164,9 +164,9 @@
     </div>
 </div>
 <div class="row">
-    <div class="span12">
+    <div class="col-md-12">
         <div class="section">
-            <p class="intro"><a href="/" id="home-btn" class="btn btn-small" style="float: left"><i class="icon-arrow-left"></i> Home</a></p>
+            <p class="intro"><a href="/" id="home-btn" class="btn btn-sm" style="float: left"><i class="glyphicon glyphicon-arrow-left"></i> Home</a></p>
         </div>
     </div>
 </div>
