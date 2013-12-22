@@ -30,18 +30,22 @@ def authentication_hook():
 
 @dashboard.before_app_first_request
 def setup_rq_connection():
-    if current_app.config.get('REDIS_URL'):
-        current_app.redis_conn = from_url(current_app.config.get('REDIS_URL'))
-    else:
-        current_app.redis_conn = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
-                       port=current_app.config.get('REDIS_PORT', 6379),
-                       password=current_app.config.get('REDIS_PASSWORD', None),
-                       db=current_app.config.get('REDIS_DB', 0))
+    ext = current_app.extensions['rq-dashboard']
+    if not ext.redis_conn:
+        if ext.redis_conn_factory:
+            ext.redis_conn = redis_conn_factory()
+        elif current_app.config.get('REDIS_URL'):
+            ext.redis_conn = from_url(current_app.config.get('REDIS_URL'))
+        else:
+            ext.redis_conn = Redis(host=current_app.config.get('REDIS_HOST', 'localhost'),
+                           port=current_app.config.get('REDIS_PORT', 6379),
+                           password=current_app.config.get('REDIS_PASSWORD', None),
+                           db=current_app.config.get('REDIS_DB', 0))
 
 
 @dashboard.before_request
 def push_rq_connection():
-    push_connection(current_app.redis_conn)
+    push_connection(current_app.extensions['rq-dashboard'].redis_conn)
 
 
 @dashboard.teardown_request
