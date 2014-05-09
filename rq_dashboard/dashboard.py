@@ -210,7 +210,7 @@ def list_workers():
         return [q.name for q in worker.queues]
 
     workers = [dict(name=worker.name, queues=serialize_queue_names(worker),
-        state=worker.state) for worker in Worker.all()]
+        state=worker.get_state()) for worker in Worker.all()]
     return dict(workers=workers)
 
 @dashboard.context_processor
