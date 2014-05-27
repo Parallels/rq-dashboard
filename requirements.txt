@@ -3,3 +3,4 @@ redis
 -e git+git@github.com:nvie/rq.git#egg=rq
 simplejson
 times
+python-dateutil>=2.1
