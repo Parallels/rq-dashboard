@@ -208,7 +208,9 @@ def list_jobs(queue_name, page):
 def list_workers():
     def serialize_queue_names(worker):
         return [q.name for q in worker.queues]
-
+    
+    q = Queue()
+    
     workers = [dict(name=worker.name, queues=serialize_queue_names(worker),
         state=worker.get_state()) for worker in Worker.all()]
     return dict(workers=workers)
