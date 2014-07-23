@@ -6,8 +6,8 @@ front-end to monitor your [RQ][rq] queues, jobs, and workers in realtime.
 
 ## It looks like this
 
-![](https://github.com/downloads/nvie/rq-dashboard/scrot_high.png)
-![](https://github.com/downloads/nvie/rq-dashboard/scrot_failed.png)
+![](https://cloud.github.com/downloads/nvie/rq-dashboard/scrot_high.png)
+![](https://cloud.github.com/downloads/nvie/rq-dashboard/scrot_failed.png)
 
 
 ## Installing
