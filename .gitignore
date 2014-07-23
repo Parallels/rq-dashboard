@@ -1,5 +1,5 @@
 *.pyc
 dump.rdb
 /*.egg-info
-.env
 /dist
+/.direnv
