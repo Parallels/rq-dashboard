@@ -116,13 +116,12 @@ def overview(queue_name, page):
     else:
         queue = Queue(queue_name)
 
-    extension = current_app.extensions['rq-dashboard']
     return render_template('rq_dashboard/dashboard.html',
             workers=Worker.all(),
             queue=queue,
             page=page,
             queues=Queue.all(),
-            rq_url_prefix=extension.url_prefix)
+            rq_url_prefix=url_for('.overview'))
 
 
 @dashboard.route('/job/<job_id>/cancel', methods=['POST'])
