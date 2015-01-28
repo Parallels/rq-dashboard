@@ -3,8 +3,8 @@ from redis import from_url
 from rq import push_connection, pop_connection
 from functools import wraps
 import times
-from flask import Blueprint
-from flask import current_app, url_for, abort
+from flask import Blueprint, Response
+from flask import current_app, url_for, request
 from flask import render_template
 from rq import Queue, Worker
 from rq import cancel_job, requeue_job
@@ -24,8 +24,13 @@ def authentication_hook():
         with it's own auth_handler method that must return True or False
     """
     auth_handler = current_app.extensions['rq-dashboard'].auth_handler
-    if auth_handler and not auth_handler():
-        abort(401)
+
+    if 'AUTH_USER' in current_app.config and 'AUTH_PASS' in current_app.config:
+        auth = request.authorization
+        if not auth or not auth_handler(auth.username, auth.password):
+            return Response('The username or password is Wrong! Please contact your adminstrator',  # noqa
+                            401,
+                            {'WWW-Authenticate': 'Basic realm="Login Required"'}) # noqa
 
 
 @dashboard.before_app_first_request
