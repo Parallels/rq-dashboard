@@ -8,4 +8,4 @@ app = Flask(__name__)
 if os.getenv('RQ_DASHBOARD_SETTINGS'):
     app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
 
-RQDashboard(app, '')
+RQDashboard(app, os.getenv('APPLICATION_ROOT', ''))
