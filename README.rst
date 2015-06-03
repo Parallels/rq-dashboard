@@ -74,7 +74,7 @@ the necessary build time (and run time) dependencies with
     $ pip install -r requirements.txt
 
 
-See the pip_docs_on_requirements_ and in particular the setup_vs_requirement_
+See the pip_docs_on_requirements_ and in particular the setup_vs_requirements_
 article by Donald Stufft.
 
 Develop in the normal way with
@@ -107,7 +107,7 @@ The RQ dashboard is currently being developed and is in beta stage.
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: http://python-rq.org/
 .. _pip_docs_on_requirements: http://pip.readthedocs.org/en/stable/user_guide.html#requirements-files
-.. _setup_vs_requirements: https://caremad.io/2013/07/setup-vs-requirement/
+.. _setup_vs_requirements: https://caremad.io/2013/07/setup-vs-requirement
 
 .. |Can I Use Python 3?| image:: https://caniusepython3.com/project/rq-dashboard.svg
    :target: https://caniusepython3.com/project/rq-dashboard
