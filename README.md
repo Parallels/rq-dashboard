@@ -1,3 +1,14 @@
+# WANTED: PROJECT MAINTAINER
+
+This project is slowly becoming outdated, and I lack the time and interest to
+further maintain it.  I know this project is used by many people, and so I'm
+looking for a maintainer / collaborator that can help maintain this project,
+review pull requests, implement new features, etc.  Please let me know if
+you're interested!
+
+
+# Introduction
+
 `rq-dashboard` is a general purpose, lightweight, [Flask][flask]-based web
 front-end to monitor your [RQ][rq] queues, jobs, and workers in realtime.
 
