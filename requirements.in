@@ -1,0 +1,15 @@
+click
+Fabric
+flake8
+Flask
+grin
+itsdangerous
+Jinja2
+MarkupSafe
+pep8
+pyflakes
+redis
+rq
+simplejson
+times
+Werkzeug
