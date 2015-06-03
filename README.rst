@@ -1,12 +1,3 @@
-WANTED: PROJECT MAINTAINER
-==========================
-
-This project is slowly becoming outdated, and I lack the time and
-interest to further maintain it. I know this project is used by many
-people, and so I’m looking for a maintainer / collaborator that can help
-maintain this project, review pull requests, implement new features,
-etc. Please let me know if you’re interested!
-
 Introduction
 ============
 
@@ -15,10 +6,12 @@ front-end to monitor your `RQ`_ queues, jobs, and workers in realtime.
 
 |Can I Use Python 3?|
 
+
 It looks like this
 ------------------
 
 |image1| |image2|
+
 
 Installing
 ----------
@@ -27,10 +20,11 @@ Installing
 
     $ pip install rq-dashboard
 
+
 Running the dashboard
 ---------------------
 
-You can either run the dashboard standalone, like this…
+You can either run the dashboard standalone, like this:
 
 .. code:: console
 
@@ -39,10 +33,11 @@ You can either run the dashboard standalone, like this…
     * Restarting with reloader
     ...
 
+
 Integrating the dashboard in your Flask app
 -------------------------------------------
 
-...or you can integrate the dashboard in your own `Flask`_ app, like this:
+Or you can integrate the dashboard in your own `Flask`_ app, like this:
 
 .. code:: python
 
@@ -67,13 +62,52 @@ app. To use a different URL root, use the following:
 
     RQDashboard(app, url_prefix='/some/other/url')
 
+
+Making a release
+----------------
+
+The development environment assumes you are in a virtualenv and have pulled in
+the necessary build time (and run time) dependencies with
+
+::
+
+    $ pip install -r requirements.txt
+
+
+See the pip_docs_on_requirements_ and in particular the setup_vs_requirement_
+article by Donald Stufft.
+
+Develop in the normal way with
+
+::
+
+    $ python setup.py develop
+
+
+Then use Fabric to perform various development tasks. For example, to tag, build
+and upload to testpypi
+
+::
+
+    $ git tag 0.3.5   # no 'v' prefix or anything
+    $ fab build
+    $ fab upload
+
+This requires write access to both the GitHub repo and to the PyPI test site.
+
+See ``fab -l`` for more options.
+
+
 Maturity notes
 --------------
 
 The RQ dashboard is currently being developed and is in beta stage.
 
+
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: http://python-rq.org/
+.. _pip_docs_on_requirements: http://pip.readthedocs.org/en/stable/user_guide.html#requirements-files
+.. _setup_vs_requirements: https://caremad.io/2013/07/setup-vs-requirement/
 
 .. |Can I Use Python 3?| image:: https://caniusepython3.com/project/rq-dashboard.svg
    :target: https://caniusepython3.com/project/rq-dashboard
