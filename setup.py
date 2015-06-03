@@ -10,6 +10,7 @@ def get_version():
         return locals['VERSION']
     raise RuntimeError('No version info found.')
 
+
 setup(
     name='rq-dashboard',
     version=get_version(),
@@ -24,11 +25,15 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
+    # Be specific about versions in requirements.txt and just name packages
+    # needed during run time here.
+    # See e.g. https://caremad.io/2013/07/setup-vs-requirement/
     install_requires=['rq>=0.3.8', 'Flask', 'redis', 'simplejson', 'times'],
-    entry_points='''\
-    [console_scripts]
-    rq-dashboard = rq_dashboard.scripts.rq_dashboard:main
-    ''',
+    entry_points={
+        'console_scripts': [
+            'rq-dashboard = rq_dashboard.scripts.rq_dashboard:main'
+        ]
+    }
     classifiers=[
         # As from http://pypi.python.org/pypi?%3Aaction=list_classifiers
         #'Development Status :: 1 - Planning',
