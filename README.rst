@@ -63,6 +63,25 @@ app. To use a different URL root, use the following:
     RQDashboard(app, url_prefix='/some/other/url')
 
 
+Adding dependencies
+-------------------
+
+We use pip-tools to keep our development dependencies up to date
+
+::
+
+    $ pip install --upgrade pip
+    $ pip install git+https://github.com/nvie/pip-tools.git@future
+
+Now make changes to the requirements.in file, and resolve all the
+2nd-level dependencies into requirements.txt like so:
+
+::
+
+    $ pip-compile --annotate requirements.in
+
+
+
 Making a release
 ----------------
 
