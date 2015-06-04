@@ -41,6 +41,12 @@ def get_options():
     parser.add_option('--interval', dest='poll_interval', type='int',
                       metavar='POLL_INTERVAL',
                       help='refresh interval')
+    parser.add_option('--auth_user', dest='auth_user',
+                      metavar='AUTH_USER',
+                      help='username for auth')
+    parser.add_option('--auth_pass', dest='auth_pass',
+                      metavar='AUTH_PASS',
+                      help='password for auth')
     parser.add_option('--url-prefix', dest='url_prefix',
                       metavar='URL_PREFIX',
                       help='url prefix e.g. for hosting behind reverse proxy')
@@ -71,6 +77,11 @@ def configure_app(app, options):
         app.config['REDIS_DB'] = options.redis_database
     if options.poll_interval:
         app.config['RQ_POLL_INTERVAL'] = options.poll_interval
+    if options.auth_user:
+        app.config['AUTH_USER'] = options.auth_user
+    if options.auth_pass:
+        app.config['AUTH_PASS'] = options.auth_pass
+
     if options.url_prefix:
         app.config['URL_PREFIX'] = options.url_prefix
     app.config['REDIS_URL'] = options.redis_url_connection or None
