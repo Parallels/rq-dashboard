@@ -1,17 +1,27 @@
 #!/usr/bin/env python
-import sys
+from __future__ import absolute_import
+from flask import Flask
 import optparse
-from ..app import app
+import os
+import rq_dashboard
+import sys
 from ..version import VERSION
 
 
 def main():
+    app = Flask(__name__)
+    options = get_options()
+    configure_app(app, options)
+    run_app(app)
+
+
+def get_options():
     parser = optparse.OptionParser("usage: %prog [options]")
     parser.add_option('-b', '--bind', dest='bind_addr',
-                      metavar='ADDR',
+                      metavar='ADDR', default='0.0.0.0',
                       help='IP addr or hostname to bind to')
     parser.add_option('-p', '--port', dest='port', type='int',
-                      metavar='PORT',
+                      metavar='PORT', default=9181,
                       help='port to bind to')
     parser.add_option('-H', '--redis-host', dest='redis_host',
                       metavar='ADDR',
@@ -37,15 +47,26 @@ def main():
     parser.add_option('--auth_pass', dest='auth_pass',
                       metavar='AUTH_PASS',
                       help='password for auth')
+    parser.add_option('--url-prefix', dest='url_prefix',
+                      metavar='URL_PREFIX',
+                      help='url prefix e.g. for hosting behind reverse proxy')
     (options, args) = parser.parse_args()
+    if len(args) > 0:
+        parser.print_help()
+        sys.exit(2)
+    return options
 
-    # Populate app.config from options, defaulting to app.config's original
-    # values, if specified, finally defaulting to something sensible.
-    app.config['BIND_ADDR'] = options.bind_addr or app.config.get('BIND_ADDR', '0.0.0.0')
-    app.config['PORT'] = options.port or app.config.get('PORT', 9181)
 
-    # Override app.config from options if specified.  Otherwise leave untouched,
-    # so the client can use its own defauls if app.config has no values.
+def configure_app(app, options):
+    # Start configuration from a configuration file, if given.
+    if os.getenv('RQ_DASHBOARD_SETTINGS'):
+        app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
+
+    # Override with any command line arguments, if given.
+    if options.bind_addr:
+        app.config['BIND_ADDR'] = options.bind_addr
+    if options.port:
+        app.config['PORT'] = options.port
     if options.redis_host:
         app.config['REDIS_HOST'] = options.redis_host
     if options.redis_port:
@@ -61,14 +82,17 @@ def main():
     if options.auth_pass:
         app.config['AUTH_PASS'] = options.auth_pass
 
+    if options.url_prefix:
+        app.config['URL_PREFIX'] = options.url_prefix
     app.config['REDIS_URL'] = options.redis_url_connection or None
 
-    if len(args) > 0:
-        parser.print_help()
-        sys.exit(2)
 
+def run_app(app):
     print('RQ Dashboard, version %s' % VERSION)
+    rq_dashboard.RQDashboard(app, url_prefix=app.config.get('URL_PREFIX', ''))
     app.run(host=app.config['BIND_ADDR'], port=app.config['PORT'])
+
 
 if __name__ == '__main__':
     main()
+

@@ -1,0 +1,10 @@
+# Required by the project itself
+Flask
+redis
+rq>=0.3.8
+times
+
+# Development tools
+Fabric
+flake8
+grin

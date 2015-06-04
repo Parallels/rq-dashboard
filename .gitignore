@@ -2,4 +2,5 @@
 dump.rdb
 /*.egg-info
 /dist
+/build
 /.direnv
