@@ -26,3 +26,4 @@ rq==0.5.3
 six==1.9.0                # via python-dateutil
 times==0.7
 werkzeug==0.10.4          # via flask
+wheel==0.24.0
