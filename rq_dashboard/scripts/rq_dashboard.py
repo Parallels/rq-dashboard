@@ -88,33 +88,33 @@ def configure_app(app, options):
         app.config['RQ_POLL_INTERVAL'] = options.poll_interval
 
 
-def add_basic_auth(blueprint, options):
-    """Add HTTP Basic Auth to the blueprint if it has been configured.
+def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
+    """Add HTTP Basic Auth to the blueprint.
 
     Note this is only for casual use!
 
     """
-    if options.username and options.password:
-        @blueprint.before_request
-        def basic_http_auth(*args, **kwargs):
-            auth = request.authorization
-            if (
-                    auth is None
-                    or auth.password != options.password
-                    or auth.username != options.username):
-                return Response(
-                    'Please login',
-                    401,
-                    {'WWW-Authenticate': 'Basic realm="RQ Dashboard"'})
+    @blueprint.before_request
+    def basic_http_auth(*args, **kwargs):
+        auth = request.authorization
+        if (
+                auth is None
+                or auth.password != password
+                or auth.username != username):
+            return Response(
+                'Please login',
+                401,
+                {'WWW-Authenticate': 'Basic realm="{}"'.format(realm)})
 
 
 def main():
     """Command line entry point defined in setup.py."""
     print('RQ Dashboard version {}'.format(get_version()))
+    blueprint = rq_dashboard.blueprint.blueprint
     options = get_options()
     app = Flask(__name__)
     configure_app(app, options)
-    add_basic_auth(rq_dashboard.blueprint.blueprint, options)
-    app.register_blueprint(
-        rq_dashboard.blueprint.blueprint, url_prefix=options.url_prefix)
+    if options.username:
+        add_basic_auth(blueprint, options.username, options.password)
+    app.register_blueprint(blueprint, url_prefix=options.url_prefix)
     app.run(host=options.bind_addr, port=options.port)
