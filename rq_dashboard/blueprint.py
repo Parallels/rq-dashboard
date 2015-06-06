@@ -5,12 +5,11 @@ parameters to REDIS. To keep the documentation and defaults all in once place
 the default settings must be loaded from ``rq_dashboard.default_settings`` e.g.
 as done in ``scripts/rq_dashboard.py``.
 
-RQ Dashboard does not contain any built-in authentication mechanism. If
-required it can be added e.g. with:
-
-    @dashboard.before_request
-    def authentication_hook():
-        ... some test which if fails then results in abort(401)
+RQ Dashboard does not contain any built-in authentication mechanism because it
+is the responsbility of the wider hosting app rather than a particular
+blueprint, and there are numerous ways of adding orthogonally. The command line
+invocation in 'scripts/rq_dashboard.py' provides the option to require HTTP
+Basic Auth in a few lines of code,
 
 """
 from flask import Blueprint, current_app, url_for, render_template

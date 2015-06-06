@@ -61,6 +61,7 @@ def get_options():
 
 
 def configure_app(app, options):
+    """Set the Flask app configuration from files and command line options."""
     # Start configuration with our built in defaults.
     app.config.from_object(rq_dashboard.default_settings)
 
@@ -85,8 +86,6 @@ def configure_app(app, options):
         app.config['REDIS_DB'] = options.redis_database
     if options.poll_interval:
         app.config['RQ_POLL_INTERVAL'] = options.poll_interval
-
-    print app.config
 
 
 def add_basic_auth(blueprint, options):
