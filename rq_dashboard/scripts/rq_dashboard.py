@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from flask import Flask
+from flask import Flask, Response, request
 import optparse
 import os
 import pkg_resources
@@ -23,6 +23,12 @@ def get_options():
     parser.add_option('--url-prefix', dest='url_prefix', default='',
                       metavar='URL_PREFIX',
                       help='url prefix e.g. for hosting behind reverse proxy')
+    parser.add_option('--username', dest='username', default=None,
+                      metavar='USERNAME',
+                      help='HTTP Basic Auth username')
+    parser.add_option('--password', dest='password', default=None,
+                      metavar='PASSWORD',
+                      help='HTTP Basic Auth password')
 
     # Built in RQ Dashboard parameters.
     parser.add_option('-H', '--redis-host', dest='redis_host',
@@ -73,12 +79,33 @@ def configure_app(app, options):
         app.config['RQ_POLL_INTERVAL'] = options.poll_interval
 
 
+def add_basic_auth(blueprint, options):
+    """Add HTTP Basic Auth if it has been configured.
+
+    Note this is only for casual use!
+
+    """
+    if options.username and options.password:
+        @blueprint.before_request
+        def basic_http_auth(*args, **kwargs):
+            auth = request.authorization
+            if (
+                    auth is None
+                    or auth.password != options.password
+                    or auth.username != options.username):
+                return Response(
+                    'Please login',
+                    401,
+                    {'WWW-Authenticate': 'Basic realm="RQ Dashboard"'})
+
+
 def main():
     """Command line entry point defined in setup.py."""
     print('RQ Dashboard version {}'.format(get_version()))
     options = get_options()
     app = Flask(__name__)
+    configure_app(app, options)
+    add_basic_auth(rq_dashboard.blueprint.blueprint, options)
     app.register_blueprint(
         rq_dashboard.blueprint.blueprint, url_prefix=options.url_prefix)
-    configure_app(app, options)
     app.run(host=options.bind_addr, port=options.port)
