@@ -112,9 +112,9 @@ def main():
     print('RQ Dashboard version {}'.format(get_version()))
     blueprint = rq_dashboard.blueprint.blueprint
     options = get_options()
-    app = Flask(__name__)
-    configure_app(app, options)
     if options.username:
         add_basic_auth(blueprint, options.username, options.password)
+    app = Flask(__name__)
+    configure_app(app, options)
     app.register_blueprint(blueprint, url_prefix=options.url_prefix)
     app.run(host=options.bind_addr, port=options.port)
