@@ -5,7 +5,11 @@ import optparse
 import os
 import rq_dashboard
 import sys
-from ..version import VERSION
+import pkg_resources
+
+
+def get_version(package='rq_dashboard'):
+    return pkg_resources.get_distribution(package).version
 
 
 def main():
@@ -77,7 +81,7 @@ def configure_app(app, options):
 
 
 def run_app(app):
-    print('RQ Dashboard, version %s' % VERSION)
+    print('RQ Dashboard version {}'.format(get_version()))
     rq_dashboard.RQDashboard(app, url_prefix=app.config.get('URL_PREFIX', ''))
     app.run(host=app.config['BIND_ADDR'], port=app.config['PORT'])
 

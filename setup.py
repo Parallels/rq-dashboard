@@ -1,14 +1,11 @@
-import os
 from setuptools import setup, find_packages
+import subprocess
 
 
 def get_version():
-    basedir = os.path.dirname(__file__)
-    with open(os.path.join(basedir, 'rq_dashboard/version.py')) as f:
-        locals = {}
-        exec(f.read(), locals)
-        return locals['VERSION']
-    raise RuntimeError('No version info found.')
+    """Return the latest git tag from repository in cwd."""
+    tags = subprocess.check_output(['git', 'tag']).strip().split('\n')
+    return sorted(tags)[-1]
 
 
 setup(
