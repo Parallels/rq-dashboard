@@ -4,3 +4,4 @@ dump.rdb
 /dist
 /build
 /.direnv
+._*

@@ -30,23 +30,23 @@ You can either run the dashboard standalone, like this:
 
     $ rq-dashboard
     * Running on http://127.0.0.1:9181/
-    * Restarting with reloader
     ...
 
 
 Integrating the dashboard in your Flask app
 -------------------------------------------
 
-Or you can integrate the dashboard in your own `Flask`_ app, like this:
+Or you can integrate the dashboard in your own `Flask`_ app by accessing the
+blueprint directly in the normal way, e.g.:
 
 .. code:: python
 
     from flask import Flask
-    from rq_dashboard import RQDashboard
-
+    import rq_dashboard
 
     app = Flask(__name__)
-    RQDashboard(app)
+    app.config.from_object('rq_dashboard.default_settings')
+    app.register_blueprint(rq_dashboard.blueprint.blueprint)
 
     @app.route("/")
     def hello():
@@ -54,13 +54,6 @@ Or you can integrate the dashboard in your own `Flask`_ app, like this:
 
     if __name__ == "__main__":
         app.run()
-
-This will register the dashboard on the ``/rq`` URL root in your Flask
-app. To use a different URL root, use the following:
-
-.. code:: python
-
-    RQDashboard(app, url_prefix='/some/other/url')
 
 
 Adding dependencies
@@ -73,13 +66,12 @@ We use pip-tools to keep our development dependencies up to date
     $ pip install --upgrade pip
     $ pip install git+https://github.com/nvie/pip-tools.git@future
 
-Now make changes to the requirements.in file, and resolve all the
-2nd-level dependencies into requirements.txt like so:
+Now make changes to the ``requirements.in`` file, and resolve all the
+2nd-level dependencies into ``requirements.txt`` like so:
 
 ::
 
     $ pip-compile --annotate requirements.in
-
 
 
 Making a release

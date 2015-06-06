@@ -41,7 +41,6 @@ def style():
         local(
             'flake8 '
             '--exclude=".svn,CVS,.bzr,.hg,.git,__pycache__,._*" '
-            '--max-line-length=80 '
             '--max-complexity=9 .')
 
 
