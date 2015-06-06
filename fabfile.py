@@ -12,8 +12,6 @@ def _relative_to_fabfile(*path):
 @task
 def todo(*args):
     """List the TODOs and FIXMEs in the code and documentation."""
-    if 'r' in args:
-        _run_with_rerunner('fab todo')
     with lcd(_relative_to_fabfile()):
         local(
             'grin -e ".pyc,.pyo" "FIXME|TODO" *')
@@ -114,7 +112,6 @@ def upload(index_server='pypitest'):
     """
     _abort_if_tag_is_not_at_head()
     with lcd(_relative_to_fabfile()):
-        local('git push --tags')
         # TODO switch to twine once the following bug has been fixed:
         # https://bugs.launchpad.net/pkginfo/+bug/1437570
         local(
