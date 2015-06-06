@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from flask import Flask, Response, request
+import importlib
 import optparse
 import os
 import pkg_resources
@@ -31,6 +32,9 @@ def get_options():
                       help='HTTP Basic Auth password')
 
     # Built in RQ Dashboard parameters.
+    parser.add_option('-c', '--config', dest='config_file', default=None,
+                      metavar='CONFIG_FILE',
+                      help='configuration file')
     parser.add_option('-H', '--redis-host', dest='redis_host',
                       metavar='ADDR',
                       help='IP addr or hostname of Redis server')
@@ -57,10 +61,14 @@ def get_options():
 
 
 def configure_app(app, options):
-    # Start configuration with our defaults.
+    # Start configuration with our built in defaults.
     app.config.from_object(rq_dashboard.default_settings)
 
-    # Override from a configuration file if given in the env variable.
+    # Override with any settings in config file, if given.
+    if options.config_file:
+        app.config.from_object(importlib.import_module(options.config_file))
+
+    # Override from a configuration file in the env variable, if present.
     if 'RQ_DASHBOARD_SETTINGS' in os.environ:
         app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
 
@@ -78,9 +86,11 @@ def configure_app(app, options):
     if options.poll_interval:
         app.config['RQ_POLL_INTERVAL'] = options.poll_interval
 
+    print app.config
+
 
 def add_basic_auth(blueprint, options):
-    """Add HTTP Basic Auth if it has been configured.
+    """Add HTTP Basic Auth to the blueprint if it has been configured.
 
     Note this is only for casual use!
 
