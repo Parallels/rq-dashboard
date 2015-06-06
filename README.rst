@@ -24,7 +24,7 @@ Installing
 Running the dashboard
 ---------------------
 
-You can either run the dashboard standalone, like this:
+Run the dashboard standalone, like this:
 
 .. code:: console
 
@@ -66,7 +66,7 @@ You can either run the dashboard standalone, like this:
 Integrating the dashboard in your Flask app
 -------------------------------------------
 
-Or you can integrate the dashboard in to your own `Flask`_ app by accessing the
+The dashboard can be integrated in to your own `Flask`_ app by accessing the
 blueprint directly in the normal way, e.g.:
 
 .. code:: python
@@ -90,10 +90,10 @@ The ``scripts/rq_dashboard.py:main`` entry point provides a simple working
 example.
 
 
-Adding dependencies
--------------------
+Developing
+----------
 
-We use pip-tools to keep our development dependencies up to date
+We use piptools_ to keep our development dependencies up to date
 
 ::
 
@@ -108,19 +108,13 @@ Now make changes to the ``requirements.in`` file, and resolve all the
     $ pip-compile --annotate requirements.in
 
 
-Making a release
-----------------
-
-The development environment assumes you are in a virtualenv and have pulled in
-the necessary build time (and run time) dependencies with
+Develop in a virtualenv and make sure you have all the necessary build time (and
+run time) dependencies with
 
 ::
 
     $ pip install -r requirements.txt
 
-
-See the pip_docs_on_requirements_ and in particular the setup_vs_requirements_
-article by Donald Stufft.
 
 Develop in the normal way with
 
@@ -140,7 +134,7 @@ and upload to testpypi
 
 This requires write access to both the GitHub repo and to the PyPI test site.
 
-See ``fab -l`` for more options.
+See ``fab -l`` for more options and ``fab -d <subcommand>`` for details.
 
 
 Maturity notes
@@ -149,10 +143,9 @@ Maturity notes
 The RQ dashboard is currently being developed and is in beta stage.
 
 
+.. _piptools: https://github.com/nvie/pip-tools
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: http://python-rq.org/
-.. _pip_docs_on_requirements: http://pip.readthedocs.org/en/stable/user_guide.html#requirements-files
-.. _setup_vs_requirements: https://caremad.io/2013/07/setup-vs-requirement
 
 .. |Can I Use Python 3?| image:: https://caniusepython3.com/project/rq-dashboard.svg
    :target: https://caniusepython3.com/project/rq-dashboard
