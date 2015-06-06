@@ -85,7 +85,7 @@ def _abort_if_tag_is_not_at_head():
 def build():
     """Check Git, clean, test, and build sdist and wheel."""
     clean()
-    # TODO style()
+    style()
     # TODO tests()
     local('python setup.py sdist bdist_wheel')
 
