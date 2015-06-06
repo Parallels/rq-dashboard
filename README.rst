@@ -33,7 +33,7 @@ You can either run the dashboard standalone, like this:
     ...
 
 
-..code:: console
+.. code:: console
 
     $ rq-dashboard --help
     RQ Dashboard version 0.3.5
