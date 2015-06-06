@@ -32,11 +32,40 @@ You can either run the dashboard standalone, like this:
     * Running on http://127.0.0.1:9181/
     ...
 
+..code:: console
+
+    $ rq-dashboard --help
+    RQ Dashboard version 0.3.5
+    Usage: rq-dashboard [options]
+
+    Options:
+      -h, --help            show this help message and exit
+      -b ADDR, --bind=ADDR  IP addr or hostname to bind to
+      -p PORT, --port=PORT  port to bind to
+      --url-prefix=URL_PREFIX
+                            url prefix e.g. for hosting behind reverse proxy
+      --username=USERNAME   HTTP Basic Auth username
+      --password=PASSWORD   HTTP Basic Auth password
+      -c CONFIG_FILE, --config=CONFIG_FILE
+                            configuration file
+      -H ADDR, --redis-host=ADDR
+                            IP addr or hostname of Redis server
+      -P REDIS_PORT, --redis-port=REDIS_PORT
+                            port of Redis server
+      --redis-password=PASSWORD
+                            password for Redis server
+      -D DB, --redis-database=DB
+                            database of Redis server
+      -u REDIS_URL, --redis_url=REDIS_URL
+                            redis url connection
+      --interval=POLL_INTERVAL
+                            refresh interval in ms
+
 
 Integrating the dashboard in your Flask app
 -------------------------------------------
 
-Or you can integrate the dashboard in your own `Flask`_ app by accessing the
+Or you can integrate the dashboard in to your own `Flask`_ app by accessing the
 blueprint directly in the normal way, e.g.:
 
 .. code:: python
