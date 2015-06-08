@@ -17,6 +17,7 @@ As a quick-and-dirty convenience, the command line invocation in
 few lines of code.
 
 """
+import arrow
 from flask import Blueprint, current_app, url_for, render_template
 from functools import wraps
 from math import ceil
@@ -24,7 +25,6 @@ from redis import Redis, from_url
 from rq import (
     Queue, Worker, cancel_job, requeue_job, get_failed_queue,
     push_connection, pop_connection)
-import times
 
 
 blueprint = Blueprint(
@@ -88,7 +88,7 @@ def serialize_queues(queues):
 def serialize_date(dt):
     if dt is None:
         return None
-    return times.format(dt, 'UTC')
+    return arrow.get(dt).to('UTC').datetime.isoformat()
 
 
 def serialize_job(job):

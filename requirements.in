@@ -3,7 +3,7 @@ click
 Flask
 redis
 rq>=0.3.8
-times
+arrow
 
 # Development tools
 Fabric
