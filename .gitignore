@@ -1,6 +1,7 @@
 *.pyc
 dump.rdb
 /*.egg-info
+.eggs
 /dist
 /build
 /.direnv
