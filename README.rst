@@ -76,7 +76,7 @@ blueprint directly in the normal way, e.g.:
 
     app = Flask(__name__)
     app.config.from_object(rq_dashboard.default_settings)
-    app.register_blueprint(rq_dashboard.blueprint.blueprint)
+    app.register_blueprint(rq_dashboard.blueprint)
 
     @app.route("/")
     def hello():

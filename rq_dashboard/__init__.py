@@ -1,2 +1,2 @@
 import default_settings  # NOQA
-import blueprint  # NOQA
+from web import blueprint  # NOQA

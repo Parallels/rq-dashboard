@@ -33,19 +33,22 @@ def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
 def make_flask_app(config, username, password, url_prefix):
     """Return Flask app with default configuration and registered blueprint."""
     app = Flask(__name__)
+
     # Start configuration with our built in defaults.
     app.config.from_object(rq_dashboard.default_settings)
+
     # Override with any settings in config file, if given.
     if config:
         app.config.from_object(importlib.import_module(config))
+
     # Override from a configuration file in the env variable, if present.
     if 'RQ_DASHBOARD_SETTINGS' in os.environ:
         app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
 
-    blueprint = rq_dashboard.blueprint.blueprint
+    # Optionally add basic auth to blueprint and register with app.
     if username:
-        add_basic_auth(blueprint, username, password)
-    app.register_blueprint(blueprint, url_prefix=url_prefix)
+        add_basic_auth(rq_dashboard.blueprint, username, password)
+    app.register_blueprint(rq_dashboard.blueprint, url_prefix=url_prefix)
 
     return app
 
@@ -92,14 +95,15 @@ def run(
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
         interval):
-    """Run the RQ Dashboard Flask server as a stand alone.
+    """Run the RQ Dashboard Flask server.
 
-    Configuration can either be set on the command line or through environment
-    variables of the form RQ_DASHBOARD_*.
+    All configuration can be set on the command line or through environment
+    variables of the form RQ_DASHBOARD_*. For example RQ_DASHBOARD_USERNAME.
 
-    Configuration can also be provided in a Python module referenced using
-    --config, or with a .cfg file referenced by the RQ_DASHBOARD_SETTINGS
-    environment variable.
+    A subset of the configuration (the configuration parameters used by the
+    underlying flask blueprint) can also be provided in a Python module
+    referenced using --config, or with a .cfg file referenced by the
+    RQ_DASHBOARD_SETTINGS environment variable.
 
     """
     click.echo('RQ Dashboard version {}'.format(get_version()))
