@@ -1,4 +1,5 @@
 # Required by the project itself
+click
 Flask
 redis
 rq>=0.3.8

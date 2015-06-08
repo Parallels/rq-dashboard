@@ -1,95 +1,18 @@
 from __future__ import absolute_import
 from flask import Flask, Response, request
+import click
 import importlib
-import optparse
 import os
 import pkg_resources
 import rq_dashboard
-import sys
 
 
 def get_version(package='rq_dashboard'):
     return pkg_resources.get_distribution(package).version
 
 
-def get_options():
-    parser = optparse.OptionParser("usage: %prog [options]")
-    # Command line hosting parameters
-    parser.add_option('-b', '--bind', dest='bind_addr',
-                      metavar='ADDR', default='0.0.0.0',
-                      help='IP addr or hostname to bind to')
-    parser.add_option('-p', '--port', dest='port', type='int',
-                      metavar='PORT', default=9181,
-                      help='port to bind to')
-    parser.add_option('--url-prefix', dest='url_prefix', default='',
-                      metavar='URL_PREFIX',
-                      help='url prefix e.g. for hosting behind reverse proxy')
-    parser.add_option('--username', dest='username', default=None,
-                      metavar='USERNAME',
-                      help='HTTP Basic Auth username')
-    parser.add_option('--password', dest='password', default=None,
-                      metavar='PASSWORD',
-                      help='HTTP Basic Auth password')
-
-    # Built in RQ Dashboard parameters.
-    parser.add_option('-c', '--config', dest='config_file', default=None,
-                      metavar='CONFIG_FILE',
-                      help='configuration file')
-    parser.add_option('-H', '--redis-host', dest='redis_host',
-                      metavar='ADDR',
-                      help='IP addr or hostname of Redis server')
-    parser.add_option('-P', '--redis-port', dest='redis_port', type='int',
-                      metavar='REDIS_PORT',
-                      help='port of Redis server')
-    parser.add_option('--redis-password', dest='redis_password',
-                      metavar='PASSWORD',
-                      help='password for Redis server')
-    parser.add_option('-D', '--redis-database', dest='redis_database',
-                      type='int', metavar='DB',
-                      help='database of Redis server')
-    parser.add_option('-u', '--redis_url', dest='redis_url_connection',
-                      metavar='REDIS_URL',
-                      help='redis url connection')
-    parser.add_option('--interval', dest='poll_interval', type='int',
-                      metavar='POLL_INTERVAL',
-                      help='refresh interval in ms')
-    (options, args) = parser.parse_args()
-    if len(args) > 0:
-        parser.print_help()
-        sys.exit(2)
-    return options
-
-
-def configure_app(app, options):
-    """Set the Flask app configuration from files and command line options."""
-    # Start configuration with our built in defaults.
-    app.config.from_object(rq_dashboard.default_settings)
-
-    # Override with any settings in config file, if given.
-    if options.config_file:
-        app.config.from_object(importlib.import_module(options.config_file))
-
-    # Override from a configuration file in the env variable, if present.
-    if 'RQ_DASHBOARD_SETTINGS' in os.environ:
-        app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
-
-    # Lastly, override with any command line arguments, if given.
-    if options.redis_url_connection:
-        app.config['REDIS_URL'] = options.redis_url_connection
-    if options.redis_host:
-        app.config['REDIS_HOST'] = options.redis_host
-    if options.redis_port:
-        app.config['REDIS_PORT'] = options.redis_port
-    if options.redis_password:
-        app.config['REDIS_PASSWORD'] = options.redis_password
-    if options.redis_database:
-        app.config['REDIS_DB'] = options.redis_database
-    if options.poll_interval:
-        app.config['RQ_POLL_INTERVAL'] = options.poll_interval
-
-
 def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
-    """Add HTTP Basic Auth to the blueprint.
+    """Add HTTP Basic Auth to a blueprint.
 
     Note this is only for casual use!
 
@@ -107,14 +30,94 @@ def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
                 {'WWW-Authenticate': 'Basic realm="{}"'.format(realm)})
 
 
-def main():
-    """Command line entry point defined in setup.py."""
-    print('RQ Dashboard version {}'.format(get_version()))
-    blueprint = rq_dashboard.blueprint.blueprint
-    options = get_options()
-    if options.username:
-        add_basic_auth(blueprint, options.username, options.password)
+def make_flask_app(config, username, password, url_prefix):
+    """Return Flask app with default configuration and registered blueprint."""
     app = Flask(__name__)
-    configure_app(app, options)
-    app.register_blueprint(blueprint, url_prefix=options.url_prefix)
-    app.run(host=options.bind_addr, port=options.port)
+    # Start configuration with our built in defaults.
+    app.config.from_object(rq_dashboard.default_settings)
+    # Override with any settings in config file, if given.
+    if config:
+        app.config.from_object(importlib.import_module(config))
+    # Override from a configuration file in the env variable, if present.
+    if 'RQ_DASHBOARD_SETTINGS' in os.environ:
+        app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
+
+    blueprint = rq_dashboard.blueprint.blueprint
+    if username:
+        add_basic_auth(blueprint, username, password)
+    app.register_blueprint(blueprint, url_prefix=url_prefix)
+
+    return app
+
+
+@click.command()
+@click.option(
+    '-b', '--bind', default='0.0.0.0',
+    help='IP or hostname on which to bind HTTP server')
+@click.option(
+    '-p', '--port', default=9181, type=int,
+    help='Port on which to bind HTTP server')
+@click.option(
+    '--url-prefix', default='',
+    help='URL prefix e.g. for use behind a reverse proxy')
+@click.option(
+    '--username', default=None,
+    help='HTTP Basic Auth username (not used if not set)')
+@click.option(
+    '--password', default=None,
+    help='HTTP Basic Auth password')
+@click.option(
+    '-c', '--config', default=None,
+    help='Configuration file (Python module on search path)')
+@click.option(
+    '-H', '--redis-host', default=None,
+    help='IP address or hostname of Redis server')
+@click.option(
+    '-P', '--redis-port', default=None, type=int,
+    help='Port of Redis server')
+@click.option(
+    '--redis-password', default=None,
+    help='Password for Redis server')
+@click.option(
+    '-D', '--redis-database', default=None, type=int,
+    help='Database of Redis server')
+@click.option(
+    '-u', '--redis-url', default=None,
+    help='Redis URL connection (overrides other individual settings')
+@click.option(
+    '--interval', default=None, type=int,
+    help='Refresh interval in ms')
+def run(
+        bind, port, url_prefix, username, password,
+        config,
+        redis_host, redis_port, redis_password, redis_database, redis_url,
+        interval):
+    """Run the RQ Dashboard Flask server as a stand alone.
+
+    Configuration can either be set on the command line or through environment
+    variables of the form RQ_DASHBOARD_*.
+
+    Configuration can also be provided in a Python module referenced using
+    --config, or with a .cfg file referenced by the RQ_DASHBOARD_SETTINGS
+    environment variable.
+
+    """
+    click.echo('RQ Dashboard version {}'.format(get_version()))
+    app = make_flask_app(config, username, password, url_prefix)
+    if redis_url:
+        app.config['REDIS_URL'] = redis_url
+    if redis_host:
+        app.config['REDIS_HOST'] = redis_host
+    if redis_port:
+        app.config['REDIS_PORT'] = redis_port
+    if redis_password:
+        app.config['REDIS_PASSWORD'] = redis_password
+    if redis_database:
+        app.config['REDIS_DB'] = redis_database
+    if interval:
+        app.config['RQ_POLL_INTERVAL'] = interval
+    app.run(host=bind, port=port)
+
+
+def main():
+    run(auto_envvar_prefix='RQ_DASHBOARD')
