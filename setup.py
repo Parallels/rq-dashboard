@@ -1,16 +1,8 @@
 from setuptools import setup, find_packages
-import subprocess
-
-
-def get_version():
-    """Return the latest git tag from repository in cwd."""
-    tags = subprocess.check_output(['git', 'tag']).strip().split('\n')
-    return sorted(tags)[-1]
 
 
 setup(
     name='rq-dashboard',
-    version=get_version(),
     url='https://github.com/nvie/rq-dashboard',
     license='BSD',
     author='Vincent Driessen',
@@ -22,6 +14,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
+    # Manage version number from git at dev-time or pkg_resources at run-time.
+    setup_requires=['setuptools-git-version'],
+    version_format='{tag}',
     # Be specific about versions in requirements.txt and just name packages
     # needed during run time here.
     # See e.g. https://caremad.io/2013/07/setup-vs-requirement/
