@@ -36,31 +36,34 @@ Run the dashboard standalone, like this:
 .. code:: console
 
     $ rq-dashboard --help
-    RQ Dashboard version 0.3.5
-    Usage: rq-dashboard [options]
+    Usage: rq-dashboard [OPTIONS]
+
+      Run the RQ Dashboard Flask server.
+
+      All configuration can be set on the command line or through environment
+      variables of the form RQ_DASHBOARD_*. For example RQ_DASHBOARD_USERNAME.
+
+      A subset of the configuration (the configuration parameters used by the
+      underlying flask blueprint) can also be provided in a Python module
+      referenced using --config, or with a .cfg file referenced by the
+      RQ_DASHBOARD_SETTINGS environment variable.
 
     Options:
-      -h, --help            show this help message and exit
-      -b ADDR, --bind=ADDR  IP addr or hostname to bind to
-      -p PORT, --port=PORT  port to bind to
-      --url-prefix=URL_PREFIX
-                            url prefix e.g. for hosting behind reverse proxy
-      --username=USERNAME   HTTP Basic Auth username
-      --password=PASSWORD   HTTP Basic Auth password
-      -c CONFIG_FILE, --config=CONFIG_FILE
-                            configuration file
-      -H ADDR, --redis-host=ADDR
-                            IP addr or hostname of Redis server
-      -P REDIS_PORT, --redis-port=REDIS_PORT
-                            port of Redis server
-      --redis-password=PASSWORD
-                            password for Redis server
-      -D DB, --redis-database=DB
-                            database of Redis server
-      -u REDIS_URL, --redis_url=REDIS_URL
-                            redis url connection
-      --interval=POLL_INTERVAL
-                            refresh interval in ms
+      -b, --bind TEXT               IP or hostname on which to bind HTTP server
+      -p, --port INTEGER            Port on which to bind HTTP server
+      --url-prefix TEXT             URL prefix e.g. for use behind a reverse proxy
+      --username TEXT               HTTP Basic Auth username (not used if not set)
+      --password TEXT               HTTP Basic Auth password
+      -c, --config TEXT             Configuration file (Python module on search
+                                    path)
+      -H, --redis-host TEXT         IP address or hostname of Redis server
+      -P, --redis-port INTEGER      Port of Redis server
+      --redis-password TEXT         Password for Redis server
+      -D, --redis-database INTEGER  Database of Redis server
+      -u, --redis-url TEXT          Redis URL connection (overrides other
+                                    individual settings)
+      --interval INTEGER            Refresh interval in ms
+      --help                        Show this message and exit.
 
 
 Integrating the dashboard in your Flask app

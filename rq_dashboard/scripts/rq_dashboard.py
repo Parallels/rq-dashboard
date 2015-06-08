@@ -86,7 +86,7 @@ def make_flask_app(config, username, password, url_prefix):
     help='Database of Redis server')
 @click.option(
     '-u', '--redis-url', default=None,
-    help='Redis URL connection (overrides other individual settings')
+    help='Redis URL connection (overrides other individual settings)')
 @click.option(
     '--interval', default=None, type=int,
     help='Refresh interval in ms')
