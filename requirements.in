@@ -9,4 +9,5 @@ arrow
 Fabric
 flake8
 grin
+isort
 wheel

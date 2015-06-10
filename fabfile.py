@@ -43,6 +43,13 @@ def style():
 
 
 @task
+def isort():
+    """Use isort to automatically (re-)order the import statements on the top of files"""
+    with lcd(_relative_to_fabfile()):
+        local('isort **/*.py')
+
+
+@task
 def clean():
     """Remove all generated files (.pyc, .coverage, .egg, etc)."""
     with lcd(_relative_to_fabfile()):
