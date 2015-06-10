@@ -24,29 +24,62 @@ Installing
 Running the dashboard
 ---------------------
 
-You can either run the dashboard standalone, like this:
+Run the dashboard standalone, like this:
 
 .. code:: console
 
     $ rq-dashboard
     * Running on http://127.0.0.1:9181/
-    * Restarting with reloader
     ...
+
+
+.. code:: console
+
+    $ rq-dashboard --help
+    Usage: rq-dashboard [OPTIONS]
+
+      Run the RQ Dashboard Flask server.
+
+      All configuration can be set on the command line or through environment
+      variables of the form RQ_DASHBOARD_*. For example RQ_DASHBOARD_USERNAME.
+
+      A subset of the configuration (the configuration parameters used by the
+      underlying flask blueprint) can also be provided in a Python module
+      referenced using --config, or with a .cfg file referenced by the
+      RQ_DASHBOARD_SETTINGS environment variable.
+
+    Options:
+      -b, --bind TEXT               IP or hostname on which to bind HTTP server
+      -p, --port INTEGER            Port on which to bind HTTP server
+      --url-prefix TEXT             URL prefix e.g. for use behind a reverse proxy
+      --username TEXT               HTTP Basic Auth username (not used if not set)
+      --password TEXT               HTTP Basic Auth password
+      -c, --config TEXT             Configuration file (Python module on search
+                                    path)
+      -H, --redis-host TEXT         IP address or hostname of Redis server
+      -P, --redis-port INTEGER      Port of Redis server
+      --redis-password TEXT         Password for Redis server
+      -D, --redis-database INTEGER  Database of Redis server
+      -u, --redis-url TEXT          Redis URL connection (overrides other
+                                    individual settings)
+      --interval INTEGER            Refresh interval in ms
+      --help                        Show this message and exit.
 
 
 Integrating the dashboard in your Flask app
 -------------------------------------------
 
-Or you can integrate the dashboard in your own `Flask`_ app, like this:
+The dashboard can be integrated in to your own `Flask`_ app by accessing the
+blueprint directly in the normal way, e.g.:
 
 .. code:: python
 
     from flask import Flask
-    from rq_dashboard import RQDashboard
-
+    import rq_dashboard
 
     app = Flask(__name__)
-    RQDashboard(app)
+    app.config.from_object(rq_dashboard.default_settings)
+    app.register_blueprint(rq_dashboard.blueprint)
 
     @app.route("/")
     def hello():
@@ -55,46 +88,35 @@ Or you can integrate the dashboard in your own `Flask`_ app, like this:
     if __name__ == "__main__":
         app.run()
 
-This will register the dashboard on the ``/rq`` URL root in your Flask
-app. To use a different URL root, use the following:
 
-.. code:: python
-
-    RQDashboard(app, url_prefix='/some/other/url')
+The ``cli.py:main`` entry point provides a simple working example.
 
 
-Adding dependencies
--------------------
+Developing
+----------
 
-We use pip-tools to keep our development dependencies up to date
+We use piptools_ to keep our development dependencies up to date
 
 ::
 
     $ pip install --upgrade pip
     $ pip install git+https://github.com/nvie/pip-tools.git@future
 
-Now make changes to the requirements.in file, and resolve all the
-2nd-level dependencies into requirements.txt like so:
+Now make changes to the ``requirements.in`` file, and resolve all the
+2nd-level dependencies into ``requirements.txt`` like so:
 
 ::
 
     $ pip-compile --annotate requirements.in
 
 
-
-Making a release
-----------------
-
-The development environment assumes you are in a virtualenv and have pulled in
-the necessary build time (and run time) dependencies with
+Develop in a virtualenv and make sure you have all the necessary build time (and
+run time) dependencies with
 
 ::
 
     $ pip install -r requirements.txt
 
-
-See the pip_docs_on_requirements_ and in particular the setup_vs_requirements_
-article by Donald Stufft.
 
 Develop in the normal way with
 
@@ -114,7 +136,7 @@ and upload to testpypi
 
 This requires write access to both the GitHub repo and to the PyPI test site.
 
-See ``fab -l`` for more options.
+See ``fab -l`` for more options and ``fab -d <subcommand>`` for details.
 
 
 Maturity notes
@@ -123,10 +145,9 @@ Maturity notes
 The RQ dashboard is currently being developed and is in beta stage.
 
 
+.. _piptools: https://github.com/nvie/pip-tools
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: http://python-rq.org/
-.. _pip_docs_on_requirements: http://pip.readthedocs.org/en/stable/user_guide.html#requirements-files
-.. _setup_vs_requirements: https://caremad.io/2013/07/setup-vs-requirement
 
 .. |Can I Use Python 3?| image:: https://caniusepython3.com/project/rq-dashboard.svg
    :target: https://caniusepython3.com/project/rq-dashboard

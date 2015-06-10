@@ -12,8 +12,6 @@ def _relative_to_fabfile(*path):
 @task
 def todo(*args):
     """List the TODOs and FIXMEs in the code and documentation."""
-    if 'r' in args:
-        _run_with_rerunner('fab todo')
     with lcd(_relative_to_fabfile()):
         local(
             'grin -e ".pyc,.pyo" "FIXME|TODO" *')
@@ -41,8 +39,14 @@ def style():
         local(
             'flake8 '
             '--exclude=".svn,CVS,.bzr,.hg,.git,__pycache__,._*" '
-            '--max-line-length=80 '
             '--max-complexity=9 .')
+
+
+@task
+def isort():
+    """Use isort to automatically (re-)order the import statements on the top of files"""
+    with lcd(_relative_to_fabfile()):
+        local('isort **/*.py')
 
 
 @task
@@ -86,7 +90,7 @@ def _abort_if_tag_is_not_at_head():
 def build():
     """Check Git, clean, test, and build sdist and wheel."""
     clean()
-    # TODO style()
+    style()
     # TODO tests()
     local('python setup.py sdist bdist_wheel')
 
@@ -115,7 +119,6 @@ def upload(index_server='pypitest'):
     """
     _abort_if_tag_is_not_at_head()
     with lcd(_relative_to_fabfile()):
-        local('git push --tags')
         # TODO switch to twine once the following bug has been fixed:
         # https://bugs.launchpad.net/pkginfo/+bug/1437570
         local(
