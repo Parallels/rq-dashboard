@@ -1,2 +1,3 @@
-import default_settings  # NOQA
-from web import blueprint  # NOQA
+# flake8: noqa
+import default_settings
+from web import blueprint
