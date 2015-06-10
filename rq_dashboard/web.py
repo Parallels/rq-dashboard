@@ -2,8 +2,8 @@
 
 Uses the standard Flask configuration mechanism e.g. to set the connection
 parameters to REDIS. To keep the documentation and defaults all in once place
-the default settings must be loaded from ``rq_dashboard.default_settings`` e.g.
-as done in ``scripts/rq_dashboard.py``.
+the default settings must be loaded from ``rq_dashboard.default_settings``
+e.g.  as done in ``cli.py``.
 
 RQ Dashboard does not contain any built-in authentication mechanism because
 
@@ -12,9 +12,8 @@ RQ Dashboard does not contain any built-in authentication mechanism because
 
     2. there are numerous ways of adding security orthogonally.
 
-As a quick-and-dirty convenience, the command line invocation in
-``scripts/rq_dashboard.py`` provides the option to require HTTP Basic Auth in a
-few lines of code.
+As a quick-and-dirty convenience, the command line invocation in ``cli.py``
+provides the option to require HTTP Basic Auth in a few lines of code.
 
 """
 from functools import wraps

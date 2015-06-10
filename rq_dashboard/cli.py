@@ -6,9 +6,9 @@ import os
 import click
 from flask import Flask, Response, request
 
-import rq_dashboard
-
-from ..version import VERSION
+from . import default_settings
+from .version import VERSION
+from .web import blueprint
 
 
 def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
@@ -35,7 +35,7 @@ def make_flask_app(config, username, password, url_prefix):
     app = Flask(__name__)
 
     # Start configuration with our built in defaults.
-    app.config.from_object(rq_dashboard.default_settings)
+    app.config.from_object(default_settings)
 
     # Override with any settings in config file, if given.
     if config:
@@ -47,8 +47,8 @@ def make_flask_app(config, username, password, url_prefix):
 
     # Optionally add basic auth to blueprint and register with app.
     if username:
-        add_basic_auth(rq_dashboard.blueprint, username, password)
-    app.register_blueprint(rq_dashboard.blueprint, url_prefix=url_prefix)
+        add_basic_auth(blueprint, username, password)
+    app.register_blueprint(blueprint, url_prefix=url_prefix)
 
     return app
 

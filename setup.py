@@ -31,7 +31,7 @@ setup(
     install_requires=['rq>=0.3.8', 'Flask', 'redis', 'arrow'],
     entry_points={
         'console_scripts': [
-            'rq-dashboard = rq_dashboard.scripts.rq_dashboard:main'
+            'rq-dashboard = rq_dashboard.cli:main'
         ]
     },
     classifiers=[

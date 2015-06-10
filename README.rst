@@ -89,8 +89,7 @@ blueprint directly in the normal way, e.g.:
         app.run()
 
 
-The ``scripts/rq_dashboard.py:main`` entry point provides a simple working
-example.
+The ``cli.py:main`` entry point provides a simple working example.
 
 
 Developing
