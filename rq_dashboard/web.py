@@ -17,15 +17,14 @@ As a quick-and-dirty convenience, the command line invocation in
 few lines of code.
 
 """
-import arrow
-from flask import Blueprint, current_app, url_for, render_template
 from functools import wraps
 from math import ceil
-from redis import Redis, from_url
-from rq import (
-    Queue, Worker, cancel_job, requeue_job, get_failed_queue,
-    push_connection, pop_connection)
 
+import arrow
+from flask import Blueprint, current_app, render_template, url_for
+from redis import Redis, from_url
+from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
+                push_connection, requeue_job)
 
 blueprint = Blueprint(
     'rq_dashboard',
