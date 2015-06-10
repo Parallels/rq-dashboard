@@ -1,14 +1,14 @@
 from __future__ import absolute_import
-from flask import Flask, Response, request
-import click
+
 import importlib
 import os
-import pkg_resources
+
+import click
+from flask import Flask, Response, request
+
 import rq_dashboard
 
-
-def get_version(package='rq_dashboard'):
-    return pkg_resources.get_distribution(package).version
+from ..version import VERSION
 
 
 def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
@@ -106,7 +106,7 @@ def run(
     RQ_DASHBOARD_SETTINGS environment variable.
 
     """
-    click.echo('RQ Dashboard version {}'.format(get_version()))
+    click.echo('RQ Dashboard version {}'.format(VERSION))
     app = make_flask_app(config, username, password, url_prefix)
     if redis_url:
         app.config['REDIS_URL'] = redis_url

@@ -1,8 +1,19 @@
+import os
 from setuptools import setup, find_packages
+
+
+def get_version():
+    basedir = os.path.dirname(__file__)
+    with open(os.path.join(basedir, 'rq_dashboard/version.py')) as f:
+        locals = {}
+        exec(f.read(), locals)
+        return locals['VERSION']
+    raise RuntimeError('No version info found.')
 
 
 setup(
     name='rq-dashboard',
+    version=get_version(),
     url='https://github.com/nvie/rq-dashboard',
     license='BSD',
     author='Vincent Driessen',
@@ -14,9 +25,6 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    # Manage version number from git at dev-time or pkg_resources at run-time.
-    setup_requires=['setuptools-git-version'],
-    version_format='{tag}',
     # Be specific about versions in requirements.txt and just name packages
     # needed during run time here.
     # See e.g. https://caremad.io/2013/07/setup-vs-requirement/
