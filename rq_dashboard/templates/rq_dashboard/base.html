@@ -6,8 +6,8 @@
   <title>RQ dashboard</title>
 
   {# Le styles -#}
-  <link rel="stylesheet" href="{{ url_for('rq_dashboard.static', filename='css/bootstrap.min.css') }}">
-  <link href="{{ url_for('rq_dashboard.static', filename='css/main.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('rq_dashboard.static', filename='%scss/bootstrap.min.css' % asset_prefix) }}">
+  <link href="{{ url_for('rq_dashboard.static', filename='%scss/main.css' % asset_prefix) }}" rel="stylesheet">
 </head>
 
 <body>
@@ -21,10 +21,10 @@
 {#- JavaScripts are loaded at the end -#}
 
 {#- Custom JS -#}
-<script src="{{ url_for('rq_dashboard.static', filename='js/jquery.min.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('rq_dashboard.static', filename='js/underscore-min.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('rq_dashboard.static', filename='js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap-tooltip.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('rq_dashboard.static', filename='%sjs/jquery.min.js' % asset_prefix) }}" type="text/javascript"></script>
+<script src="{{ url_for('rq_dashboard.static', filename='%sjs/underscore-min.js' % asset_prefix) }}" type="text/javascript"></script>
+<script src="{{ url_for('rq_dashboard.static', filename='%sjs/sugar-1.2.1.min.js' % asset_prefix) }}" type="text/javascript"></script>
+<script src="{{ url_for('rq_dashboard.static', filename='%sjs/bootstrap-tooltip.js' % asset_prefix) }}" type="text/javascript"></script>
 <script type="text/javascript">
 {% block inline_js %}{% endblock %}
 </script>

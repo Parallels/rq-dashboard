@@ -139,6 +139,7 @@ def overview(queue_name, page):
         queue=queue,
         page=page,
         queues=Queue.all(),
+        asset_prefix=current_app.config.get('RQ_DASHBOARD_ASSET_PREFIX', ''),
         rq_url_prefix=url_for('.overview')
     )
 
