@@ -25,13 +25,14 @@ from redis import Redis, from_url
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
 
+from models import QueueStats
+
 blueprint = Blueprint(
     'rq_dashboard',
     __name__,
     template_folder='templates',
     static_folder='static',
 )
-
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
@@ -73,20 +74,37 @@ def jsonify(f):
     return _wrapped
 
 
-def serialize_queues(queues):
-    return [
-        dict(
-            name=q.name,
-            count=q.count,
-            url=url_for('.overview', queue_name=q.name))
-        for q in queues
-    ]
-
-
 def serialize_date(dt):
     if dt is None:
         return None
     return arrow.get(dt).to('UTC').datetime.isoformat()
+
+
+def serialize_queues(queues):
+    stats = {
+        q.name: QueueStats() for q in queues
+    }
+    for w in Worker.all():
+        # name = w.name
+        # w._name = None
+        worker = w.name
+        host = '.'.join(w.name.split('.')[:-1])
+        for q in w.queues:
+            qs = stats[q.name]
+            qs.hosts.add(host)
+            qs.workers.add(worker)
+        # w._name = name
+
+    return [
+        dict(
+            name=q.name,
+            stats=stats[q.name].dict(),
+            # hosts=list(stats[q.name].hosts),
+            # workers=list(stats[q.name].workers),
+            count=q.count,
+            url=url_for('.overview', queue_name=q.name))
+        for q in queues
+    ]
 
 
 def serialize_job(job):
@@ -187,8 +205,25 @@ def compact_queue(queue_name):
 @blueprint.route('/queues.json')
 @jsonify
 def list_queues():
-    queues = serialize_queues(sorted(Queue.all()))
+    queues = serialize_queues(Queue.all())
     return dict(queues=queues)
+
+
+@blueprint.route('/workers.json')
+@jsonify
+def list_workers():
+    def serialize_queue_names(worker):
+        return [q.name for q in worker.queues]
+
+    workers = [
+        dict(
+            name=worker.name,
+            queues=serialize_queue_names(worker),
+            state=worker.get_state()
+        )
+        for worker in Worker.all()
+    ]
+    return dict(workers=workers)
 
 
 @blueprint.route('/jobs/<queue_name>/<page>.json')
@@ -227,23 +262,6 @@ def list_jobs(queue_name, page):
     offset = (current_page - 1) * per_page
     jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page)]
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
-
-
-@blueprint.route('/workers.json')
-@jsonify
-def list_workers():
-    def serialize_queue_names(worker):
-        return [q.name for q in worker.queues]
-
-    workers = [
-        dict(
-            name=worker.name,
-            queues=serialize_queue_names(worker),
-            state=worker.get_state()
-        )
-        for worker in Worker.all()
-    ]
-    return dict(workers=workers)
 
 
 @blueprint.context_processor
