@@ -93,6 +93,10 @@ table#jobs span.end_date {
     margin-left: 24px;
 }
 
+table#jobs span.scheduled_date {
+    font-size: 80%;
+}
+
 table#workers {
     /*width: 600px;*/
 }
