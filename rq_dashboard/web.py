@@ -80,31 +80,47 @@ def serialize_date(dt):
     return arrow.get(dt).to('UTC').datetime.isoformat()
 
 
-def serialize_queues(queues):
+def serialize_dashboard():
+    queues = Queue.all()
+    workers = Worker.all()
     stats = {
         q.name: QueueStats() for q in queues
     }
-    for w in Worker.all():
+    for w in workers:
         # name = w.name
         # w._name = None
         worker = w.name
-        host = '.'.join(w.name.split('.')[:-1])
+        bits = w.name.split('.')
+        host, pid = (
+            '.'.join(bits[:-1]), bits[-1])
         for q in w.queues:
             qs = stats[q.name]
-            qs.hosts.add(host)
+            hl = qs.hosts.get(host)
+            pd = dict(
+                pid = pid, 
+                state = w.get_state())
+            if hl is None:
+                hl = [pd]
+                qs.hosts[host] = hl
+            else:
+                hl.append(pd)
+            hl.sort()
             qs.workers.add(worker)
         # w._name = name
 
-    return [
-        dict(
-            name=q.name,
-            stats=stats[q.name].dict(),
-            # hosts=list(stats[q.name].hosts),
-            # workers=list(stats[q.name].workers),
-            count=q.count,
-            url=url_for('.overview', queue_name=q.name))
-        for q in queues
-    ]
+    return dict(
+        queues=[
+            dict(
+                name=q.name,
+                stats=stats[q.name].dict(),
+                count=q.count,
+                url=url_for('.overview', queue_name=q.name))
+            for q in queues
+        ],
+        workers=[
+            w.name for w in workers
+        ]
+    )
 
 
 def serialize_job(job):
@@ -202,28 +218,10 @@ def compact_queue(queue_name):
     return dict(status='OK')
 
 
-@blueprint.route('/queues.json')
+@blueprint.route('/dashboard.json')
 @jsonify
-def list_queues():
-    queues = serialize_queues(Queue.all())
-    return dict(queues=queues)
-
-
-@blueprint.route('/workers.json')
-@jsonify
-def list_workers():
-    def serialize_queue_names(worker):
-        return [q.name for q in worker.queues]
-
-    workers = [
-        dict(
-            name=worker.name,
-            queues=serialize_queue_names(worker),
-            state=worker.get_state()
-        )
-        for worker in Worker.all()
-    ]
-    return dict(workers=workers)
+def load_dashboard():
+    return dict(**serialize_dashboard())
 
 
 @blueprint.route('/jobs/<queue_name>/<page>.json')
