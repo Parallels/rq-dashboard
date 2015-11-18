@@ -25,7 +25,6 @@ from redis import Redis, from_url
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
 
-from models import QueueStats
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -80,39 +79,44 @@ def serialize_date(dt):
     return arrow.get(dt).to('UTC').datetime.isoformat()
 
 
-def serialize_dashboard():
-    queues = Queue.all()
-    workers = Worker.all()
+def get_stats(queues, workers):
     stats = {
-        q.name: QueueStats() for q in queues
+        q.name: dict(
+            hosts = dict(),
+            workers = list()
+        ) for q in queues
     }
     for w in workers:
-        # name = w.name
-        # w._name = None
-        worker = w.name
+        # name = w.name; w._name = None
         bits = w.name.split('.')
         host, pid = (
             '.'.join(bits[:-1]), bits[-1])
         for q in w.queues:
             qs = stats[q.name]
-            hl = qs.hosts.get(host)
             pd = dict(
                 pid = pid, 
                 state = w.get_state())
+            hl = qs['hosts'].get(host)
             if hl is None:
                 hl = [pd]
-                qs.hosts[host] = hl
+                qs['hosts'][host] = hl
             else:
                 hl.append(pd)
             hl.sort()
-            qs.workers.add(worker)
-        # w._name = name
+            qs['workers'].append(w.name)
+        # w._name = name # put back
+    return stats
 
+def serialize_dashboard():
+    queues = Queue.all()
+    workers = Worker.all()
+    stats = get_stats(queues, workers)
+    
     return dict(
         queues=[
             dict(
                 name=q.name,
-                stats=stats[q.name].dict(),
+                stats=stats[q.name],
                 count=q.count,
                 url=url_for('.overview', queue_name=q.name))
             for q in queues
