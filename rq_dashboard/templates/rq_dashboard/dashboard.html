@@ -31,8 +31,8 @@
                     <td class="">
                       <i class="icon-inbox" style="opacity: .5;"></i>
                       <a href="<%= d.url %>"><%= d.name %></a></td>
-                    <td class=""><%= d.hosts_count %></td>
-                    <td class=""><%= d.workers_count %></td>
+                    <td class=""><% if (!(d.name === 'failed')) { %><%= d.hosts_count %><% } %></td>
+                    <td class=""><% if (!(d.name === 'failed')) { %><%= d.workers_count %><% } %></td>
                     <td class="narrow"><%= d.count %></td>
                 </tr>
             </script>
