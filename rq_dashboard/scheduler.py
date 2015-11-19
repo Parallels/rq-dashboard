@@ -3,7 +3,7 @@ from math import ceil
 
 from flask import Blueprint, current_app, render_template, url_for
 from redis import Redis, from_url
-from rq import Queue, Worker, pop_connection, push_connection
+from rq import Queue, pop_connection, push_connection
 from rq_scheduler import Scheduler
 
 from .utils import (jsonify, remove_none_values, pagination_window,
@@ -16,6 +16,7 @@ blueprint = Blueprint(
     template_folder='templates',
     static_folder='static',
 )
+
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
@@ -35,9 +36,11 @@ def setup_rq_connection():
 def push_rq_connection():
     push_connection(current_app.redis_conn)
 
+
 @blueprint.teardown_request
 def pop_rq_connection(exception=None):
     pop_connection()
+
 
 @blueprint.context_processor
 def inject_interval():

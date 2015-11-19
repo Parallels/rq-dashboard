@@ -50,7 +50,11 @@ def make_flask_app(config, username, password, url_prefix):
     if username:
         add_basic_auth(blueprint, username, password)
         add_basic_auth(scheduler_blueprint, username, password)
-    app.register_blueprint(scheduler_blueprint, url_prefix=url_prefix + '/scheduler')
+
+    app.register_blueprint(
+        scheduler_blueprint,
+        url_prefix=url_prefix + '/scheduler'
+    )
     app.register_blueprint(blueprint, url_prefix=url_prefix)
 
     return app

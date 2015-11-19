@@ -16,10 +16,8 @@ As a quick-and-dirty convenience, the command line invocation in ``cli.py``
 provides the option to require HTTP Basic Auth in a few lines of code.
 
 """
-from functools import wraps
 from math import ceil
 
-import arrow
 from flask import Blueprint, current_app, render_template, url_for
 from redis import Redis, from_url
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
