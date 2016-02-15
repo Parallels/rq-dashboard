@@ -1,0 +1,170 @@
+{% extends "rq_dashboard/base.html" %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="span6">
+        <div class="section">
+
+            <h1>Queues</h1>
+            <p class="fixed intro">
+            This list below contains all the registered queues with the
+            number of jobs currently scheduled for the queue. Select a queue
+            to view all jobs currently scheduled for the queue.</p>
+
+            <table id="queues" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Queue</th>
+                        <th class="narrow">Jobs</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-role="loading-placeholder">
+                        <td colspan="2">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <script name="queue-row" type="text/template">
+                <tr data-role="queue" <% if (d.name === 'failed' && d.count > 0) { %> class="failed"<% } %>>
+                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="<%= d.url %>"><%= d.name %></a></td>
+                    <td class="narrow"><%= d.count %></td>
+                </tr>
+            </script>
+
+            <script name="no-queues-row" type="text/template">
+                <tr>
+                    <td colspan="3">No queues.</td>
+                </tr>
+            </script>
+
+        </div>
+    </div>
+
+    <div class="span6">
+        <div class="section">
+
+          <h1>Scheduler</h1>
+          <p class="fixed intro">This list below shows the current status of the scheduler.</p>
+
+          <div id="scheduler-status">
+            <span data-role="loading-placeholder">
+                Loading...
+            </span>
+
+            <script name="scheduler-status" type="text/template">
+              <span data-role="scheduler-status">
+                <% if (d.running) { %>
+                  <i class="icon-play"></i> Scheduler is running
+                <% } else { %>
+                  <i class="icon-pause"></i> Scheduler is not running
+                <% } %>
+              </span>
+            </script>
+          </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="span12">
+        <div class="section">
+
+        <h1>Scheduled Jobs for <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
+        <p class="intro">
+        <a href="{{ url_for('rq_scheduler_dashboard.cancel_all', queue_name=queue.name) }}" id="cancel-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-remove"></i> Cancel All</a>
+        This list below contains all the scheduled jobs for queue <strong>{{ queue.name }}</strong>, sorted by age (next due on top).</p>
+
+        <table id="jobs" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Created At</th>
+                    <th>Scheduled For</th>
+                    <th class="narrow">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="2">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script name="job-row" type="text/template">
+            <tr data-role="job" data-job-id="<%= d.id %>">
+                <td>
+                    <i class="icon-file" style="opacity: .5;"></i>
+                    <span class="description"><%= $('<div/>').text(d.description).html() %></span>
+                    <% if (d.exc_info) { %>
+                        <span class="origin">from <strong><%= d.origin %></strong></span>
+                    <% } %>
+                    <div class="job_id"><%= d.id %></div>
+                    <% if (d.exc_info) { %>
+                        <span class="end_date">Failed <%= d.ended_at %></span>
+                        <pre class="exc_info"><%= $('<div/>').text(d.exc_info).html() %></pre>
+                    <% } %>
+                </td>
+                <td><span class="creation_date"><%= d.created_at %></span></td>
+                <td><span class="scheduled_date"><%= d.scheduled_for %></span></td>
+                <td class="actions narrow">
+                    <% if (d.exc_info) { %>
+                        <a href="#" data-role="requeue-job-btn" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
+                    <% } %>
+                    <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
+                </td>
+            </tr>
+        </script>
+
+        <script name="no-jobs-row" type="text/template">
+            <tr>
+                <td colspan="3">No jobs.</td>
+            </tr>
+        </script>
+
+        <div id="page-selection" class="pagination pagination-centered">
+          <ul>
+          </ul>
+        </div>
+
+        <script name="no-previous-page-link" type="text/template">
+            <li class="disabled" ><a href="#" >&laquo;</a></li>
+        </script>
+
+        <script name="previous-page-link" type="text/template">
+            <li><a href="<%= url %>" >&laquo;</a></li>
+        </script>
+
+        <script name="page-link" type="text/template">
+            <li><a href="<%= url %>" ><%= number %></a></li>
+        </script>
+
+        <script name="next-page-link" type="text/template">
+            <li><a href="<%= url %>" >&raquo;</a></li>
+        </script>
+
+        <script name="no-next-page-link" type="text/template">
+            <li class="disabled" ><a href="#" >&raquo;</a></li>
+        </script>
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="span12">
+        <div class="section">
+            <p class="intro"><a href="/" id="home-btn" class="btn btn-small" style="float: left"><i class="icon-arrow-left"></i> Home</a></p>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+{% block inline_js %}
+var POLL_INTERVAL = {{ poll_interval }};
+{% include "rq_dashboard/scheduler_dashboard.js" with context %}
+{% endblock %}

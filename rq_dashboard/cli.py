@@ -9,6 +9,7 @@ from flask import Flask, Response, request
 from . import default_settings
 from .version import VERSION
 from .web import blueprint
+from .scheduler import blueprint as scheduler_blueprint
 
 
 def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
@@ -48,6 +49,12 @@ def make_flask_app(config, username, password, url_prefix):
     # Optionally add basic auth to blueprint and register with app.
     if username:
         add_basic_auth(blueprint, username, password)
+        add_basic_auth(scheduler_blueprint, username, password)
+
+    app.register_blueprint(
+        scheduler_blueprint,
+        url_prefix=url_prefix + '/scheduler'
+    )
     app.register_blueprint(blueprint, url_prefix=url_prefix)
 
     return app
