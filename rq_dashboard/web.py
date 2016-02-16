@@ -25,13 +25,13 @@ from redis import Redis, from_url
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
 
+
 blueprint = Blueprint(
     'rq_dashboard',
     __name__,
     template_folder='templates',
     static_folder='static',
 )
-
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
@@ -73,20 +73,58 @@ def jsonify(f):
     return _wrapped
 
 
-def serialize_queues(queues):
-    return [
-        dict(
-            name=q.name,
-            count=q.count,
-            url=url_for('.overview', queue_name=q.name))
-        for q in queues
-    ]
-
-
 def serialize_date(dt):
     if dt is None:
         return None
     return arrow.get(dt).to('UTC').datetime.isoformat()
+
+
+def get_stats(queues, workers):
+    stats = {
+        q.name: dict(
+            hosts = dict(),
+            workers = list()
+        ) for q in queues
+    }
+    for w in workers:
+        # name = w.name; w._name = None
+        bits = w.name.split('.')
+        host, pid = (
+            '.'.join(bits[:-1]), bits[-1])
+        for q in w.queues:
+            qs = stats[q.name]
+            pd = dict(
+                pid = pid, 
+                state = w.get_state())
+            hl = qs['hosts'].get(host)
+            if hl is None:
+                hl = [pd]
+                qs['hosts'][host] = hl
+            else:
+                hl.append(pd)
+            hl.sort()
+            qs['workers'].append(w.name)
+        # w._name = name # put back
+    return stats
+
+def serialize_dashboard():
+    queues = Queue.all()
+    workers = Worker.all()
+    stats = get_stats(queues, workers)
+    
+    return dict(
+        queues=[
+            dict(
+                name=q.name,
+                stats=stats[q.name],
+                count=q.count,
+                url=url_for('.overview', queue_name=q.name))
+            for q in queues
+        ],
+        workers=[
+            w.name for w in workers
+        ]
+    )
 
 
 def serialize_job(job):
@@ -184,11 +222,10 @@ def compact_queue(queue_name):
     return dict(status='OK')
 
 
-@blueprint.route('/queues.json')
+@blueprint.route('/dashboard.json')
 @jsonify
-def list_queues():
-    queues = serialize_queues(sorted(Queue.all()))
-    return dict(queues=queues)
+def load_dashboard():
+    return dict(**serialize_dashboard())
 
 
 @blueprint.route('/jobs/<queue_name>/<page>.json')
@@ -227,23 +264,6 @@ def list_jobs(queue_name, page):
     offset = (current_page - 1) * per_page
     jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page)]
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
-
-
-@blueprint.route('/workers.json')
-@jsonify
-def list_workers():
-    def serialize_queue_names(worker):
-        return [q.name for q in worker.queues]
-
-    workers = [
-        dict(
-            name=worker.name,
-            queues=serialize_queue_names(worker),
-            state=worker.get_state()
-        )
-        for worker in Worker.all()
-    ]
-    return dict(workers=workers)
 
 
 @blueprint.context_processor

@@ -1,7 +1,6 @@
 var url_for = function(name, param) {
     var url = {{ rq_url_prefix|tojson|safe }};
-    if (name == 'queues') { url += 'queues.json'; }
-    else if (name == 'workers') { url += 'workers.json'; }
+    if (name == 'dashboard') { url += 'dashboard.json'; }
     else if (name == 'cancel_job') { url += 'job/' + encodeURIComponent(param) + '/cancel'; }
     else if (name == 'requeue_job') { url += 'job/' + encodeURIComponent(param) + '/requeue'; }
     return url;
@@ -19,10 +18,9 @@ var toRelative = function(universal_date_string) {
 };
 
 var api = {
-    getQueues: function(cb) {
-        $.getJSON(url_for('queues'), function(data) {
-            var queues = data.queues;
-            cb(queues);
+    getDashboard: function(cb) {
+        $.getJSON(url_for('dashboard'), function(data) {
+            cb(data);
         });
     },
 
@@ -32,48 +30,52 @@ var api = {
             var pagination = data.pagination;
             cb(jobs, pagination);
         });
-    },
-
-    getWorkers: function(cb) {
-        $.getJSON(url_for('workers'), function(data) {
-            var workers = data.workers;
-            cb(workers);
-        });
     }
 };
 
 
 //
-// QUEUES
+// DASHBOARD
 //
 (function($) {
-    var $raw_tpl = $('script[name=queue-row]').html();
-    var noQueuesHtml = $('script[name=no-queues-row]').html();
-    var template = _.template($raw_tpl);
-    var $tbody = $('table#queues tbody');
+    var $qTemplate = $('script[name=queue-row]').html();
+    var qTemplate = _.template($qTemplate);
+    
+    var $sTemplate = $('script[name=stats-row]').html();
+    var sTemplate = _.template($sTemplate);
+
+    var $tbody = $('table#dashboard tbody');
+    var $noQueuesHtml = $('script[name=no-queues-row]').html();
     var $placeholderEl = $('tr[data-role=loading-placeholder]', $tbody);
 
     var reload_table = function(done) {
         $placeholderEl.show();
 
         // Fetch the available queues
-        api.getQueues(function(queues) {
+        api.getDashboard(function(data) {
             var html = '';
             var fqEl;
 
             $tbody.empty();
 
+            var queues = data.queues;
+            var workers = data.workers;
             if (queues.length > 0) {
                 $.each(queues, function(i, queue) {
-                    var el = template({d: queue}, {variable: 'd'});
-
+                    var hosts = Object.keys(queue.stats.hosts);
+                    queue.workers_count = queue.stats.workers.length;
+                    queue.hosts_count = hosts.length;
+                    
+                    var qEl = qTemplate({d: queue}, {variable: 'd'});
                     // Special markup for the failed queue
-                    if (queue.name === 'failed' && queue.count > 0) {
-                        fqEl = el;
+                    if (queue.name === 'failed') {
+                        fqEl = qEl;
                         return;
                     }
-
-                    html += el;
+                    html += qEl;
+                    
+                    var sEl = sTemplate({d: queue.stats}, {variable: 'd'});
+                    html += sEl;
                 });
 
                 // Append the failed queue at the end, since it's a special queue
@@ -83,7 +85,7 @@ var api = {
 
                 $tbody.append(html);
             } else {
-                $tbody.append(noQueuesHtml);
+                $tbody.append($noQueuesHtml);
             }
 
             if (done !== undefined) {
@@ -105,62 +107,6 @@ var api = {
         $('#refresh-button').click(refresh_table);
         setInterval(refresh_table, POLL_INTERVAL);
         $('[data-toggle=tooltip]').tooltip();
-
-    });
-})($);
-
-
-//
-// WORKERS
-//
-(function($) {
-    var $raw_tpl = $('script[name=worker-row]').html();
-    var noWorkersHtml = $('script[name=no-workers-row]').html();
-    var template = _.template($raw_tpl);
-    var $tbody = $('table#workers tbody');
-    var $placeholderEl = $('tr[data-role=loading-placeholder]', $tbody);
-
-    var reload_table = function(done) {
-        $placeholderEl.show();
-
-        // Fetch the available workers
-        api.getWorkers(function(workers) {
-            var html = '';
-
-            $tbody.empty();
-
-            if (workers.length > 0) {
-                $.each(workers, function(i, worker) {
-                    if (worker.state === 'busy') {
-                        worker.state = 'play';
-                    } else {
-                        worker.state = 'pause';
-                    }
-                    html += template({d: worker}, {variable: 'd'});
-                });
-                $tbody.append(html);
-            } else {
-                $tbody.append(noWorkersHtml);
-            }
-
-            if (done !== undefined) {
-                done();
-            }
-        });
-    };
-
-    var refresh_table = function() {
-        $('span.loading').fadeIn('fast');
-        reload_table(function() {
-            $('span.loading').fadeOut('fast');
-        });
-    };
-
-    $(document).ready(function() {
-
-        reload_table();
-        $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, POLL_INTERVAL);
 
     });
 })($);

@@ -4,76 +4,63 @@
 {% block content %}
 
 <div class="row">
-    <div class="span6">
+    <div class="span12">
         <div class="section">
 
-            <h1>Queues</h1>
-            <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently in the queue.  Select a queue from above to view all jobs currently pending on the queue.</p>
+            <h1>Dashboard</h1>
+            <p class="fixed intro">Registered queues and workers. Click on a queue name to see its running jobs.</p>
 
-            <table id="queues" class="table table-bordered">
+            <table id="dashboard" class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>Queue</th>
+                        <th class="">Queue</th>
+                        <th class="">Hosts</th>
+                        <th class="">Workers</th>
                         <th class="narrow">Jobs</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr data-role="loading-placeholder">
-                        <td colspan="2">Loading...</td>
+                        <td colspan="5">Loading...</td>
                     </tr>
                 </tbody>
             </table>
 
             <script name="queue-row" type="text/template">
-                <tr data-role="queue" <% if (d.name === 'failed' && d.count > 0) { %> class="failed"<% } %>>
-                    <td><i class="icon-inbox" style="opacity: .5;"></i> <a href="<%= d.url %>"><%= d.name %></a></td>
+                <tr data-role="queue" class="<% if (d.name === 'failed') { %>failed<% } %>">
+                    <td class="">
+                      <i class="icon-inbox" style="opacity: .5;"></i>
+                      <a href="<%= d.url %>"><%= d.name %></a></td>
+                    <td class=""><% if (!(d.name === 'failed')) { %><%= d.hosts_count %><% } %></td>
+                    <td class=""><% if (!(d.name === 'failed')) { %><%= d.workers_count %><% } %></td>
                     <td class="narrow"><%= d.count %></td>
                 </tr>
             </script>
 
-            <script name="no-queues-row" type="text/template">
-                <tr>
-                    <td colspan="3">No queues.</td>
+            <script name="stats-row" type="text/template">
+                <% for (host in d.hosts) { %>
+                <tr data-role="stats">
+                    <td class="empty"></td>
+                    <td class=""><%= host %></td>
+                    <td><% for (i in d.hosts[host]) { 
+                        var worker = d.hosts[host][i]; 
+                        if (worker.state === 'busy') {
+                           worker.state = 'play';
+                        } else {
+                           worker.state = 'pause';
+                        } %>
+                        <i class="icon-<%= worker.state %>"></i><%= worker.pid %> &nbsp;
+                    <% } %></td>
+                    <td class="narrow"></td>
                 </tr>
+                <% } %>
             </script>
 
-        </div>
-    </div>
-
-    <div class="span6">
-        <div class="section">
-
-        <h1>Workers</h1>
-        <p class="fixed intro">This list below contains all the registered workers.</p>
-
-        <table id="workers" class="table table-bordered">
-            <thead>
+            <script name="no-queues-row" type="text/template">
                 <tr>
-                    <th style="width:48px">State</th>
-                    <th>Worker</th>
-                    <th>Queues</th>
+                    <td colspan="4">No queues.</td>
                 </tr>
-            </thead>
-            <tbody>
-                <tr data-role="loading-placeholder">
-                    <td colspan="3">Loading...</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <script name="worker-row" type="text/template">
-            <tr data-role="worker">
-                <td><i class="icon-<%= d.state %>"></i></td>
-                <td><%= d.name %></td>
-                <td><%= d.queues.join(', ') %></td>
-            </tr>
-        </script>
-
-        <script name="no-workers-row" type="text/template">
-            <tr>
-                <td colspan="3">No workers.</td>
-            </tr>
-        </script>
+            </script>
 
         </div>
     </div>

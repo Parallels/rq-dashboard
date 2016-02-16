@@ -44,15 +44,15 @@ h1 strong.failed {
     text-shadow: 0 -1px #922;
 }
 
-table, table tr, table tr td {
-    background-color: snow;
-}
-
-table tbody tr td.narrow {
+th.narrow, td.narrow {
     width: 100px;
 }
+th.empty, td.empty {
+    border-top-style: none;
+    border-bottom-style: none;
+}
 
-table#queues {
+table#dashboard {
     /*width: 300px;*/
 }
 
@@ -64,6 +64,8 @@ table#jobs td.actions a {
 table#jobs span.description {
     color: #555;
     font-weight: 600;
+    ms-word-break: break-all;
+    word-break: break-word;
 }
 
 table#jobs span.origin {
@@ -91,10 +93,6 @@ table#jobs span.creation_date {
 table#jobs span.end_date {
     font-size: 80%;
     margin-left: 24px;
-}
-
-table#workers {
-    /*width: 600px;*/
 }
 
 table tbody tr td {
