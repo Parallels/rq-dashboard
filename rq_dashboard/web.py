@@ -90,6 +90,8 @@ def serialize_date(dt):
 
 
 def serialize_job(job):
+    if job is None:
+        return None
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
