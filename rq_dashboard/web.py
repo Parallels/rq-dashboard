@@ -238,6 +238,7 @@ def list_workers():
     workers = [
         dict(
             name=worker.name,
+            current_job=serialize_job(worker.get_current_job()),
             queues=serialize_queue_names(worker),
             state=str(worker.get_state())
         )
