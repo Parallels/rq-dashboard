@@ -14,7 +14,7 @@ def get_version():
 setup(
     name='rq-dashboard',
     version=get_version(),
-    url='https://github.com/nvie/rq-dashboard',
+    url='https://github.com/ducu/rq-dashboard',
     license='BSD',
     author='Vincent Driessen',
     author_email='vincent@3rdcloud.com',

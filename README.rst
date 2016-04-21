@@ -151,5 +151,5 @@ The RQ dashboard is currently being developed and is in beta stage.
 
 .. |Can I Use Python 3?| image:: https://caniusepython3.com/project/rq-dashboard.svg
    :target: https://caniusepython3.com/project/rq-dashboard
-.. |image1| image:: https://cloud.github.com/downloads/nvie/rq-dashboard/scrot_high.png
-.. |image2| image:: https://cloud.github.com/downloads/nvie/rq-dashboard/scrot_failed.png
+.. |image1| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_high.png
+.. |image2| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_failed.png
