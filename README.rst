@@ -1,3 +1,9 @@
+I'm looking to transfer ownership of this repo to someone willing to maintain it
+================================================================================
+Please reach out to me, so I can also give you access to the PyPI repository.  Until a new owenr is found, issues and PRs remain closed.
+
+
+
 Introduction
 ============
 
