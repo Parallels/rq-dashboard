@@ -89,6 +89,14 @@ def serialize_date(dt):
     return arrow.get(dt).to('UTC').datetime.isoformat()
 
 
+def format_job_info(job_info):
+    length = current_app.config.get('RQ_DASHBOARD_JOB_INFO')
+    if len(job_info) <= length:
+        return job_info
+    else:
+        return ' '.join(job_info[:length + 1].split(' ')[0:-1]) + '...'
+
+
 def serialize_job(job):
     return dict(
         id=job.id,
@@ -98,7 +106,8 @@ def serialize_job(job):
         origin=job.origin,
         result=job._result,
         exc_info=str(job.exc_info),
-        description=job.description)
+        description=format_job_info(job.description)
+    )
 
 
 def remove_none_values(input_dict):

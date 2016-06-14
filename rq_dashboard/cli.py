@@ -90,11 +90,14 @@ def make_flask_app(config, username, password, url_prefix):
 @click.option(
     '--interval', default=None, type=int,
     help='Refresh interval in ms')
+@click.option(
+    '-j', '--job-info', default=100, type=int,
+    help='The number of characters to print for RQ job descriptions')
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
-        interval):
+        interval, job_info):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -120,6 +123,9 @@ def run(
         app.config['REDIS_DB'] = redis_database
     if interval:
         app.config['RQ_POLL_INTERVAL'] = interval
+    if job_info < 0:
+        job_info = 100  # disallow negative values
+    app.config['RQ_DASHBOARD_JOB_INFO'] = job_info
     app.run(host=bind, port=port)
 
 
