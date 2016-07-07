@@ -26,7 +26,7 @@ from rq import (
     Queue, Worker,
     cancel_job, get_failed_queue, pop_connection, push_connection, requeue_job
 )
-from rq.exceptions import NoSuchJobError
+from rq.exceptions import NoSuchJobError, InvalidJobOperationError
 from rq.job import JobStatus
 
 blueprint = Blueprint(
@@ -182,6 +182,8 @@ def requeue_and_double_job_view(job_id):
         raise NoSuchJobError(
             'Job {} does not exist in failed queue'.format(job_id)
         )
+    if fq.remove(job_id) == 0:
+        raise InvalidJobOperationError('Cannot requeue non-failed jobs')
     # Reset the job state
     job.set_status(JobStatus.QUEUED)
     job.exc_info = None
