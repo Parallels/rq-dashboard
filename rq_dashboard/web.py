@@ -22,8 +22,12 @@ from math import ceil
 import arrow
 from flask import Blueprint, current_app, render_template, url_for
 from redis import Redis, from_url
-from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
-                push_connection, requeue_job)
+from rq import (
+    Queue, Worker,
+    cancel_job, get_failed_queue, pop_connection, push_connection, requeue_job
+)
+from rq.exceptions import NoSuchJobError
+from rq.job import JobStatus
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -163,6 +167,32 @@ def cancel_job_view(job_id):
 @jsonify
 def requeue_job_view(job_id):
     requeue_job(job_id)
+    return dict(status='OK')
+
+
+@blueprint.route('/job/<job_id>/requeue-and-double', methods=['POST'])
+@jsonify
+def requeue_and_double_job_view(job_id):
+    # Get the handle for the failed queue
+    fq = get_failed_queue()
+    # Fetch the job from the failed queue
+    job = fq.fetch_job(job_id)
+    # Test if the job exists
+    if job is None:
+        raise NoSuchJobError(
+            'Job {} does not exist in failed queue'.format(job_id)
+        )
+    # Reset the job state
+    job.set_status(JobStatus.QUEUED)
+    job.exc_info = None
+    if not job.timeout:
+        job.timeout = Queue.DEFAULT_TIMEOUT
+    # Double the timeout
+    job.timeout *= 2
+    # Get a handle for the original queue
+    q = Queue(job.origin, connection=fq.connection)
+    # Queue the job
+    q.enqueue_job(job)
     return dict(status='OK')
 
 
