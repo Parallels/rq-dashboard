@@ -182,6 +182,7 @@ def requeue_and_double_job_view(job_id):
         raise NoSuchJobError(
             'Job {} does not exist in failed queue'.format(job_id)
         )
+    # Remove the job from the failed queue
     if fq.remove(job_id) == 0:
         raise InvalidJobOperationError('Cannot requeue non-failed jobs')
     # Reset the job state
