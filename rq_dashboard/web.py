@@ -170,9 +170,9 @@ def requeue_job_view(job_id):
     return dict(status='OK')
 
 
-@blueprint.route('/job/<job_id>/requeue-and-double', methods=['POST'])
+@blueprint.route('/job/<job_id>/requeue-ttlx2', methods=['POST'])
 @jsonify
-def requeue_and_double_job_view(job_id):
+def requeue_ttlx2_job_view(job_id):
     # Get the handle for the failed queue
     fq = get_failed_queue()
     # Fetch the job from the failed queue
