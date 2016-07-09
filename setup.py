@@ -12,9 +12,9 @@ def get_version():
 
 
 setup(
-    name='rq-dash',
+    name='rq-dashboard',
     version=get_version(),
-    url='https://github.com/joowani/rq-dash',
+    url='https://github.com/ducu/rq-dashboard',
     license='BSD',
     author='Vincent Driessen',
     author_email='vincent@3rdcloud.com',

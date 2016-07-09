@@ -4,7 +4,6 @@ var url_for = function(name, param) {
     else if (name == 'workers') { url += 'workers.json'; }
     else if (name == 'cancel_job') { url += 'job/' + encodeURIComponent(param) + '/cancel'; }
     else if (name == 'requeue_job') { url += 'job/' + encodeURIComponent(param) + '/requeue'; }
-    else if (name == 'requeue_ttlx2_job') { url += 'job/' + encodeURIComponent(param) + '/requeue-ttlx2'; }
     return url;
 };
 
@@ -326,23 +325,6 @@ var api = {
             $row = $this.parents('tr'),
             job_id = $row.data('job-id'),
             url = url_for('requeue_job', job_id);
-
-        $.post(url, function(data) {
-            $row.fadeOut('fast', function() { $row.remove(); });
-        });
-
-        return false;
-    });
-
-    // Enable the AJAX behaviour of the requeue ttlx2 button
-    $tbody.on('click', '[data-role=requeue-ttlx2-job-btn]', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var $this = $(this),
-            $row = $this.parents('tr'),
-            job_id = $row.data('job-id'),
-            url = url_for('requeue_ttlx2_job', job_id);
 
         $.post(url, function(data) {
             $row.fadeOut('fast', function() { $row.remove(); });
