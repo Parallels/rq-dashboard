@@ -22,12 +22,8 @@ from math import ceil
 import arrow
 from flask import Blueprint, current_app, render_template, url_for
 from redis import Redis, from_url
-from rq import (
-    Queue, Worker,
-    cancel_job, get_failed_queue, pop_connection, push_connection, requeue_job
-)
-from rq.exceptions import NoSuchJobError, InvalidJobOperationError
-from rq.job import JobStatus
+from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
+                push_connection, requeue_job)
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -93,14 +89,6 @@ def serialize_date(dt):
     return arrow.get(dt).to('UTC').datetime.isoformat()
 
 
-def format_job_info(job_info):
-    length = current_app.config.get('RQ_DASHBOARD_JOB_INFO')
-    if len(job_info) <= length:
-        return job_info
-    else:
-        return ' '.join(job_info[:length + 1].split(' ')[0:-1]) + '...'
-
-
 def serialize_job(job):
     return dict(
         id=job.id,
@@ -110,8 +98,7 @@ def serialize_job(job):
         origin=job.origin,
         result=job._result,
         exc_info=str(job.exc_info),
-        description=format_job_info(job.description)
-    )
+        description=job.description)
 
 
 def remove_none_values(input_dict):
@@ -167,35 +154,6 @@ def cancel_job_view(job_id):
 @jsonify
 def requeue_job_view(job_id):
     requeue_job(job_id)
-    return dict(status='OK')
-
-
-@blueprint.route('/job/<job_id>/requeue-ttlx2', methods=['POST'])
-@jsonify
-def requeue_ttlx2_job_view(job_id):
-    # Get the handle for the failed queue
-    fq = get_failed_queue()
-    # Fetch the job from the failed queue
-    job = fq.fetch_job(job_id)
-    # Test if the job exists
-    if job is None:
-        raise NoSuchJobError(
-            'Job {} does not exist in failed queue'.format(job_id)
-        )
-    # Remove the job from the failed queue
-    if fq.remove(job_id) == 0:
-        raise InvalidJobOperationError('Cannot requeue non-failed jobs')
-    # Reset the job state
-    job.set_status(JobStatus.QUEUED)
-    job.exc_info = None
-    if not job.timeout:
-        job.timeout = Queue.DEFAULT_TIMEOUT
-    # Double the timeout
-    job.timeout *= 2
-    # Get a handle for the original queue
-    q = Queue(job.origin, connection=fq.connection)
-    # Queue the job
-    q.enqueue_job(job)
     return dict(status='OK')
 
 
