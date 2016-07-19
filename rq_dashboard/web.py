@@ -21,9 +21,11 @@ from math import ceil
 
 import arrow
 from flask import Blueprint, current_app, render_template, url_for
+from flask_rq import get_queue
 from redis import Redis, from_url
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
-                push_connection, requeue_job, get_queue)
+                push_connection, requeue_job)
+
 
 blueprint = Blueprint(
     'rq_dashboard',
