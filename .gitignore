@@ -6,3 +6,6 @@ dump.rdb
 /build
 /.direnv
 ._*
+.env/
+*.sublime-project
+*.sublime-workspace

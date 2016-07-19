@@ -17,3 +17,6 @@ REDIS_DB = 0
 
 RQ_POLL_INTERVAL = 2500  #: Web interface poll period for updates in ms
 DEBUG = False
+
+JOB_CANCELATOR_QUEUE = 'default'
+JOB_CANCELATOR = None

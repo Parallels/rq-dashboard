@@ -23,7 +23,7 @@ import arrow
 from flask import Blueprint, current_app, render_template, url_for
 from redis import Redis, from_url
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
-                push_connection, requeue_job)
+                push_connection, requeue_job, get_queue)
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -146,7 +146,13 @@ def overview(queue_name, page):
 @blueprint.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
-    cancel_job(job_id)
+    job_cancelator = current_app.config['JOB_CANCELATOR']
+    if job_cancelator:
+        queue_name = current_app.config['JOB_CANCELATOR_QUEUE'] or 'default'
+        queue = get_queue(queue_name)
+        queue.enqueue(job_cancelator, job_id=job_id)
+    else:
+        cancel_job(job_id)
     return dict(status='OK')
 
 
