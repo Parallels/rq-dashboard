@@ -159,6 +159,8 @@ def cancel_job_view(job_id):
             )
         )
         try:
+            Queue('failed').pop_job_id(job_id)
+            Queue('canceled').push_job_id(job_id)
             job = queue.enqueue(job_cancelator, args=(job_id,))
             current_app.logger.debug("Scheduled a job {}".format(job))
         except Exception:
