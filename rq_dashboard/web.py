@@ -152,8 +152,14 @@ def cancel_job_view(job_id):
     if job_cancelator:
         queue_name = current_app.config['JOB_CANCELATOR_QUEUE'] or 'default'
         queue = get_queue(queue_name)
+        current_app.logger.debug(
+            "Cancelling job id={} by another job {}".format(
+                job_id, job_cancelator
+            )
+        )
         queue.enqueue(job_cancelator, job_id=job_id)
     else:
+        current_app.logger.debug("Cancelling job={} directly".format(job_id))
         cancel_job(job_id)
     return dict(status='OK')
 
