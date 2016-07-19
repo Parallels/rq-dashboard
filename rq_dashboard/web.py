@@ -151,13 +151,19 @@ def cancel_job_view(job_id):
     job_cancelator = current_app.config['JOB_CANCELATOR']
     if job_cancelator:
         queue_name = current_app.config['JOB_CANCELATOR_QUEUE'] or 'default'
-        queue = get_queue(queue_name)
+        # queue = get_queue(queue_name)
+        queue = Queue(queue_name)
         current_app.logger.debug(
             "Cancelling job id={} by another job {}".format(
                 job_id, job_cancelator
             )
         )
-        queue.enqueue(job_cancelator, job_id=job_id)
+        try:
+            job = queue.enqueue(job_cancelator, args=(job_id,))
+            current_app.logger.debug("Scheduled a job {}".format(job))
+        except Exception:
+            current_app.logger.exception(
+                "Error scheduling job cancellator {}".format(job_cancelator))
     else:
         current_app.logger.debug("Cancelling job={} directly".format(job_id))
         cancel_job(job_id)
