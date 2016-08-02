@@ -20,7 +20,7 @@ from functools import wraps
 from math import ceil
 
 import arrow
-from flask import Blueprint, current_app, render_template, url_for
+from flask import Blueprint, current_app, render_template, url_for, request
 from redis import Redis, from_url
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
@@ -232,6 +232,14 @@ def list_jobs(queue_name, page):
 @blueprint.route('/workers.json')
 @jsonify
 def list_workers():
+    worker_id = request.args.get("worker_id", None)
+
+    def filtering(worker):
+        if worker_id:
+            return worker_id in worker.name
+        else:
+            return True
+
     def serialize_queue_names(worker):
         return [q.name for q in worker.queues]
 
@@ -242,6 +250,7 @@ def list_workers():
             state=str(worker.get_state())
         )
         for worker in Worker.all()
+        if filtering(worker)
     ]
     return dict(workers=workers)
 
