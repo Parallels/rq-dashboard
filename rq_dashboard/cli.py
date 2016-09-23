@@ -27,7 +27,7 @@ def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
             return Response(
                 'Please login',
                 401,
-                {'WWW-Authenticate': 'Basic realm="{}"'.format(realm)})
+                {'WWW-Authenticate': 'Basic realm="{0}"'.format(realm)})
 
 
 def make_flask_app(config, username, password, url_prefix):
@@ -106,7 +106,7 @@ def run(
     RQ_DASHBOARD_SETTINGS environment variable.
 
     """
-    click.echo('RQ Dashboard version {}'.format(VERSION))
+    click.echo('RQ Dashboard version {0}'.format(VERSION))
     app = make_flask_app(config, username, password, url_prefix)
     if redis_url:
         app.config['REDIS_URL'] = redis_url
