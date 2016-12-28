@@ -153,3 +153,20 @@ The RQ dashboard is currently being developed and is in beta stage.
    :target: https://caniusepython3.com/project/rq-dashboard
 .. |image1| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_high.png
 .. |image2| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_failed.png
+
+
+Docker
+------
+
+You can also run the dashboard inside of docker, simply build the image with 
+
+::
+    $ make image
+
+and you can then run the image, possibly modifying it with the following environment
+variables from their default values
+
+* REDIS_URL=redis://redis
+* USERNAME=rq
+* PASSWORD=password
+
