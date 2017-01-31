@@ -10,8 +10,9 @@ front-end to monitor your `RQ`_ queues, jobs, and workers in realtime.
 It looks like this
 ------------------
 
-|image1| |image2|
+.. image:: https://cloud.github.com/downloads/eoranged/rq-dashboard/scrot_high.png
 
+.. image:: https://cloud.github.com/downloads/eoranged/rq-dashboard/scrot_failed.png
 
 Installing
 ----------
