@@ -29,6 +29,7 @@ EXPOSE $PORT
 ENV REDIS_URL redis://redis
 ENV USERNAME rq
 ENV PASSWORD password
+ENV URL_PREFIX /
 
 ENTRYPOINT ["/tini", "--", "/autoexec.sh"]
 CMD ["web"]
