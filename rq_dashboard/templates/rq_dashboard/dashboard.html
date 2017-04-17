@@ -83,6 +83,8 @@
     <div class="span12">
         <div class="section">
 
+        <div class="pull-right"><button class="btn btn-mini" id="pause-job-refresh" data-paused="false"><i class="icon-pause"></i> Automatic Refresh</button></div>
+
         <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
         <p class="intro">
         <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip" title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true ><i class="icon-trash icon-white"></i> Empty</a>

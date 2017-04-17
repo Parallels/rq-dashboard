@@ -258,12 +258,27 @@ var api = {
         });
     };
 
-    $(document).ready(function() {
+    var pause_refresh = function (e) {
+      e.preventDefault();
+      var $el = $(this);
+      if( $el.data('paused') ) {
+        $el.data('paused', false);
+        $el.find('i').removeClass('icon-play').addClass('icon-pause');
+        refresh_table();
+        interval = setInterval(refresh_table, POLL_INTERVAL);
+      }
+      else {
+        $el.data('paused', true);
+        $el.find('i').removeClass('icon-pause').addClass('icon-play');
+        clearInterval(interval);
+      }
+    };
 
+    $(document).ready(function() {
         reload_table();
         $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, POLL_INTERVAL);
-
+        interval = setInterval(refresh_table, POLL_INTERVAL);
+        $('#pause-job-refresh').click(pause_refresh);
     });
 
     // Enable the AJAX behaviour of the empty button
