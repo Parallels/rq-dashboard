@@ -6,6 +6,7 @@ import sys
 
 import click
 from flask import Flask, Response, request
+from rq.utils import import_attribute
 
 from . import default_settings
 from .version import VERSION
@@ -139,11 +140,11 @@ def run(
     if interval:
         app.config['RQ_POLL_INTERVAL'] = interval
     if worker_class:
-        app.config['WORKER_CLASS'] = worker_class
+        app.config['WORKER_CLASS'] = import_attribute(worker_class)
     if job_class:
-        app.config['JOB_CLASS'] = job_class
+        app.config['JOB_CLASS'] = import_attribute(job_class)
     if queue_class:
-        app.config['QUEUE_CLASS'] = queue_class
+        app.config['QUEUE_CLASS'] = import_attribute(queue_class)
     app.run(host=bind, port=port)
 
 
