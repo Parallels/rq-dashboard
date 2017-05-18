@@ -6,6 +6,7 @@ import sys
 
 import click
 from flask import Flask, Response, request
+from rq.utils import import_attribute
 
 from . import default_settings
 from .version import VERSION
@@ -93,11 +94,23 @@ def make_flask_app(config, username, password, url_prefix):
     help='Refresh interval in ms')
 @click.option('--path', default='.',
               help='Specify the import path.')
+@click.option('--worker-class', '-w',
+              envvar='RQ_WORKER_CLASS',
+              default=default_settings.DEFAULT_WORKER_CLASS,
+              help='RQ Worker class to use')
+@click.option('--job-class', '-j',
+              envvar='RQ_JOB_CLASS',
+              default=default_settings.DEFAULT_JOB_CLASS,
+              help='RQ Job class to use')
+@click.option('--queue-class',
+              envvar='RQ_QUEUE_CLASS',
+              default=default_settings.DEFAULT_QUEUE_CLASS,
+              help='RQ Queue class to use')
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
-        interval, path):
+        interval, path, worker_class, job_class, queue_class):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -126,6 +139,12 @@ def run(
         app.config['REDIS_DB'] = redis_database
     if interval:
         app.config['RQ_POLL_INTERVAL'] = interval
+    if worker_class:
+        app.config['WORKER_CLASS'] = import_attribute(worker_class)
+    if job_class:
+        app.config['JOB_CLASS'] = import_attribute(job_class)
+    if queue_class:
+        app.config['QUEUE_CLASS'] = import_attribute(queue_class)
     app.run(host=bind, port=port)
 
 
