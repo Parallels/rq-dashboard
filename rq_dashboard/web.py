@@ -22,9 +22,9 @@ from math import ceil
 import arrow
 from flask import Blueprint, current_app, render_template, url_for
 from redis import Redis, from_url
-from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
+from rq import (cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
-
+# Queue, Worker
 blueprint = Blueprint(
     'rq_dashboard',
     __name__,
@@ -123,6 +123,8 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 @blueprint.route('/<queue_name>', defaults={'page': '1'})
 @blueprint.route('/<queue_name>/<page>')
 def overview(queue_name, page):
+    Queue = current_app.config.get('QUEUE_CLASS')
+    Worker = current_app.config.get('WORKER_CLASS')
     if queue_name is None:
         # Show the failed queue by default if it contains any jobs
         failed = Queue('failed')
@@ -171,6 +173,7 @@ def requeue_all():
 @blueprint.route('/queue/<queue_name>/empty', methods=['POST'])
 @jsonify
 def empty_queue(queue_name):
+    Queue = current_app.config.get('QUEUE_CLASS')
     q = Queue(queue_name)
     q.empty()
     return dict(status='OK')
@@ -179,6 +182,7 @@ def empty_queue(queue_name):
 @blueprint.route('/queue/<queue_name>/compact', methods=['POST'])
 @jsonify
 def compact_queue(queue_name):
+    Queue = current_app.config.get('QUEUE_CLASS')
     q = Queue(queue_name)
     q.compact()
     return dict(status='OK')
@@ -187,6 +191,7 @@ def compact_queue(queue_name):
 @blueprint.route('/queues.json')
 @jsonify
 def list_queues():
+    Queue = current_app.config.get('QUEUE_CLASS')
     queues = serialize_queues(sorted(Queue.all()))
     return dict(queues=queues)
 
@@ -194,6 +199,7 @@ def list_queues():
 @blueprint.route('/jobs/<queue_name>/<page>.json')
 @jsonify
 def list_jobs(queue_name, page):
+    Queue = current_app.config.get('QUEUE_CLASS')
     current_page = int(page)
     queue = Queue(queue_name)
     per_page = 5
@@ -234,6 +240,8 @@ def list_jobs(queue_name, page):
 def list_workers():
     def serialize_queue_names(worker):
         return [q.name for q in worker.queues]
+
+    Worker = current_app.config.get('WORKER_CLASS')
 
     workers = [
         dict(

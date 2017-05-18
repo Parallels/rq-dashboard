@@ -17,3 +17,7 @@ REDIS_DB = 0
 
 RQ_POLL_INTERVAL = 2500  #: Web interface poll period for updates in ms
 DEBUG = False
+
+DEFAULT_JOB_CLASS = 'rq.job.Job'
+DEFAULT_QUEUE_CLASS = 'rq.Queue'
+DEFAULT_WORKER_CLASS = 'rq.Worker'
