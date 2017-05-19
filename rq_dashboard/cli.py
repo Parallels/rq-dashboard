@@ -91,13 +91,14 @@ def make_flask_app(config, username, password, url_prefix):
 @click.option(
     '--interval', default=None, type=int,
     help='Refresh interval in ms')
-@click.option('--path', default='.',
-              help='Specify the import path.')
+@click.option(
+    '--extra-path', default='.', multiple=True,
+    help='Append specified directories to sys.path')
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
-        interval, path):
+        interval, extra_path):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -109,8 +110,8 @@ def run(
     RQ_DASHBOARD_SETTINGS environment variable.
 
     """
-    if path:
-        sys.path = path.split(':') + sys.path
+    if extra_path:
+        sys.path += list(extra_path)
 
     click.echo('RQ Dashboard version {0}'.format(VERSION))
     app = make_flask_app(config, username, password, url_prefix)
