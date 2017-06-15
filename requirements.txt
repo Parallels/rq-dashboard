@@ -32,3 +32,4 @@ redis==2.10.3
 six==1.9.0                # via python-dateutil
 werkzeug==0.10.4          # via flask
 wheel==0.24.0
+python-dotenv==0.6.4
