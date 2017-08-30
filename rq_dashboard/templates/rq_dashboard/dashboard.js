@@ -1,6 +1,8 @@
 var url_for = function(name, param) {
     var url = {{ rq_url_prefix|tojson|safe }};
-    if (name == 'queues') { url += 'queues.json'; }
+    if (name == 'rq-instances') {url += 'rq-instances.json'; }
+    else if (name == 'rq-instance') { url += 'rq-instance/' + encodeURIComponent(param); }
+    else if (name == 'queues') { url += 'queues.json'; }
     else if (name == 'workers') { url += 'workers.json'; }
     else if (name == 'cancel_job') { url += 'job/' + encodeURIComponent(param) + '/cancel'; }
     else if (name == 'requeue_job') { url += 'job/' + encodeURIComponent(param) + '/requeue'; }
@@ -19,6 +21,13 @@ var toRelative = function(universal_date_string) {
 };
 
 var api = {
+    getRqInstances: function(cb) {
+        $.getJSON(url_for('rq-instances'), function(data) {
+            var instances = data.rq_instances;
+            cb(instances);
+        });
+    },
+
     getQueues: function(cb) {
         $.getJSON(url_for('queues'), function(data) {
             var queues = data.queues;
@@ -42,6 +51,38 @@ var api = {
     }
 };
 
+//
+// RQ instances
+//
+(function($) {
+    var $rqInstances = $('#rq-instances');
+
+    var resolve_rq_instances = function() {
+        api.getRqInstances(function(instances) {
+            if (!Array.isArray(instances)) {
+                $('#rq-instances-row').hide();
+                return;
+            }
+            $rqInstances.empty();
+            $.each(instances, function(i, instance) {
+                $rqInstances.append($('<option>', {
+                    value: i,
+                    text: instance
+                  }));
+            });
+        });
+    };
+
+    // Listen for changes on the select
+    $rqInstances.change(function() {
+        var url = url_for('rq-instance', $(this).val());
+        $.post(url, function(data) {});
+    });
+
+    $(document).ready(function() {
+        resolve_rq_instances();
+    });
+})($);
 
 //
 // QUEUES
