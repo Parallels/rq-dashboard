@@ -94,11 +94,15 @@ def make_flask_app(config, username, password, url_prefix):
 @click.option(
     '--extra-path', default='.', multiple=True,
     help='Append specified directories to sys.path')
+@click.option(
+    '--web-background', default='black',
+    help='Background of the web interface')
+
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
-        interval, extra_path):
+        interval, extra_path, web_background):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -127,6 +131,8 @@ def run(
         app.config['REDIS_DB'] = redis_database
     if interval:
         app.config['RQ_POLL_INTERVAL'] = interval
+    if web_background:
+        app.config["WEB_BACKGROUND"] = web_background
     app.run(host=bind, port=port)
 
 
