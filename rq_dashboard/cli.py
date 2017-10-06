@@ -89,10 +89,10 @@ def make_flask_app(config, username, password, url_prefix):
     '-u', '--redis-url', default=None,
     help='Redis URL connection (overrides other individual settings)')
 @click.option(
-    '--sentinels', default=None, multi=True,
+    '--redis-sentinels', default=None,
     help='Array of redis sentinels. Each should be formatted: <host>:<port>')
 @click.option(
-    '--master-name', default=None,
+    '--redis-master-name', default=None,
     help='Name of redis master. Only needed when using sentinels')
 @click.option(
     '--interval', default=None, type=int,
@@ -103,13 +103,14 @@ def make_flask_app(config, username, password, url_prefix):
 @click.option(
     '--web-background', default='black',
     help='Background of the web interface')
-
+@click.option(
+    '--debug/--normal', default=False, help='Enter DEBUG mode')
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
         redis_sentinels, redis_master_name,
-        interval, extra_path, web_background):
+        interval, extra_path, web_background, debug):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -137,14 +138,14 @@ def run(
     if redis_database:
         app.config['REDIS_DB'] = redis_database
     if redis_sentinels:
-        app.config['REDIS_SENTINELS'] = ','.join(redis_sentinels)
+        app.config['REDIS_SENTINELS'] = redis_sentinels
     if redis_master_name:
         app.config['REDIS_MASTER_NAME'] = redis_master_name
     if interval:
         app.config['RQ_POLL_INTERVAL'] = interval
     if web_background:
         app.config["WEB_BACKGROUND"] = web_background
-    app.run(host=bind, port=port)
+    app.run(host=bind, port=port, debug=debug)
 
 
 def main():

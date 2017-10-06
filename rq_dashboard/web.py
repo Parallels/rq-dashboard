@@ -41,8 +41,8 @@ def setup_rq_connection():
     if isinstance(redis_url, list):
         current_app.redis_conn = from_url(redis_url[0])
     elif redis_sentinels:
-        redis_master = current_app.config('REDIS_MASTER_NAME')
-        password=current_app.config.get('REDIS_PASSWORD'),
+        redis_master = current_app.config.get('REDIS_MASTER_NAME')
+        password=current_app.config.get('REDIS_PASSWORD')
         db=current_app.config.get('REDIS_DB')
         sentinel_hosts = [tuple(sentinel.split(':', 1))
                           for sentinel in redis_sentinels.split(',')]
