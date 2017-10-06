@@ -63,6 +63,10 @@ Run the dashboard standalone, like this:
       -D, --redis-database INTEGER  Database of Redis server
       -u, --redis-url TEXT          Redis URL connection (overrides other
                                     individual settings)
+      --sentinels TEXT              List of sentinel addresses (comma separated),
+                                    in such format <host1>:<port1>,<host2>:<port2>...
+      --master-name TEXT            Only required if using sentinels.
+                                    Tells sentinel what master to query
       --interval INTEGER            Refresh interval in ms
       --help                        Show this message and exit.
 
