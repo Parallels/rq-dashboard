@@ -36,7 +36,9 @@ blueprint = Blueprint(
 @blueprint.before_app_first_request
 def setup_rq_connection():
     redis_url = current_app.config.get('REDIS_URL')
-    if redis_url:
+    if isinstance(redis_url, list):
+        current_app.redis_conn = from_url(redis_url[0])
+    elif redis_url:
         current_app.redis_conn = from_url(redis_url)
     else:
         current_app.redis_conn = Redis(
@@ -97,12 +99,12 @@ def serialize_job(job):
         ended_at=serialize_date(job.ended_at),
         origin=job.origin,
         result=job._result,
-        exc_info=str(job.exc_info),
+        exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description)
 
 
 def remove_none_values(input_dict):
-    return {k: v for (k, v) in input_dict.items() if v is not None}
+    return dict(((k, v) for k, v in input_dict.items() if v is not None))
 
 
 def pagination_window(total_items, cur_page, per_page=5, window_size=10):
@@ -183,6 +185,23 @@ def compact_queue(queue_name):
     q.compact()
     return dict(status='OK')
 
+@blueprint.route('/rq-instance/<instance_number>', methods=['POST'])
+@jsonify
+def change_rq_instance(instance_number):
+    redis_url = current_app.config.get('REDIS_URL')
+    if not isinstance(redis_url, list):
+        return dict(status='Single RQ. Not Permitted.')
+    if int(instance_number) >= len(redis_url):
+        raise LookupError('Index exceeds RQ list. Not Permitted.')
+    pop_connection()
+    current_app.redis_conn = from_url(redis_url[int(instance_number)])
+    push_rq_connection()
+    return dict(status='OK')
+
+@blueprint.route('/rq-instances.json')
+@jsonify
+def list_instances():
+    return dict(rq_instances=current_app.config.get('REDIS_URL'))
 
 @blueprint.route('/queues.json')
 @jsonify

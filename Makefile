@@ -1,3 +1,8 @@
+TAG?=latest
+IMAGENAME?=jtilander/rq-dashboard
+
+.PHONY: image push all clean release force_release
+
 all:
 	@grep -Ee '^[a-z].*:' Makefile | cut -d: -f1 | grep -vF all
 
@@ -16,3 +21,9 @@ force_release: clean
 	git push --tags
 	python setup.py sdist bdist_wheel
 	twine upload dist/*
+
+image:
+	docker build -t $(IMAGENAME):$(TAG) .
+
+push: image
+	docker push $(IMAGENAME):$(TAG) .
