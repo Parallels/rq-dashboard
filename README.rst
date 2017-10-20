@@ -10,8 +10,9 @@ front-end to monitor your `RQ`_ queues, jobs, and workers in realtime.
 It looks like this
 ------------------
 
-|image1| |image2|
+.. image:: https://cloud.github.com/downloads/eoranged/rq-dashboard/scrot_high.png
 
+.. image:: https://cloud.github.com/downloads/eoranged/rq-dashboard/scrot_failed.png
 
 Installing
 ----------
@@ -79,7 +80,7 @@ blueprint directly in the normal way, e.g.:
 
     app = Flask(__name__)
     app.config.from_object(rq_dashboard.default_settings)
-    app.register_blueprint(rq_dashboard.blueprint)
+    app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
     @app.route("/")
     def hello():
@@ -89,7 +90,7 @@ blueprint directly in the normal way, e.g.:
         app.run()
 
 
-The ``cli.py:main`` entry point provides a simple working example.
+If you start the Flask app on the default port, you can access the dashboard at http://localhost:5000/rq. The ``cli.py:main`` entry point provides a simple working example.
 
 
 Developing
@@ -153,3 +154,20 @@ The RQ dashboard is currently being developed and is in beta stage.
    :target: https://caniusepython3.com/project/rq-dashboard
 .. |image1| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_high.png
 .. |image2| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_failed.png
+
+
+Docker
+------
+
+You can also run the dashboard inside of docker, simply build the image with 
+
+::
+    $ make image
+
+and you can then run the image, possibly modifying it with the following environment
+variables from their default values
+
+* REDIS_URL=redis://redis
+* USERNAME=rq
+* PASSWORD=password
+
