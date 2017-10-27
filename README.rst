@@ -162,6 +162,7 @@ Docker
 You can also run the dashboard inside of docker, simply build the image with 
 
 ::
+
     $ make image
 
 and you can then run the image, possibly modifying it with the following environment
