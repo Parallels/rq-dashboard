@@ -171,6 +171,8 @@ var api = {
             $tbody.empty();
 
             if (workers.length > 0) {
+                $('#workers-count').html(workers.length + ' workers registered')
+
                 $.each(workers, function(i, worker) {
                     if (worker.state === 'busy') {
                         worker.state = 'play';
@@ -181,6 +183,7 @@ var api = {
                 });
                 $tbody.append(html);
             } else {
+                $('#workers-count').html('No workers registered!')
                 $tbody.append(noWorkersHtml);
             }
 
@@ -326,6 +329,15 @@ var api = {
 
         var $this = $(this);
         $.post($this.attr('href'), function(data) {});
+
+        return false;
+    });
+
+    $('#workers-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $('#workers').toggle();
 
         return false;
     });
