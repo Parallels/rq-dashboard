@@ -20,8 +20,9 @@ from functools import wraps
 from math import ceil
 
 import arrow
-from flask import Blueprint, current_app, render_template, url_for
+from flask import Blueprint, current_app, render_template, url_for, request
 from redis import Redis, from_url
+from redis.sentinel import Sentinel
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
 
@@ -36,10 +37,18 @@ blueprint = Blueprint(
 @blueprint.before_app_first_request
 def setup_rq_connection():
     redis_url = current_app.config.get('REDIS_URL')
+    redis_sentinels = current_app.config.get('REDIS_SENTINELS')
     if isinstance(redis_url, list):
         current_app.redis_conn = from_url(redis_url[0])
-    elif redis_url:
-        current_app.redis_conn = from_url(redis_url)
+    elif redis_sentinels:
+        redis_master = current_app.config.get('REDIS_MASTER_NAME')
+        password=current_app.config.get('REDIS_PASSWORD')
+        db=current_app.config.get('REDIS_DB')
+        sentinel_hosts = [tuple(sentinel.split(':', 1))
+                          for sentinel in redis_sentinels.split(',')]
+
+        sentinel = Sentinel(sentinel_hosts, db=db, password=password)
+        current_app.redis_conn = sentinel.master_for(redis_master)
     else:
         current_app.redis_conn = Redis(
             host=current_app.config.get('REDIS_HOST'),
