@@ -17,4 +17,5 @@ REDIS_DB = 0
 
 RQ_POLL_INTERVAL = 2500  #: Web interface poll period for updates in ms
 DEBUG = False
-WEB_BACKGROUND="black"
+WEB_BACKGROUND = "black"
+DELETE_JOBS = False
