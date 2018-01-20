@@ -3,7 +3,10 @@ click
 Flask
 redis
 rq>=0.3.8
-arrow
+arrow>=0.12.1
+
+# Compatibility
+backports.functools_lru_cache; python_version < '3.3'
 
 # Development tools
-pip-tools
+nose

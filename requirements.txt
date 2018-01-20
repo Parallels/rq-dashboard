@@ -4,16 +4,16 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-arrow==0.5.4
+arrow==0.12.1
+backports.functools-lru-cache==1.4 ; python_version < "3.3"
 click==6.7
-first==2.0.1              # via pip-tools
-flask==0.10.1
+flask==0.12.2
 itsdangerous==0.24        # via flask
-jinja2==2.7.3             # via flask
-markupsafe==0.23          # via jinja2
-pip-tools==1.11.0
-python-dateutil==2.4.2    # via arrow
-redis==2.10.3
+jinja2==2.10              # via flask
+markupsafe==1.0           # via jinja2
+nose==1.3.7
+python-dateutil==2.6.1    # via arrow
+redis==2.10.6
 rq==0.5.3
-six==1.9.0                # via pip-tools, python-dateutil
-werkzeug==0.10.4          # via flask
+six==1.11.0               # via python-dateutil
+werkzeug==0.14.1          # via flask
