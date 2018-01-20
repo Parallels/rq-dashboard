@@ -21,10 +21,8 @@ def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
     @blueprint.before_request
     def basic_http_auth(*args, **kwargs):
         auth = request.authorization
-        if (
-                auth is None
-                or auth.password != password
-                or auth.username != username):
+        if (auth is None or auth.password != password or
+                auth.username != username):
             return Response(
                 'Please login',
                 401,
@@ -104,13 +102,15 @@ def make_flask_app(config, username, password, url_prefix):
     '--web-background', default='black',
     help='Background of the web interface')
 @click.option(
+    '--delete-jobs', default=False, help='Delete jobs instead of cancel')
+@click.option(
     '--debug/--normal', default=False, help='Enter DEBUG mode')
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
         redis_sentinels, redis_master_name,
-        interval, extra_path, web_background, debug):
+        interval, extra_path, web_background, debug, delete_jobs):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -145,6 +145,9 @@ def run(
         app.config['RQ_POLL_INTERVAL'] = interval
     if web_background:
         app.config["WEB_BACKGROUND"] = web_background
+    if delete_jobs:
+        app.config["DELETE_JOBS"] = delete_jobs
+
     app.run(host=bind, port=port, debug=debug)
 
 

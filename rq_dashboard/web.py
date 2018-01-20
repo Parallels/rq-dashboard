@@ -25,6 +25,7 @@ from redis import Redis, from_url
 from redis.sentinel import Sentinel
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
+from rq.job import Job
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -42,8 +43,8 @@ def setup_rq_connection():
         current_app.redis_conn = from_url(redis_url[0])
     elif redis_sentinels:
         redis_master = current_app.config.get('REDIS_MASTER_NAME')
-        password=current_app.config.get('REDIS_PASSWORD')
-        db=current_app.config.get('REDIS_DB')
+        password = current_app.config.get('REDIS_PASSWORD')
+        db = current_app.config.get('REDIS_DB')
         sentinel_hosts = [tuple(sentinel.split(':', 1))
                           for sentinel in redis_sentinels.split(',')]
 
@@ -157,7 +158,10 @@ def overview(queue_name, page):
 @blueprint.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
-    cancel_job(job_id)
+    if current_app.config.get('DELETE_JOBS'):
+        Job.fetch(job_id).delete()
+    else:
+        cancel_job(job_id)
     return dict(status='OK')
 
 
@@ -194,6 +198,7 @@ def compact_queue(queue_name):
     q.compact()
     return dict(status='OK')
 
+
 @blueprint.route('/rq-instance/<instance_number>', methods=['POST'])
 @jsonify
 def change_rq_instance(instance_number):
@@ -207,10 +212,12 @@ def change_rq_instance(instance_number):
     push_rq_connection()
     return dict(status='OK')
 
+
 @blueprint.route('/rq-instances.json')
 @jsonify
 def list_instances():
     return dict(rq_instances=current_app.config.get('REDIS_URL'))
+
 
 @blueprint.route('/queues.json')
 @jsonify
