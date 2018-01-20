@@ -6,8 +6,4 @@ rq>=0.3.8
 arrow
 
 # Development tools
-Fabric
-flake8
-grin
-isort
-wheel
+pip-tools
