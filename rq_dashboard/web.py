@@ -26,6 +26,7 @@ from redis.sentinel import Sentinel
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
 from rq.job import Job
+from six import string_types
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -41,6 +42,8 @@ def setup_rq_connection():
     redis_sentinels = current_app.config.get('REDIS_SENTINELS')
     if isinstance(redis_url, list):
         current_app.redis_conn = from_url(redis_url[0])
+    elif isinstance(redis_url, string_types):
+        current_app.redis_conn = from_url(redis_url)
     elif redis_sentinels:
         redis_master = current_app.config.get('REDIS_MASTER_NAME')
         password = current_app.config.get('REDIS_PASSWORD')

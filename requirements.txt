@@ -15,5 +15,5 @@ nose==1.3.7
 python-dateutil==2.6.1    # via arrow
 redis==2.10.6
 rq==0.5.3
-six==1.11.0               # via python-dateutil
+six==1.11.0
 werkzeug==0.14.1          # via flask
