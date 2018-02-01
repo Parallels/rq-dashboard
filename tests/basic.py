@@ -39,6 +39,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertIsInstance(data, dict)
         self.assertIn('workers', data)
 
+
 __all__ = [
     'BasicTestCase',
 ]
