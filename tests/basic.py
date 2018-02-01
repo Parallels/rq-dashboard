@@ -5,12 +5,10 @@ import unittest
 
 from rq_dashboard.cli import make_flask_app
 
-from .compatibility_mixin import CompatibilityMixin
-
 HTTP_OK = 200
 
 
-class BasicTestCase(unittest.TestCase, CompatibilityMixin):
+class BasicTestCase(unittest.TestCase):
     def setUp(self):
         self.app = make_flask_app(None, None, None, '')
         self.app.testing = True
