@@ -269,6 +269,8 @@ def list_jobs(queue_name, page):
 
 
 def serialize_current_job_tooltip(job):
+    if job is None:
+        return ""
     return "Job ID: {job_id}&#013;&#010;" \
            "Description: {description}&#013;&#010;" \
            "Created at: {created_at}&#013;&#010;".format(
