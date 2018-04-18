@@ -85,6 +85,7 @@ def jsonify(f):
                 from traceback import format_exc
                 result_dict['exc_info'] = format_exc()
         return flask_jsonify(**result_dict)
+
     return _wrapped
 
 
@@ -234,7 +235,7 @@ def list_queues():
 def list_jobs(queue_name, page):
     current_page = int(page)
     queue = Queue(queue_name)
-    per_page = 5
+    per_page = 10
     total_items = queue.count
     pages_numbers_in_window = pagination_window(
         total_items, current_page, per_page)
@@ -267,6 +268,15 @@ def list_jobs(queue_name, page):
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
 
 
+def serialize_current_job_tooltip(job):
+    return "Job ID: {job_id}&#013;&#010;" \
+           "Description: {description}&#013;&#010;" \
+           "Created at: {created_at}&#013;&#010;".format(
+        job_id=job.id, description=job.description,
+        created_at=serialize_date(job.created_at),
+    )
+
+
 @blueprint.route('/workers.json')
 @jsonify
 def list_workers():
@@ -277,7 +287,9 @@ def list_workers():
         dict(
             name=worker.name,
             queues=serialize_queue_names(worker),
-            state=str(worker.get_state())
+            state=str(worker.get_state()),
+            current_job_tooltip=serialize_current_job_tooltip(
+                worker.get_current_job()),
         )
         for worker in Worker.all()
     ]
