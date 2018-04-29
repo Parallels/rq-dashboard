@@ -4,15 +4,14 @@ Introduction
 ``rq-dashboard`` is a general purpose, lightweight, `Flask`_-based web
 front-end to monitor your `RQ`_ queues, jobs, and workers in realtime.
 
-|Can I Use Python 3?|
-
+|Build Status|
+|Python Support|
 
 It looks like this
 ------------------
 
-.. image:: https://cloud.github.com/downloads/eoranged/rq-dashboard/scrot_high.png
-
-.. image:: https://cloud.github.com/downloads/eoranged/rq-dashboard/scrot_failed.png
+|image1|
+|image2|
 
 Installing
 ----------
@@ -63,11 +62,15 @@ Run the dashboard standalone, like this:
       -D, --redis-database INTEGER  Database of Redis server
       -u, --redis-url TEXT          Redis URL connection (overrides other
                                     individual settings)
-      --sentinels TEXT              List of sentinel addresses (comma separated),
-                                    in such format <host1>:<port1>,<host2>:<port2>...
-      --master-name TEXT            Only required if using sentinels.
-                                    Tells sentinel what master to query
+      --redis-sentinels TEXT        List of redis sentinels. Each should be
+                                    formatted: <host>:<port>
+      --redis-master-name TEXT      Name of redis master. Only needed when using
+                                    sentinels
       --interval INTEGER            Refresh interval in ms
+      --extra-path TEXT             Append specified directories to sys.path
+      --web-background TEXT         Background of the web interface
+      --delete-jobs TEXT            Delete jobs instead of cancel
+      --debug / --normal            Enter DEBUG mode
       --help                        Show this message and exit.
 
 
@@ -130,40 +133,16 @@ Develop in the normal way with
     $ python setup.py develop
 
 
-Then use Fabric to perform various development tasks. For example, to tag, build
-and upload to testpypi
-
-::
-
-    $ git tag 0.3.5   # no 'v' prefix or anything
-    $ fab build
-    $ fab upload
-
-This requires write access to both the GitHub repo and to the PyPI test site.
-
-See ``fab -l`` for more options and ``fab -d <subcommand>`` for details.
-
-
 Maturity notes
 --------------
 
 The RQ dashboard is currently being developed and is in beta stage.
 
 
-.. _piptools: https://github.com/nvie/pip-tools
-.. _Flask: http://flask.pocoo.org/
-.. _RQ: http://python-rq.org/
-
-.. |Can I Use Python 3?| image:: https://caniusepython3.com/project/rq-dashboard.svg
-   :target: https://caniusepython3.com/project/rq-dashboard
-.. |image1| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_high.png
-.. |image2| image:: https://cloud.github.com/downloads/ducu/rq-dashboard/scrot_failed.png
-
-
 Docker
 ------
 
-You can also run the dashboard inside of docker, simply build the image with 
+You can also run the dashboard inside of docker, simply build the image with
 
 ::
 
@@ -176,3 +155,19 @@ variables from their default values
 * USERNAME=rq
 * PASSWORD=password
 
+
+.. _piptools: https://github.com/nvie/pip-tools
+.. _Flask: http://flask.pocoo.org/
+.. _RQ: http://python-rq.org/
+
+.. |Build Status| image:: https://travis-ci.org/eoranged/rq-dashboard.svg?branch=master
+   :target: https://travis-ci.org/eoranged/rq-dashboard
+.. |Python Support| image:: https://img.shields.io/pypi/pyversions/rq-dashboard.svg
+   :target: https://pypi.python.org/pypi/rq-dashboard
+
+.. |image1| image:: https://i.imgur.com/XGmoKQA.png?1
+   :target: https://i.imgur.com/XGmoKQA.png
+   :width: 47%
+.. |image2| image:: https://i.imgur.com/nStM6H7.png?1
+   :target: https://i.imgur.com/nStM6H7.png
+   :width: 47%

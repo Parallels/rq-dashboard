@@ -88,7 +88,7 @@ def make_flask_app(config, username, password, url_prefix):
     help='Redis URL connection (overrides other individual settings)')
 @click.option(
     '--redis-sentinels', default=None,
-    help='Array of redis sentinels. Each should be formatted: <host>:<port>')
+    help='List of redis sentinels. Each should be formatted: <host>:<port>')
 @click.option(
     '--redis-master-name', default=None,
     help='Name of redis master. Only needed when using sentinels')
