@@ -268,15 +268,14 @@ def list_jobs(queue_name, page):
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
 
 
-def serialize_current_job_tooltip(job):
+def serialize_current_job(job):
     if job is None:
         return "idle"
-    return "Job ID: {job_id}&#013;&#010;" \
-           "Description: {description}&#013;&#010;" \
-           "Created at: {created_at}&#013;&#010;".format(
-        job_id=job.id, description=job.description,
-        created_at=serialize_date(job.created_at),
-    )
+    return dict(
+            job_id=job.id,
+            description=job.description,
+            created_at=serialize_date(job.created_at)
+            )
 
 
 @blueprint.route('/workers.json')
@@ -290,7 +289,7 @@ def list_workers():
             name=worker.name,
             queues=serialize_queue_names(worker),
             state=str(worker.get_state()),
-            current_job_tooltip=serialize_current_job_tooltip(
+            current_job=serialize_current_job(
                 worker.get_current_job()),
         )
         for worker in Worker.all()
