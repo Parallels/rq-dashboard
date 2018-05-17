@@ -20,13 +20,14 @@ from functools import wraps
 from math import ceil
 
 import arrow
-from flask import Blueprint, current_app, render_template, url_for, request
 from redis import Redis, from_url
 from redis.sentinel import Sentinel
 from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
                 push_connection, requeue_job)
 from rq.job import Job
 from six import string_types
+
+from flask import Blueprint, current_app, render_template, url_for
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -272,10 +273,10 @@ def serialize_current_job(job):
     if job is None:
         return "idle"
     return dict(
-            job_id=job.id,
-            description=job.description,
-            created_at=serialize_date(job.created_at)
-            )
+        job_id=job.id,
+        description=job.description,
+        created_at=serialize_date(job.created_at)
+    )
 
 
 @blueprint.route('/workers.json')

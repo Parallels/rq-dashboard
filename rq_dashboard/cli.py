@@ -5,6 +5,7 @@ import os
 import sys
 
 import click
+
 from flask import Flask, Response, request
 
 from . import default_settings
