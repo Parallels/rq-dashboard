@@ -21,7 +21,7 @@ setup(
     description='rq-dashboard is a general purpose, lightweight, web interface'
                 ' to monitor your RQ queues, jobs, and workers in realtime.',
     long_description=__doc__,
-    packages=find_packages(),
+    packages=find_packages(exclude=('tests',)),
     include_package_data=True,
     zip_safe=False,
     platforms='any',
