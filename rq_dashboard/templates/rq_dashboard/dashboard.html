@@ -161,12 +161,16 @@
                 </ul>
             </div>
 
+            <script name="first-page-link" type="text/template">
+                <li><a href="<%= url %>">&laquo;</a></li>
+            </script>
+
             <script name="no-previous-page-link" type="text/template">
-                <li class="disabled"><a href="#">&laquo;</a></li>
+                <li class="disabled"><a href="#">&lsaquo;</a></li>
             </script>
 
             <script name="previous-page-link" type="text/template">
-                <li><a href="<%= url %>">&laquo;</a></li>
+                <li><a href="<%= url %>">&lsaquo;</a></li>
             </script>
 
             <script name="page-link" type="text/template">
@@ -174,11 +178,15 @@
             </script>
 
             <script name="next-page-link" type="text/template">
-                <li><a href="<%= url %>">&raquo;</a></li>
+                <li><a href="<%= url %>">&rsaquo;</a></li>
             </script>
 
             <script name="no-next-page-link" type="text/template">
-                <li class="disabled"><a href="#">&raquo;</a></li>
+                <li class="disabled"><a href="#">&rsaquo;</a></li>
+            </script>
+
+            <script name="last-page-link" type="text/template">
+                <li><a href="<%= url %>">&raquo;</a></li>
             </script>
 
         </div>

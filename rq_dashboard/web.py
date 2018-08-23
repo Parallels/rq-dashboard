@@ -256,11 +256,18 @@ def list_jobs(queue_name, page):
         next_page = dict(url=url_for(
             '.overview', queue_name=queue_name, page=(current_page + 1)))
 
+    first_page_link = dict(url=url_for('.overview', queue_name=queue_name, page=1))
+    last_page_link = dict(url=url_for('.overview', queue_name=queue_name, page=last_page))
+
     pagination = remove_none_values(
         dict(
+            current_page=current_page,
+            num_pages=last_page,
             pages_in_window=pages_in_window,
             next_page=next_page,
-            prev_page=prev_page
+            prev_page=prev_page,
+            first_page=first_page_link,
+            last_page=last_page_link,
         )
     )
 

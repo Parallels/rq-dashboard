@@ -224,6 +224,10 @@ var api = {
     var template_prev_page = _.template($raw_tpl_prev_page);
     var $raw_tpl_next_page = $('script[name=next-page-link]').html();
     var template_next_page = _.template($raw_tpl_next_page);
+    var $raw_tpl_first_page = $('script[name=first-page-link]').html();
+    var template_first_page = _.template($raw_tpl_first_page);
+    var $raw_tpl_last_page = $('script[name=last-page-link]').html();
+    var template_last_page = _.template($raw_tpl_last_page);
     var $tbody = $('table#jobs tbody');
     var $placeholderEl = $('tr[data-role=loading-placeholder]', $tbody);
     var html;
@@ -258,6 +262,14 @@ var api = {
 
         $ul.empty();
 
+        // first page
+        html = template_first_page(pagination.first_page);
+        $el = $(html);
+        if (pagination.current_page == 1) {
+            $el.addClass('disabled');
+        }
+        $ul.append($el);
+
         // prev page
         if (pagination.prev_page !== undefined ) {
             html = template_prev_page(pagination.prev_page);
@@ -289,6 +301,14 @@ var api = {
             html = $('script[name=no-next-page-link]').html();
             $ul.append(html);
         }
+
+        // last page
+        html = template_last_page(pagination.last_page);
+        $el = $(html);
+        if (pagination.current_page == pagination.num_pages) {
+            $el.addClass('disabled');
+        }
+        $ul.append($el);
 
         if (done !== undefined) {
             done();
