@@ -163,7 +163,7 @@ def overview(queue_name, page):
 @blueprint.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
-    if current_app.config.get('DELETE_JOBS'):
+    if current_app.config.get('RQ_DELETE_JOBS'):
         Job.fetch(job_id).delete()
     else:
         cancel_job(job_id)

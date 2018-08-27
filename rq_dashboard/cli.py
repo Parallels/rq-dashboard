@@ -145,9 +145,9 @@ def run(
     if interval:
         app.config['RQ_POLL_INTERVAL'] = interval
     if web_background:
-        app.config["WEB_BACKGROUND"] = web_background
+        app.config['RQ_WEB_BACKGROUND'] = web_background
     if delete_jobs:
-        app.config["DELETE_JOBS"] = delete_jobs
+        app.config['RQ_DELETE_JOBS'] = delete_jobs
 
     app.run(host=bind, port=port, debug=debug)
 
