@@ -118,3 +118,13 @@ span.loading {
     font-size: .8em;
     color: #555;
 }
+
+#alert-fixed {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 25%;
+    z-index:9999;
+    text-align: center;
+    display: none;
+}

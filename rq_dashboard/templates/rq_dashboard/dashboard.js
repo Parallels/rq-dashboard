@@ -316,6 +316,11 @@ var api = {
     };
 
     var refresh_table = function() {
+        if (window.getSelection().toString()) {
+            $('#alert-fixed').show();
+            return;
+        }
+        $('#alert-fixed').hide();
         $('span.loading').fadeIn('fast');
         reload_table(function() {
             $('span.loading').fadeOut('fast');
