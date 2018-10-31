@@ -52,6 +52,23 @@ var api = {
 };
 
 //
+// Modal confirmation
+//
+var modalConfirm = function(action, cb) {
+    $('#confirmation-modal').modal('show');
+    $('#confirmation-modal-action').text(action);
+
+    $('#confirmation-modal-yes').unbind().click(function () {
+        cb();
+        $('#confirmation-modal').modal('hide');
+    });
+
+    $('#confirmation-modal-no').unbind().click(function () {
+        $('#confirmation-modal').modal('hide');
+    });
+};
+
+//
 // RQ instances
 //
 (function($) {
@@ -336,8 +353,10 @@ var api = {
         e.stopPropagation();
 
         var $this = $(this);
-        $.post($this.attr('href'), function(data) {
-            reload_table();
+        modalConfirm('empty', function() {
+            $.post($this.attr('href'), function(data) {
+                reload_table();
+            });
         });
 
         return false;
@@ -348,8 +367,9 @@ var api = {
         e.stopPropagation();
 
         var $this = $(this);
-        $.post($this.attr('href'), function(data) {});
-
+        modalConfirm('compact', function() {
+           $.post($this.attr('href'), function(data) {});
+        });
         return false;
     });
 
@@ -367,8 +387,9 @@ var api = {
         e.stopPropagation();
 
         var $this = $(this);
-        $.post($this.attr('href'), function(data) {});
-
+        modalConfirm('requeue all', function() {
+            $.post($this.attr('href'), function(data) {});
+        });
         return false;
     });
 
