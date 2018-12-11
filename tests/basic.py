@@ -5,12 +5,10 @@ import unittest
 
 from rq_dashboard.cli import make_flask_app
 
-from .compatibility_mixin import CompatibilityMixin
-
 HTTP_OK = 200
 
 
-class BasicTestCase(unittest.TestCase, CompatibilityMixin):
+class BasicTestCase(unittest.TestCase):
     def setUp(self):
         self.app = make_flask_app(None, None, None, '')
         self.app.testing = True
@@ -40,6 +38,7 @@ class BasicTestCase(unittest.TestCase, CompatibilityMixin):
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('workers', data)
+
 
 __all__ = [
     'BasicTestCase',
