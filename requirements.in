@@ -1,6 +1,6 @@
 # Required by the project itself
 click
-Flask
+flask>=0.12.3
 redis
 rq>=0.3.8
 arrow>=0.12.1
