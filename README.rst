@@ -108,7 +108,7 @@ We use piptools_ to keep our development dependencies up to date
 ::
 
     $ pip install --upgrade pip
-    $ pip install git+https://github.com/nvie/pip-tools.git@future
+    $ pip install pip-tools
 
 Now make changes to the ``requirements.in`` file, and resolve all the
 2nd-level dependencies into ``requirements.txt`` like so:
