@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import importlib
 import os
 import sys
+import warnings
 
 import click
 
@@ -30,7 +31,34 @@ def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
                 {'WWW-Authenticate': 'Basic realm="{}"'.format(realm)})
 
 
-def make_flask_app(config, username, password, url_prefix):
+LEGACY_CONFIG_OPTIONS = {
+    'REDIS_URL': 'RQ_DASHBOARD_REDIS_URL',
+    'REDIS_HOST': 'RQ_DASHBOARD_REDIS_HOST',
+    'REDIS_PORT': 'RQ_DASHBOARD_REDIS_PORT',
+    'REDIS_PASSWORD': 'RQ_DASHBOARD_REDIS_PASSWORD',
+    'REDIS_DB': 'RQ_DASHBOARD_REDIS_DB',
+    'REDIS_SENTINELS': 'RQ_DASHBOARD_REDIS_SENTINELS',
+    'REDIS_MASTER_NAME': 'RQ_DASHBOARD_REDIS_MASTER_NAME',
+    'RQ_POLL_INTERVAL': 'RQ_DASHBOARD_POLL_INTERVAL',
+    'WEB_BACKGROUND': 'RQ_DASHBOARD_WEB_BACKGROUND',
+    'DELETE_JOBS': 'RQ_DASHBOARD_DELETE_JOBS',
+}
+
+warning_template = "Configuration option {old_name} is depricated and will be removed in future versions. "\
+                   "Please use {new_name} instead."
+
+
+def upgrade_config(app):
+    """
+    Updates old configuration options with new ones throwing warnings to those who haven't upgraded yet.
+    """
+    for old_name, new_name in LEGACY_CONFIG_OPTIONS.items():
+        if old_name in app.config:
+            warnings.warn(warning_template.format(old_name=old_name, new_name=new_name), DeprecationWarning)
+            app.config[new_name] = app.config[old_name]
+
+
+def make_flask_app(config, username, password, url_prefix, compatibility_mode=True):
     """Return Flask app with default configuration and registered blueprint."""
     app = Flask(__name__)
 
@@ -44,6 +72,9 @@ def make_flask_app(config, username, password, url_prefix):
     # Override from a configuration file in the env variable, if present.
     if 'RQ_DASHBOARD_SETTINGS' in os.environ:
         app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
+
+    if compatibility_mode:
+        upgrade_config(app)
 
     # Optionally add basic auth to blueprint and register with app.
     if username:
@@ -94,7 +125,7 @@ def make_flask_app(config, username, password, url_prefix):
     '--redis-master-name', default=None,
     help='Name of redis master. Only needed when using sentinels')
 @click.option(
-    '--interval', default=None, type=int,
+    '--poll-interval', '--interval', 'poll_interval', default=None, type=int,
     help='Refresh interval in ms')
 @click.option(
     '--extra-path', default='.', multiple=True,
@@ -111,7 +142,7 @@ def run(
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
         redis_sentinels, redis_master_name,
-        interval, extra_path, web_background, debug, delete_jobs):
+        poll_interval, extra_path, web_background, debug, delete_jobs):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -129,25 +160,25 @@ def run(
     click.echo('RQ Dashboard version {}'.format(VERSION))
     app = make_flask_app(config, username, password, url_prefix)
     if redis_url:
-        app.config['REDIS_URL'] = redis_url
+        app.config['RQ_DASHBOARD_REDIS_URL'] = redis_url
     if redis_host:
-        app.config['REDIS_HOST'] = redis_host
+        app.config['RQ_DASHBOARD_REDIS_HOST'] = redis_host
     if redis_port:
-        app.config['REDIS_PORT'] = redis_port
+        app.config['RQ_DASHBOARD_REDIS_PORT'] = redis_port
     if redis_password:
-        app.config['REDIS_PASSWORD'] = redis_password
+        app.config['RQ_DASHBOARD_REDIS_PASSWORD'] = redis_password
     if redis_database:
-        app.config['REDIS_DB'] = redis_database
+        app.config['RQ_DASHBOARD_REDIS_DB'] = redis_database
     if redis_sentinels:
-        app.config['REDIS_SENTINELS'] = redis_sentinels
+        app.config['RQ_DASHBOARD_REDIS_SENTINELS'] = redis_sentinels
     if redis_master_name:
-        app.config['REDIS_MASTER_NAME'] = redis_master_name
-    if interval:
-        app.config['RQ_POLL_INTERVAL'] = interval
+        app.config['RQ_DASHBOARD_REDIS_MASTER_NAME'] = redis_master_name
+    if poll_interval:
+        app.config['RQ_DASHBOARD_POLL_INTERVAL'] = poll_interval
     if web_background:
-        app.config["WEB_BACKGROUND"] = web_background
+        app.config["RQ_DASHBOARD_WEB_BACKGROUND"] = web_background
     if delete_jobs:
-        app.config["DELETE_JOBS"] = delete_jobs
+        app.config["RQ_DASHBOARD_DELETE_JOBS"] = delete_jobs
 
     app.run(host=bind, port=port, debug=debug)
 
