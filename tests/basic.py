@@ -31,6 +31,7 @@ class BasicTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('queues', data)
+        self.assertEqual(response.headers['Cache-Control'], 'no-store')
 
     def test_workers_list_json(self):
         response = self.client.get('/workers.json')

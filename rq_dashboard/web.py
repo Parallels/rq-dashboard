@@ -85,7 +85,7 @@ def jsonify(f):
                 result_dict['reason'] = str(e)
                 from traceback import format_exc
                 result_dict['exc_info'] = format_exc()
-        return flask_jsonify(**result_dict)
+        return flask_jsonify(**result_dict), {'Cache-Control': 'no-store'}
 
     return _wrapped
 
