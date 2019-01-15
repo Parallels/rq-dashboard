@@ -292,7 +292,7 @@ def list_workers():
     def serialize_queue_names(worker):
         return [q.name for q in worker.queues]
 
-    workers = [
+    workers = sorted((
         dict(
             name=worker.name,
             queues=serialize_queue_names(worker),
@@ -300,8 +300,8 @@ def list_workers():
             current_job=serialize_current_job(
                 worker.get_current_job()),
         )
-        for worker in Worker.all()
-    ]
+        for worker in Worker.all()),
+        key=lambda w: (w['state'], w['name']))
     return dict(workers=workers)
 
 
