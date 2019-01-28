@@ -27,7 +27,7 @@ from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
 from rq.job import Job
 from six import string_types
 
-from flask import Blueprint, current_app, render_template, url_for
+from flask import Blueprint, current_app, render_template, url_for, make_response
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -149,15 +149,16 @@ def overview(queue_name, page):
             queue = Queue()
     else:
         queue = Queue(queue_name)
-
-    return render_template(
+    r = make_response(render_template(
         'rq_dashboard/dashboard.html',
         workers=Worker.all(),
         queue=queue,
         page=page,
         queues=Queue.all(),
         rq_url_prefix=url_for('.overview')
-    )
+    ))
+    r.headers.set('Cache-Control', 'no-store')
+    return r
 
 
 @blueprint.route('/job/<job_id>/cancel', methods=['POST'])
