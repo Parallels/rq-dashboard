@@ -16,6 +16,7 @@ As a quick-and-dirty convenience, the command line invocation in ``cli.py``
 provides the option to require HTTP Basic Auth in a few lines of code.
 
 """
+import re
 from functools import wraps
 from math import ceil
 
@@ -221,7 +222,13 @@ def change_rq_instance(instance_number):
 @blueprint.route('/rq-instances.json')
 @jsonify
 def list_instances():
-    return dict(rq_instances=current_app.config.get('REDIS_URL'))
+    redis_url = current_app.config.get('REDIS_URL')
+    if isinstance(redis_url, list):
+        return dict(rq_instances=[re.sub(r'://:[^@]*@','://:***@',x) for x in current_app.config.get('REDIS_URL')])
+    elif isinstance(redis_url, string_types):
+        return dict(rq_instances=re.sub(r'://:[^@]*@','://:***@',current_app.config.get('REDIS_URL')))
+    else:
+        return dict()
 
 
 @blueprint.route('/queues.json')
