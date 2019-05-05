@@ -254,7 +254,7 @@ var modalConfirm = function(action, cb) {
         $placeholderEl.show();
 
         // Fetch the available jobs on the queue
-        api.getJobs('{{ queue.name }}', '{{ page }}', function(jobs, pagination) {
+        api.getJobs({{ queue.name|tojson|safe }}, {{ page|tojson|safe }}, function(jobs, pagination) {
             onJobsLoaded(jobs, pagination, done);
         });
     };
@@ -302,7 +302,7 @@ var modalConfirm = function(action, cb) {
             var $el = $(html);
 
             // Special markup for the active page
-            if (page.number === {{ page }} ) {
+            if (page.number === {{ page|tojson|safe }} ) {
                 $el.addClass('active');
             }
 
