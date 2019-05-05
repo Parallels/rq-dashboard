@@ -56,6 +56,11 @@ table#queues {
     /*width: 300px;*/
 }
 
+table#jobs {
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
 table#jobs td.actions a {
     margin-right: 8px;
     margin-bottom: 8px;
