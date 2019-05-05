@@ -234,7 +234,7 @@ def list_instances():
         )
     else:
         # TODO handle case when configuration is not in form of URL
-        return dict()
+        return dict(rq_instances=[])
 
 
 @blueprint.route('/queues.json')
