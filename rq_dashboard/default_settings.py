@@ -7,15 +7,15 @@ Intended to be loaded with::
 and then overridden as required.
 
 """
-#: If set the REDIS_URL takes precedence over REDIS_HOST, REDIS_PORT, etc
-REDIS_URL = None
+#: If set the RQ_DASHBOARD_REDIS_URL takes precedence over RQ_DASHBOARD_REDIS_HOST, RQ_DASHBOARD_REDIS_PORT, etc
+RQ_DASHBOARD_REDIS_URL = None
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-REDIS_PASSWORD = None
-REDIS_DB = 0
+RQ_DASHBOARD_REDIS_HOST = 'localhost'
+RQ_DASHBOARD_REDIS_PORT = 6379
+RQ_DASHBOARD_REDIS_PASSWORD = None
+RQ_DASHBOARD_REDIS_DB = 0
 
-RQ_POLL_INTERVAL = 2500  #: Web interface poll period for updates in ms
+RQ_DASHBOARD_POLL_INTERVAL = 2500  #: Web interface poll period for updates in ms
 DEBUG = False
-WEB_BACKGROUND = "black"
-DELETE_JOBS = False
+RQ_DASHBOARD_WEB_BACKGROUND = "black"
+RQ_DASHBOARD_DELETE_JOBS = False

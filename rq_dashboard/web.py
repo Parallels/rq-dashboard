@@ -39,16 +39,16 @@ blueprint = Blueprint(
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
-    redis_url = current_app.config.get('REDIS_URL')
-    redis_sentinels = current_app.config.get('REDIS_SENTINELS')
+    redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
+    redis_sentinels = current_app.config.get('RQ_DASHBOARD_REDIS_SENTINELS')
     if isinstance(redis_url, list):
         current_app.redis_conn = from_url(redis_url[0])
     elif isinstance(redis_url, string_types):
         current_app.redis_conn = from_url(redis_url)
     elif redis_sentinels:
-        redis_master = current_app.config.get('REDIS_MASTER_NAME')
-        password = current_app.config.get('REDIS_PASSWORD')
-        db = current_app.config.get('REDIS_DB')
+        redis_master = current_app.config.get('RQ_DASHBOARD_REDIS_MASTER_NAME')
+        password = current_app.config.get('RQ_DASHBOARD_REDIS_PASSWORD')
+        db = current_app.config.get('RQ_DASHBOARD_REDIS_DB')
         sentinel_hosts = [tuple(sentinel.split(':', 1))
                           for sentinel in redis_sentinels.split(',')]
 
@@ -56,10 +56,10 @@ def setup_rq_connection():
         current_app.redis_conn = sentinel.master_for(redis_master)
     else:
         current_app.redis_conn = Redis(
-            host=current_app.config.get('REDIS_HOST'),
-            port=current_app.config.get('REDIS_PORT'),
-            password=current_app.config.get('REDIS_PASSWORD'),
-            db=current_app.config.get('REDIS_DB')
+            host=current_app.config.get('RQ_DASHBOARD_REDIS_HOST'),
+            port=current_app.config.get('RQ_DASHBOARD_REDIS_PORT'),
+            password=current_app.config.get('RQ_DASHBOARD_REDIS_PASSWORD'),
+            db=current_app.config.get('RQ_DASHBOARD_REDIS_DB')
         )
 
 
@@ -163,7 +163,7 @@ def overview(queue_name, page):
 @blueprint.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
-    if current_app.config.get('DELETE_JOBS'):
+    if current_app.config.get('RQ_DASHBOARD_DELETE_JOBS'):
         Job.fetch(job_id).delete()
     else:
         cancel_job(job_id)
@@ -207,7 +207,7 @@ def compact_queue(queue_name):
 @blueprint.route('/rq-instance/<instance_number>', methods=['POST'])
 @jsonify
 def change_rq_instance(instance_number):
-    redis_url = current_app.config.get('REDIS_URL')
+    redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
     if not isinstance(redis_url, list):
         return dict(status='Single RQ. Not Permitted.')
     if int(instance_number) >= len(redis_url):
@@ -221,7 +221,7 @@ def change_rq_instance(instance_number):
 @blueprint.route('/rq-instances.json')
 @jsonify
 def list_instances():
-    return dict(rq_instances=current_app.config.get('REDIS_URL'))
+    return dict(rq_instances=current_app.config.get('RQ_DASHBOARD_REDIS_URL'))
 
 
 @blueprint.route('/queues.json')
@@ -307,5 +307,5 @@ def list_workers():
 
 @blueprint.context_processor
 def inject_interval():
-    interval = current_app.config.get('RQ_POLL_INTERVAL')
+    interval = current_app.config.get('RQ_DASHBOARD_POLL_INTERVAL')
     return dict(poll_interval=interval)

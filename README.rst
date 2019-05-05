@@ -49,29 +49,32 @@ Run the dashboard standalone, like this:
       RQ_DASHBOARD_SETTINGS environment variable.
 
     Options:
-      -b, --bind TEXT               IP or hostname on which to bind HTTP server
-      -p, --port INTEGER            Port on which to bind HTTP server
-      --url-prefix TEXT             URL prefix e.g. for use behind a reverse proxy
-      --username TEXT               HTTP Basic Auth username (not used if not set)
-      --password TEXT               HTTP Basic Auth password
-      -c, --config TEXT             Configuration file (Python module on search
-                                    path)
-      -H, --redis-host TEXT         IP address or hostname of Redis server
-      -P, --redis-port INTEGER      Port of Redis server
-      --redis-password TEXT         Password for Redis server
-      -D, --redis-database INTEGER  Database of Redis server
-      -u, --redis-url TEXT          Redis URL connection (overrides other
-                                    individual settings)
-      --redis-sentinels TEXT        List of redis sentinels. Each should be
-                                    formatted: <host>:<port>
-      --redis-master-name TEXT      Name of redis master. Only needed when using
-                                    sentinels
-      --interval INTEGER            Refresh interval in ms
-      --extra-path TEXT             Append specified directories to sys.path
-      --web-background TEXT         Background of the web interface
-      --delete-jobs TEXT            Delete jobs instead of cancel
-      --debug / --normal            Enter DEBUG mode
-      --help                        Show this message and exit.
+      -b, --bind TEXT                 IP or hostname on which to bind HTTP server
+      -p, --port INTEGER              Port on which to bind HTTP server
+      --url-prefix TEXT               URL prefix e.g. for use behind a reverse
+                                      proxy
+      --username TEXT                 HTTP Basic Auth username (not used if not
+                                      set)
+      --password TEXT                 HTTP Basic Auth password
+      -c, --config TEXT               Configuration file (Python module on search
+                                      path)
+      -H, --redis-host TEXT           IP address or hostname of Redis server
+      -P, --redis-port INTEGER        Port of Redis server
+      --redis-password TEXT           Password for Redis server
+      -D, --redis-database INTEGER    Database of Redis server
+      -u, --redis-url TEXT            Redis URL connection (overrides other
+                                      individual settings)
+      --redis-sentinels TEXT          List of redis sentinels. Each should be
+                                      formatted: <host>:<port>
+      --redis-master-name TEXT        Name of redis master. Only needed when using
+                                      sentinels
+      --poll-interval, --interval INTEGER
+                                      Refresh interval in ms
+      --extra-path TEXT               Append specified directories to sys.path
+      --web-background TEXT           Background of the web interface
+      --delete-jobs TEXT              Delete jobs instead of cancel
+      --debug / --normal              Enter DEBUG mode
+      --help                          Show this message and exit.
 
 
 Integrating the dashboard in your Flask app
