@@ -26,9 +26,23 @@ from six import string_types
 from flask import Blueprint, current_app, make_response, render_template, url_for
 from redis import Redis, from_url
 from redis.sentinel import Sentinel
-from rq import (Queue, Worker, cancel_job, get_failed_queue, pop_connection,
+from rq import (Queue, Worker, cancel_job, pop_connection,
                 push_connection, requeue_job)
 from rq.job import Job
+
+
+def get_all_queues():
+    """
+    Return list of all queues.
+
+    Redefined in compat module to also return magic failed queue.
+    """
+    return Queue.all()
+
+try:
+    from rq import get_failed_queue  # removed in 1.0
+except ImportError:
+    from .compat import get_failed_queue, get_all_queues
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -36,6 +50,13 @@ blueprint = Blueprint(
     template_folder='templates',
     static_folder='static',
 )
+
+
+def get_queue(queue_name):
+    if queue_name == 'failed':
+        return get_failed_queue()
+    else:
+        return Queue(queue_name)
 
 
 @blueprint.before_app_first_request
@@ -78,14 +99,7 @@ def jsonify(f):
     @wraps(f)
     def _wrapped(*args, **kwargs):
         from flask import jsonify as flask_jsonify
-        try:
-            result_dict = f(*args, **kwargs)
-        except Exception as e:
-            result_dict = dict(status='error')
-            if current_app.config['DEBUG']:
-                result_dict['reason'] = str(e)
-                from traceback import format_exc
-                result_dict['exc_info'] = format_exc()
+        result_dict = f(*args, **kwargs)
         return flask_jsonify(**result_dict), {'Cache-Control': 'no-store'}
 
     return _wrapped
@@ -141,9 +155,11 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
 @blueprint.route('/<queue_name>', defaults={'page': '1'})
 @blueprint.route('/<queue_name>/<page>')
 def overview(queue_name, page):
-    if queue_name is None:
+    if queue_name == 'failed':
+        queue = get_failed_queue()
+    elif queue_name is None:
         # Show the failed queue by default if it contains any jobs
-        failed = Queue('failed')
+        failed = get_failed_queue()
         if not failed.is_empty():
             queue = failed
         else:
@@ -155,7 +171,7 @@ def overview(queue_name, page):
         workers=Worker.all(),
         queue=queue,
         page=page,
-        queues=Queue.all(),
+        queues=get_all_queues(),
         rq_url_prefix=url_for('.overview')
     ))
     r.headers.set('Cache-Control', 'no-store')
@@ -175,7 +191,7 @@ def cancel_job_view(job_id):
 @blueprint.route('/job/<job_id>/requeue', methods=['POST'])
 @jsonify
 def requeue_job_view(job_id):
-    requeue_job(job_id)
+    requeue_job(job_id, connection=current_app.redis_conn)
     return dict(status='OK')
 
 
@@ -186,14 +202,14 @@ def requeue_all():
     job_ids = fq.job_ids
     count = len(job_ids)
     for job_id in job_ids:
-        requeue_job(job_id)
+        requeue_job(job_id, connection=current_app.redis_conn)
     return dict(status='OK', count=count)
 
 
 @blueprint.route('/queue/<queue_name>/empty', methods=['POST'])
 @jsonify
 def empty_queue(queue_name):
-    q = Queue(queue_name)
+    q = get_queue(queue_name)
     q.empty()
     return dict(status='OK')
 
@@ -201,7 +217,7 @@ def empty_queue(queue_name):
 @blueprint.route('/queue/<queue_name>/compact', methods=['POST'])
 @jsonify
 def compact_queue(queue_name):
-    q = Queue(queue_name)
+    q = get_queue(queue_name)
     q.compact()
     return dict(status='OK')
 
@@ -240,7 +256,7 @@ def list_instances():
 @blueprint.route('/queues.json')
 @jsonify
 def list_queues():
-    queues = serialize_queues(sorted(Queue.all()))
+    queues = serialize_queues(sorted(get_all_queues()))
     return dict(queues=queues)
 
 
@@ -248,8 +264,8 @@ def list_queues():
 @jsonify
 def list_jobs(queue_name, page):
     current_page = int(page)
-    queue = Queue(queue_name)
-    per_page = 10
+    queue = get_queue(queue_name)
+    per_page = 5
     total_items = queue.count
     pages_numbers_in_window = pagination_window(
         total_items, current_page, per_page)
@@ -285,7 +301,8 @@ def list_jobs(queue_name, page):
     )
 
     offset = (current_page - 1) * per_page
-    jobs = [serialize_job(job) for job in queue.get_jobs(offset, per_page)]
+    queue_jobs = queue.get_jobs(offset, per_page)
+    jobs = [serialize_job(job) for job in queue_jobs]
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
 
 
