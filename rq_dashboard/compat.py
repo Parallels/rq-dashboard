@@ -54,7 +54,8 @@ class FailedQueue(Queue):
     def empty(self):
         for registry in self._registries:
             job_ids = registry.get_job_ids()
-            for job in Job.fetch_many(job_ids):
+            for job_id in job_ids:
+                job = Job.fetch(job_id)
                 job.delete()
 
     def is_empty(self):
