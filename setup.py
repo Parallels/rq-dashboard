@@ -28,7 +28,7 @@ setup(
     # Be specific about versions in requirements.txt and just name packages
     # needed during run time here.
     # See e.g. https://caremad.io/2013/07/setup-vs-requirement/
-    install_requires=['rq>=0.3.8,<1.0.0', 'Flask', 'redis', 'arrow'],
+    install_requires=['rq>=0.3.8', 'Flask', 'redis', 'arrow'],
     entry_points={
         'console_scripts': [
             'rq-dashboard = rq_dashboard.cli:main'
