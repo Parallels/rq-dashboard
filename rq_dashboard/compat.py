@@ -12,12 +12,11 @@ class FailedQueue(Queue):
     Minimalist implementation of old failed queue.
     Very slow and memory-consuming.
     """
-    def __init__(self, default_timeout=None, connection=None, async=True):
+    def __init__(self, default_timeout=None, connection=None):
         super(FailedQueue, self).__init__(
             name=NotImplemented,
             default_timeout=default_timeout,
             connection=connection,
-            async=async,
         )
 
         self._registries = (q.failed_job_registry for q in Queue.all())

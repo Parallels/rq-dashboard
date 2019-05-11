@@ -40,6 +40,11 @@ class BasicTestCase(unittest.TestCase):
         self.assertIsInstance(data, dict)
         self.assertIn('workers', data)
 
+    def test_failed_jobs(self):
+        response = self.client.get('/failed')
+        self.assertEqual(response.status_code, HTTP_OK)
+
+
 
 __all__ = [
     'BasicTestCase',
