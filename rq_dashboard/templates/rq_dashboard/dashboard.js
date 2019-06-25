@@ -398,7 +398,7 @@ var modalConfirm = function(action, cb) {
         return false;
     });
 
-    // Enable the AJAX behaviour of the empty button
+    // Enable the AJAX behaviour of the cancel button
     $tbody.on('click', '[data-role=cancel-job-btn]', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -408,8 +408,10 @@ var modalConfirm = function(action, cb) {
             job_id = $row.data('job-id'),
             url = url_for('cancel_job', job_id);
 
-        $.post(url, function(data) {
-            $row.fadeOut('fast', function() { $row.remove(); });
+        modalConfirm('cancel job', function() {
+            $.post(url, function(data) {
+                $row.fadeOut('fast', function() { $row.remove(); });
+            });
         });
 
         return false;
