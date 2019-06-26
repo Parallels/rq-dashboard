@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import importlib
 import os
 import sys
-import warnings
 
 import click
 
@@ -31,33 +30,6 @@ def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
                 {'WWW-Authenticate': 'Basic realm="{}"'.format(realm)})
 
 
-LEGACY_CONFIG_OPTIONS = {
-    'REDIS_URL': 'RQ_DASHBOARD_REDIS_URL',
-    'REDIS_HOST': 'RQ_DASHBOARD_REDIS_HOST',
-    'REDIS_PORT': 'RQ_DASHBOARD_REDIS_PORT',
-    'REDIS_PASSWORD': 'RQ_DASHBOARD_REDIS_PASSWORD',
-    'REDIS_DB': 'RQ_DASHBOARD_REDIS_DB',
-    'REDIS_SENTINELS': 'RQ_DASHBOARD_REDIS_SENTINELS',
-    'REDIS_MASTER_NAME': 'RQ_DASHBOARD_REDIS_MASTER_NAME',
-    'RQ_POLL_INTERVAL': 'RQ_DASHBOARD_POLL_INTERVAL',
-    'WEB_BACKGROUND': 'RQ_DASHBOARD_WEB_BACKGROUND',
-    'DELETE_JOBS': 'RQ_DASHBOARD_DELETE_JOBS',
-}
-
-warning_template = "Configuration option {old_name} is depricated and will be removed in future versions. "\
-                   "Please use {new_name} instead."
-
-
-def upgrade_config(app):
-    """
-    Updates old configuration options with new ones throwing warnings to those who haven't upgraded yet.
-    """
-    for old_name, new_name in LEGACY_CONFIG_OPTIONS.items():
-        if old_name in app.config:
-            warnings.warn(warning_template.format(old_name=old_name, new_name=new_name), DeprecationWarning)
-            app.config[new_name] = app.config[old_name]
-
-
 def make_flask_app(config, username, password, url_prefix, compatibility_mode=True):
     """Return Flask app with default configuration and registered blueprint."""
     app = Flask(__name__)
@@ -72,9 +44,6 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
     # Override from a configuration file in the env variable, if present.
     if 'RQ_DASHBOARD_SETTINGS' in os.environ:
         app.config.from_envvar('RQ_DASHBOARD_SETTINGS')
-
-    if compatibility_mode:
-        upgrade_config(app)
 
     # Optionally add basic auth to blueprint and register with app.
     if username:

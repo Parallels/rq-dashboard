@@ -29,6 +29,7 @@ from redis.sentinel import Sentinel
 from rq import (Queue, Worker, cancel_job, pop_connection,
                 push_connection, requeue_job)
 from rq.job import Job
+from .legacy_config import upgrade_config
 
 
 def get_all_queues():
@@ -39,10 +40,11 @@ def get_all_queues():
     """
     return Queue.all()
 
+
 try:
     from rq import get_failed_queue  # removed in 1.0
 except ImportError:
-    from .compat import get_failed_queue, get_all_queues
+    from .compat import get_failed_queue, get_all_queues  # noqa: F811
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -61,6 +63,7 @@ def get_queue(queue_name):
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
+    upgrade_config(current_app)  # we need to do It here instead of cli, since It may be embeded
     redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
     redis_sentinels = current_app.config.get('RQ_DASHBOARD_REDIS_SENTINELS')
     if isinstance(redis_url, list):
