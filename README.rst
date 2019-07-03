@@ -92,6 +92,9 @@ blueprint directly in the normal way, e.g.:
     app.config.from_object(rq_dashboard.default_settings)
     app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
+    # load flask config
+    app.config.from_object(object_name)
+
     @app.route("/")
     def hello():
         return "Hello World!"
@@ -100,7 +103,10 @@ blueprint directly in the normal way, e.g.:
         app.run()
 
 
+Note that you need to call the ``rq_dashboard`` blueprint AFTER the config, as explained here_ with that your config will overwrite the default config in ``rq_dashboard``
+
 If you start the Flask app on the default port, you can access the dashboard at http://localhost:5000/rq. The ``cli.py:main`` entry point provides a simple working example.
+
 
 
 Developing
@@ -158,7 +164,7 @@ variables from their default values
 * USERNAME=rq
 * PASSWORD=password
 
-
+.. _here: https://github.com/lorn/rq-dashboard/blob/master/rq_dashboard/default_settings.py
 .. _piptools: https://github.com/nvie/pip-tools
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: http://python-rq.org/
