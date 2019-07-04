@@ -108,7 +108,7 @@
                 <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small"
                    style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
                 This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by
-                age (oldest on top).</p>
+                age ({% if newest_top %}newest {% else %}oldest {% endif %} on top).</p>
 
             <table id="jobs" class="table table-bordered">
                 <thead>

@@ -175,7 +175,8 @@ def overview(queue_name, page):
         queue=queue,
         page=page,
         queues=get_all_queues(),
-        rq_url_prefix=url_for('.overview')
+        rq_url_prefix=url_for('.overview'),
+        newest_top=current_app.config.get('RQ_DASHBOARD_JOB_SORT_ORDER') == '-age'
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
@@ -303,8 +304,18 @@ def list_jobs(queue_name, page):
         )
     )
 
-    offset = (current_page - 1) * per_page
+    reverse_order = False
+    if current_app.config.get('RQ_DASHBOARD_JOB_SORT_ORDER') == '-age':
+        offset = (last_page - current_page) * per_page
+        reverse_order = True
+    else:
+        offset = (current_page - 1) * per_page
+
     queue_jobs = queue.get_jobs(offset, per_page)
+
+    if reverse_order:
+        queue_jobs = sorted(queue_jobs, key=lambda x: x.created_at, reverse=True)
+
     jobs = [serialize_job(job) for job in queue_jobs]
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
 
