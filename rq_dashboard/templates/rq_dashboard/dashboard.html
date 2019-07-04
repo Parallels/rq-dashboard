@@ -58,7 +58,7 @@
             <button id="workers-btn" type="button" class="btn btn-info">Toggle workers list</button>
             <p id="workers-count" class="fixed intro">No workers registered!</p>
 
-            <table id="workers" class="table table-bordered">
+            <table id="workers" class="table table-bordered" style="display:none">
                 <thead>
                 <tr>
                     <th style="width:48px">State</th>
@@ -90,6 +90,104 @@
         </div>
     </div>
 </div>
+
+
+<div class="row">
+    <div class="span12">
+        <div class="section">
+
+            <h1>Running Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
+            <p class="intro">
+                <a href="{{ url_for('rq_dashboard.cancel_queue_jobs', queue_name=queue.name) }}" id="queue-job-cancel-btn"
+                   class="btn btn-cancel btn-small" style="float: right" data-toggle="tooltip"
+                   title="Cancel all running jobs from this queue (<b>destructive</b>)" data-html=true><i
+                        class="icon-trash icon-white"></i> Cancel ALL</a>
+
+                <a href="{{ url_for('rq_dashboard.delete_queue_jobs', queue_name=queue.name) }}" id="queue-job-delete-btn"
+                   class="btn btn-cancel btn-small" style="float: right" data-toggle="tooltip"
+                   title="Delete all running jobs from this queue (<b>destructive</b>)" data-html=true><i
+                        class="icon-trash icon-white"></i> Delete ALL</a>
+                
+
+            <table id="running-jobs" class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th class="narrow">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="2">Loading...</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <script name="running-jobs-row" type="text/template">
+                <tr data-role="job" data-job-id="<%= d.id %>">
+                    <td>
+                        <i class="icon-file" style="opacity: .5;"></i>
+                        <span class="description"><%= $('<div/>').text(d.description).html() %></span>
+                        <% if (d.exc_info) { %>
+                        <span class="origin">from <strong><%= d.origin %></strong></span>
+                        <% } %>
+                        <div class="job_id"><%= d.id %></div>
+                        <% if (d.exc_info) { %>
+                        <span class="end_date">Failed <%= d.ended_at %></span>
+                        <pre class="exc_info"><%= $('<div/>').text(d.exc_info).html() %></pre>
+                        <% } %>
+                    </td>
+                    <td><span class="creation_date"><%= d.created_at %></span></td>
+                    <td class="actions narrow">
+                        <a href="#" data-role="stop-job-btn" class="btn btn-small"><i class="icon-stop"></i> Stop</a>
+                    </td>
+                </tr>
+            </script>
+
+            <script name="no-running-jobs-row" type="text/template">
+                <tr>
+                    <td colspan="3">No jobs.</td>
+                </tr>
+            </script>
+
+            <div id="running-jobs-page-selection" class="pagination pagination-centered">
+                <ul>
+                </ul>
+            </div>
+
+            <script name="first-page-link" type="text/template">
+                <li><a href="<%= url %>">&laquo;</a></li>
+            </script>
+
+            <script name="no-previous-page-link" type="text/template">
+                <li class="disabled"><a href="#">&lsaquo;</a></li>
+            </script>
+
+            <script name="previous-page-link" type="text/template">
+                <li><a href="<%= url %>">&lsaquo;</a></li>
+            </script>
+
+            <script name="page-link" type="text/template">
+                <li><a href="<%= url %>"><%= number %></a></li>
+            </script>
+
+            <script name="next-page-link" type="text/template">
+                <li><a href="<%= url %>">&rsaquo;</a></li>
+            </script>
+
+            <script name="no-next-page-link" type="text/template">
+                <li class="disabled"><a href="#">&rsaquo;</a></li>
+            </script>
+
+            <script name="last-page-link" type="text/template">
+                <li><a href="<%= url %>">&raquo;</a></li>
+            </script>
+
+        </div>
+    </div>
+</div>
+
 
 <div class="row">
     <div class="span12">
@@ -192,6 +290,9 @@
         </div>
     </div>
 </div>
+
+
+
 <div class="row">
     <div class="span12">
         <div class="section">
