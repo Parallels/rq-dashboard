@@ -77,6 +77,18 @@ def get_registry(queue, state):
     return registry_class(**params)
 
 
+def get_all_job_ids(queue_name, state):
+    job_ids = []
+    queue = get_queue(queue_name)
+    if state:
+        registry = get_registry(queue, state)
+        if registry:
+            job_ids = registry.get_job_ids()
+    else:
+        job_ids = queue.get_job_ids()
+    return job_ids
+
+
 @blueprint.before_app_first_request
 def setup_rq_connection():
     upgrade_config(current_app)  # we need to do It here instead of cli, since It may be embeded
@@ -210,10 +222,17 @@ def cancel_job_view(job_id):
     return dict(status='OK')
 
 
-@blueprint.route('/job/<job_id>/requeue', methods=['POST'])
+@blueprint.route('/job/<job_id>/<state>/requeue', methods=['POST'])
 @jsonify
-def requeue_job_view(job_id):
-    requeue_job(job_id, connection=current_app.redis_conn)
+def requeue_job_view(job_id, state=None):
+    print(job_id, state)
+    if not state:
+        requeue_job(job_id, connection=current_app.redis_conn)
+    elif state == 'finished':
+        job = Job.fetch(job_id)
+        queue = get_queue(job.origin)
+        print(queue, job)
+        queue.enqueue_job(job)
     return dict(status='OK')
 
 
@@ -236,21 +255,19 @@ def empty_queue(queue_name):
     return dict(status='OK')
 
 
-@blueprint.route('/queue/<queue_name>/cancel_all_job', methods=['POST'])
+@blueprint.route('/queue/<queue_name>/<state>/cancel_all_job', methods=['POST'])
 @jsonify
-def cancel_queue_jobs(queue_name):
-    q = get_queue(queue_name)
-    for job in q.get_jobs():
-        job.cancel()
+def cancel_all_job_view(queue_name, state=None):
+    for job_id in get_all_job_ids(queue_name, state):
+        cancel_job(job_id)
     return dict(status='OK')
 
 
-@blueprint.route('/queue/<queue_name>/delete_all_job', methods=['POST'])
+@blueprint.route('/queue/<queue_name>/<state>/delete_all_job', methods=['POST'])
 @jsonify
-def delete_queue_jobs(queue_name):
-    q = get_queue(queue_name)
-    for job in q.get_jobs():
-        job.delete()
+def delete_all_job_view(queue_name, state=None):
+    for job_id in get_all_job_ids(queue_name, state):
+        Job.fetch(job_id).delete()
     return dict(status='OK')
 
 
@@ -300,17 +317,16 @@ def list_queues():
     return dict(queues=queues)
 
 
-@blueprint.route('/jobs/<queue_name>/<page>.json')
 @blueprint.route('/jobs/<queue_name>/<state>/<page>.json')
 @jsonify
-def list_jobs(queue_name, page, state=None):
+def list_jobs(queue_name, page, state='pending'):
     current_page = int(page)
     queue = get_queue(queue_name)
     per_page = 5
 
     total_items = queue.count
     registry = None
-    if state:
+    if state in ['running', 'finished']:
         registry = get_registry(queue, state)
         total_items = registry.count if registry else 0
 
@@ -356,7 +372,7 @@ def list_jobs(queue_name, page, state=None):
     else:
         queue_jobs = []
 
-    jobs = [serialize_job(job) for job in queue_jobs]
+    jobs = [serialize_job(job) for job in queue_jobs if job]
     return dict(name=queue.name, jobs=jobs, pagination=pagination)
 
 
