@@ -222,6 +222,7 @@ def cancel_job_view(job_id):
     return dict(status='OK')
 
 
+@blueprint.route('/job/<job_id>/requeue', methods=['POST'])
 @blueprint.route('/job/<job_id>/<state>/requeue', methods=['POST'])
 @jsonify
 def requeue_job_view(job_id, state=None):
@@ -231,7 +232,6 @@ def requeue_job_view(job_id, state=None):
     elif state == 'finished':
         job = Job.fetch(job_id)
         queue = get_queue(job.origin)
-        print(queue, job)
         queue.enqueue_job(job)
     return dict(status='OK')
 
@@ -319,7 +319,7 @@ def list_queues():
 
 @blueprint.route('/jobs/<queue_name>/<state>/<page>.json')
 @jsonify
-def list_jobs(queue_name, page, state='pending'):
+def list_jobs(queue_name, state='pending', page=1):
     current_page = int(page)
     queue = get_queue(queue_name)
     per_page = 5
@@ -365,7 +365,7 @@ def list_jobs(queue_name, page, state='pending'):
 
     offset = (current_page - 1) * per_page
     if registry:
-        job_ids = registry.get_job_ids(offset, per_page)
+        job_ids = registry.get_job_ids(offset, offset + per_page)
         queue_jobs = [queue.fetch_job(job_id) for job_id in job_ids]
     elif total_items > 0:
         queue_jobs = queue.get_jobs(offset, per_page)
