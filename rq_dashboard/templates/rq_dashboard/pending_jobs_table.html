@@ -42,7 +42,7 @@
                         <div class="job_id"><%= d.id %></div>
                         <% if (d.exc_info) { %>
                         <span class="end_date">Failed <%= d.ended_at %></span>
-                        <pre class="exc_info"><%= $('<div/>').text(d.exc_info).html() %></pre>
+                        <pre class="exc_info" style="display:none"><%= $('<div/>').text(d.exc_info).html() %></pre>
                         <% } %>
                     </td>
                     <td><span class="creation_date"><%= d.created_at %></span></td>
