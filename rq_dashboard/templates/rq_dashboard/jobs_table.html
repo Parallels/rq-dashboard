@@ -19,7 +19,7 @@
                            title="Cancel all running jobs from this queue (<b>destructive</b>)" 
                            data-html=true><i class="icon-trash icon-white"></i> Cancel ALL</a>
                   {% elif state_name == 'pending' %}
-                  <a {{ queue_name }} href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue_name) }}" id="empty-pending-jobs-btn"
+                  <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue_name) }}" id="empty-pending-jobs-btn"
                            class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip"
                            title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true><i
                            class="icon-trash icon-white"></i> Empty</a>
@@ -68,11 +68,11 @@
                     </td>
                     <td><span class="creation_date"><%= d.created_at %></span></td>
                     <td class="actions narrow">
-                        {% if queue_name != 'running' %}
-                          <a href="#" data-role="requeue-{{ queue_name }}-job-btn" 
+                        {% if state_name != 'running' %}
+                          <a href="#" data-role="requeue-{{ state_name }}-job-btn" 
                               class="btn btn-small"><i class="icon-retweet"></i>Requeue</a>
                         {% endif %}
-                        <a href="#" data-role="cancel-{{ queue_name }}-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
+                        <a href="#" data-role="cancel-{{ state_name }}-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
                     </td>
                 </tr>
             </script>
