@@ -10,18 +10,17 @@
     {% include "rq_dashboard/workers.html" %}
 </div>
 
+{% import 'rq_dashboard/jobs_table.html' as job_table %}
+
+{{ job_table.render_html(queue.name, 'pending') }}
 
 {% if queue.name != 'failed' %}
-    {% include "rq_dashboard/running_jobs_table.html" %}
+    {{ job_table.render_html(queue.name, 'running') }}
 {% endif %}
-
-{% include "rq_dashboard/pending_jobs_table.html" %}
-
 
 {% if queue.name != 'failed' %}
-    {% include "rq_dashboard/finished_jobs_table.html" %}
+    {{ job_table.render_html(queue.name, 'finished') }}
 {% endif %}
-
 
 <div class="row">
     <div class="span12">

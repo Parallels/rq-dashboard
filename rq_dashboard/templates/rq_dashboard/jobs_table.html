@@ -1,0 +1,122 @@
+{% macro render_html(queue_name, state_name) -%}
+
+<div class="row" id="{{ state_name }}-jobs-table">
+    <div class="span12">
+        <div class="section">
+            <h1>{% if queue_name != 'failed' %}{{ state_name }}{% endif %} jobs on 
+              <strong>{{ queue_name }} <span class="job-count"></span></strong>
+            </h1>
+            <p class="intro">
+                  {% if state_name == 'finished' %}
+                  <a href="{{ url_for('rq_dashboard.delete_all_job_view', queue_name=queue_name, state='finished') }}" id="empty-finished-jobs-btn" 
+                         class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip"
+                         title="Remove all finished jobs (<b>destructive</b>)" data-html=true><i
+                         class="icon-trash icon-white"></i> Empty</a>
+                  {% elif state_name == 'running' %}
+                  <a href="{{ url_for('rq_dashboard.cancel_all_job_view', queue_name=queue_name, state='running') }}" 
+                           id="cancel-all-running-job-btn"
+                           class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip"
+                           title="Cancel all running jobs from this queue (<b>destructive</b>)" 
+                           data-html=true><i class="icon-trash icon-white"></i> Cancel ALL</a>
+                  {% elif state_name == 'pending' %}
+                      <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue_name) }}" id="empty-pending-jobs-btn"
+                           class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip"
+                           title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true><i
+                           class="icon-trash icon-white"></i> Empty</a>
+
+                      <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue_name) }}" id="compact-btn"
+                           class="btn btn-small" style="float: right; margin-right: 8px;" data-toggle="tooltip"
+                           title="Remove all stale jobs from this queue (non-destructive)"><i class="icon-resize-small"></i>
+                            Compact</a>
+
+                      <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small"
+                            style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
+                  {% endif %}
+
+                  This list below contains all the registered jobs on queue <strong>{{ queue_name }}</strong>, sorted by
+                  age (oldest on top).</p>
+
+            <table id="{{ state_name }}-jobs" class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th class="narrow">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="2">Loading...</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <script name="{{ state_name }}-jobs-row" type="text/template">
+                <tr data-role="job" data-job-id="<%= d.id %>">
+                    <td>
+                        <i class="icon-file" style="opacity: .5;"></i>
+                        <span class="description"><%= $('<div/>').text(d.description).html() %></span>
+                        <% if (d.exc_info) { %>
+                        <span class="origin">from <strong><%= d.origin %></strong></span>
+                        <% } %>
+
+                        <div class="job_id"><%= d.id %></div>
+                        <% if (d.exc_info) { %>
+                        <span class="end_date">Failed <%= d.ended_at %></span>
+                        <pre class="exc_info"><%= $('<div/>').text(d.exc_info).html() %></pre>
+                        <% } %>
+                    </td>
+                    <td><span class="creation_date"><%= d.created_at %></span></td>
+                    <td class="actions narrow">
+                        {% if queue_name != 'running' %}
+                          <a href="#" data-role="requeue-{{ queue_name }}-job-btn" 
+                              class="btn btn-small"><i class="icon-retweet"></i>Requeue</a>
+                        {% endif %}
+                        <a href="#" data-role="cancel-{{ queue_name }}-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
+                    </td>
+                </tr>
+            </script>
+
+            <script name="no-{{ state_name }}-jobs-row" type="text/template">
+                <tr>
+                    <td colspan="3">No jobs.</td>
+                </tr>
+            </script>
+
+            <div id="{{ state_name }}-jobs-page-selection" class="pagination pagination-centered">
+                <ul>
+                </ul>
+            </div>
+
+            <script name="first-page-link" type="text/template">
+                <li><a href="<%= url %>">&laquo;</a></li>
+            </script>
+
+            <script name="no-previous-page-link" type="text/template">
+                <li class="disabled"><a href="#">&lsaquo;</a></li>
+            </script>
+
+            <script name="previous-page-link" type="text/template">
+                <li><a href="<%= url %>">&lsaquo;</a></li>
+            </script>
+
+            <script name="page-link" type="text/template">
+                <li><a href="<%= url %>"><%= number %></a></li>
+            </script>
+
+            <script name="next-page-link" type="text/template">
+                <li><a href="<%= url %>">&rsaquo;</a></li>
+            </script>
+
+            <script name="no-next-page-link" type="text/template">
+                <li class="disabled"><a href="#">&rsaquo;</a></li>
+            </script>
+
+            <script name="last-page-link" type="text/template">
+                <li><a href="<%= url %>">&raquo;</a></li>
+            </script>
+        </div>
+    </div>
+</div>
+
+{%- endmacro %}

@@ -24,6 +24,7 @@ var toRelative = function(universal_date_string) {
     return d.relative();
 };
 
+
 var api = {
     getRqInstances: function(cb) {
         $.getJSON(url_for('rq-instances'), function(data) {
@@ -43,7 +44,8 @@ var api = {
         $.getJSON(url_for_jobs(queue_name, state, page), function(data) {
             var jobs = data.jobs;
             var pagination = data.pagination;
-            cb(jobs, pagination);
+            var total_jobs = data.total_jobs;
+            cb(jobs, pagination, total_jobs);
         });
     },
 
@@ -230,7 +232,14 @@ var modalConfirm = function(action, cb) {
     });
 })($);
 
+{% import 'rq_dashboard/jobs_table.js' as job_table %}
 
-{% include 'rq_dashboard/pending_jobs.js' with context %}
-{% include 'rq_dashboard/running_jobs.js' with context %}
-{% include 'rq_dashboard/finished_jobs.js' with context %}
+{{ job_table.render_js(queue.name, 'pending', page if (state == 'pending' or queue_name == 'failed') else 1)  }}
+
+{% if queue.name != 'failed' %}
+    {{ job_table.render_js(queue.name, 'running', page if state == 'running' else 1) }}
+{% endif %}
+
+{% if queue.name != 'failed' %}
+    {{ job_table.render_js(queue.name, 'finished', page if state == 'finished' else 1) }}
+{% endif %}

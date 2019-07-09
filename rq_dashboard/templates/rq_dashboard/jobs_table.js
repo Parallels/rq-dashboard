@@ -1,39 +1,47 @@
+{% macro render_js(queue_name, state_name, page) -%}
 //
-// Running JOBS
+//  {% if queue_name != 'failed' %}{{ state_name }} {% endif %} JOBS
 //
 (function($) {
-    var $raw_tpl = $('#running-jobs-table script[name=running-jobs-row]').html();
+    var $raw_tpl = $('#{{ state_name }}-jobs-table script[name={{ state_name }}-jobs-row]').html();
     var template = _.template($raw_tpl);
-    var $raw_tpl_page = $('#running-jobs-table script[name=page-link]').html();
+    var $raw_tpl_page = $('#{{ state_name }}-jobs-table script[name=page-link]').html();
     var template_page = _.template($raw_tpl_page);
-    var $ul = $('#running-jobs-table div#running-jobs-page-selection ul');
-    var noJobsHtml = $('#running-jobs-table script[name=no-running-jobs-row]').html();
-    var $raw_tpl_prev_page = $('#running-jobs-table script[name=previous-page-link]').html();
+    var $ul = $('#{{ state_name }}-jobs-table div#{{ state_name }}-jobs-page-selection ul');
+    var noJobsHtml = $('#{{ state_name }}-jobs-table script[name=no-{{ state_name }}-jobs-row]').html();
+    var $raw_tpl_prev_page = $('#{{ state_name }}-jobs-table script[name=previous-page-link]').html();
     var template_prev_page = _.template($raw_tpl_prev_page);
-    var $raw_tpl_next_page = $('#running-jobs-table script[name=next-page-link]').html();
+    var $raw_tpl_next_page = $('#{{ state_name }}-jobs-table script[name=next-page-link]').html();
     var template_next_page = _.template($raw_tpl_next_page);
-    var $raw_tpl_first_page = $('#running-jobs-table script[name=first-page-link]').html();
+    var $raw_tpl_first_page = $('#{{ state_name }}-jobs-table script[name=first-page-link]').html();
     var template_first_page = _.template($raw_tpl_first_page);
-    var $raw_tpl_last_page = $('#running-jobs-table script[name=last-page-link]').html();
+    var $raw_tpl_last_page = $('#{{ state_name }}-jobs-table script[name=last-page-link]').html();
     var template_last_page = _.template($raw_tpl_last_page);
-    var $tbody = $('#running-jobs-table table#running-jobs tbody');
-    var $placeholderEl = $('#running-jobs-table tr[data-role=loading-placeholder]', $tbody);
+    var $tcontainer = $('#{{ state_name }}-jobs-table');
+    var $tbody = $('#{{ state_name }}-jobs-table table#{{ state_name }}-jobs tbody');
+    var $placeholderEl = $('#{{ state_name }}-jobs-table tr[data-role=loading-placeholder]', $tbody);
     var html;
     var $el;
 
     var reload_table = function(done) {
         $placeholderEl.show();
 
+        var route_page = {{ page|tojson|safe }};
+        var route_queue = {{ queue_name|tojson|safe }};
+        var route_state = {{ state_name|tojson|safe }};
+
         // Fetch the available jobs on the queue
-        api.getJobs({{ queue.name|tojson|safe }}, 'running' , {{ page|tojson|safe }}, function(jobs, pagination) {
-            onJobsLoaded(jobs, pagination, done);
+        api.getJobs(route_queue, route_state, route_page, function(jobs, pagination, total_jobs) {
+            onJobsLoaded(jobs, pagination, total_jobs, done);
         });
     };
 
-    var onJobsLoaded = function(jobs, pagination, done) {
+    var onJobsLoaded = function(jobs, pagination, total_jobs, done) {
         var html = '';
 
         $tbody.empty();
+
+        $tcontainer.find('.job-count').html('(' + total_jobs + ')')
 
         if (jobs.length > 0) {
             $.each(jobs, function(i, job) {
@@ -73,7 +81,7 @@
             var $el = $(html);
 
             // Special markup for the active page
-            if (page.number === {{ page|tojson|safe }} ) {
+            if (page.number === {{ page|int|tojson|safe }} ) {
                 $el.addClass('active');
             }
 
@@ -124,7 +132,7 @@
     });
 
     // Enable the AJAX behaviour of the cancel button
-    $tbody.on('click', '[data-role=cancel-running-job-btn]', function(e) {
+    $tbody.on('click', '[data-role=cancel-{{ queue_name }}-job-btn]', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -142,15 +150,78 @@
         return false;
     });
 
-    $('#cancel-all-running-job-btn').click(function(e) {
+    $('#cancel-all-{{ queue_name }}-job-btn').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
 
         var $this = $(this);
-        modalConfirm('cancel all running jobs', function() {
+        modalConfirm('cancel all {{ queue_name }} jobs', function() {
             $.post($this.attr('href'), function(data) {});
         });
         return false;
     });
 
+    $('#empty-{{ queue_name }}-jobs-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        modalConfirm('empty', function() {
+            $.post($this.attr('href'), function(data) {
+                reload_table();
+            });
+        });
+
+        return false;
+    });
+
+    $('#compact-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        modalConfirm('compact', function() {
+           $.post($this.attr('href'), function(data) {});
+        });
+        return false;
+    });
+
+    $('#workers-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $('#workers').toggle();
+
+        return false;
+    });
+
+    $('#requeue-all-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        modalConfirm('requeue all', function() {
+            $.post($this.attr('href'), function(data) {});
+        });
+        return false;
+    });
+
+    $tbody.on('click', '[data-role=requeue-{{ queue_name }}-job-btn]', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this),
+            $row = $this.parents('tr'),
+            job_id = $row.data('job-id'),
+            route_name = "{{ queue_name }}" == 'finisehd' ? 'requeue_finished_job' : 'requeue_job',
+            url = url_for(route_name, job_id);
+
+        $.post(url, function(data) {
+            $row.fadeOut('fast', function() { $row.remove(); });
+        });
+
+        return false;
+    });
+
 })($);
+{%- endmacro %}

@@ -373,7 +373,7 @@ def list_jobs(queue_name, state='pending', page=1):
         queue_jobs = []
 
     jobs = [serialize_job(job) for job in queue_jobs if job]
-    return dict(name=queue.name, jobs=jobs, pagination=pagination)
+    return dict(name=queue.name, jobs=jobs, pagination=pagination, total_jobs=total_items)
 
 
 def serialize_current_job(job):
