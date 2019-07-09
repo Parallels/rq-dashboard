@@ -19,7 +19,7 @@
                            title="Cancel all running jobs from this queue (<b>destructive</b>)" 
                            data-html=true><i class="icon-trash icon-white"></i> Cancel ALL</a>
                   {% elif state_name == 'pending' %}
-                      <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue_name) }}" id="empty-pending-jobs-btn"
+                  <a {{ queue_name }} href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue_name) }}" id="empty-pending-jobs-btn"
                            class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip"
                            title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true><i
                            class="icon-trash icon-white"></i> Empty</a>

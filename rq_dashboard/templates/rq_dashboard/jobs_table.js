@@ -132,7 +132,7 @@
     });
 
     // Enable the AJAX behaviour of the cancel button
-    $tbody.on('click', '[data-role=cancel-{{ queue_name }}-job-btn]', function(e) {
+    $tbody.on('click', '[data-role=cancel-{{ state_name }}-job-btn]', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -150,18 +150,18 @@
         return false;
     });
 
-    $('#cancel-all-{{ queue_name }}-job-btn').click(function(e) {
+    $('#cancel-all-{{ state_name }}-job-btn').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
 
         var $this = $(this);
-        modalConfirm('cancel all {{ queue_name }} jobs', function() {
+        modalConfirm('cancel all {{ state_name }} jobs', function() {
             $.post($this.attr('href'), function(data) {});
         });
         return false;
     });
 
-    $('#empty-{{ queue_name }}-jobs-btn').click(function(e) {
+    $('#empty-{{ state_name }}-jobs-btn').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -206,14 +206,14 @@
         return false;
     });
 
-    $tbody.on('click', '[data-role=requeue-{{ queue_name }}-job-btn]', function(e) {
+    $tbody.on('click', '[data-role=requeue-{{ state_name }}-job-btn]', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
         var $this = $(this),
             $row = $this.parents('tr'),
             job_id = $row.data('job-id'),
-            route_name = "{{ queue_name }}" == 'finisehd' ? 'requeue_finished_job' : 'requeue_job',
+            route_name = "{{ state_name }}" == 'finisehd' ? 'requeue_finished_job' : 'requeue_job',
             url = url_for(route_name, job_id);
 
         $.post(url, function(data) {
