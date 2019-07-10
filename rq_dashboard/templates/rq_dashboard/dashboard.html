@@ -12,14 +12,14 @@
                 
 {% import 'rq_dashboard/jobs_table.html' as job_table %}
 
-{{ job_table.render_html(queue.name, 'pending') }}
+{{ job_table.render_html(queue.name, 'pending', newest_top) }}
 
 {% if queue.name != 'failed' %}
-    {{ job_table.render_html(queue.name, 'running') }}
+    {{ job_table.render_html(queue.name, 'running', newest_top) }}
 {% endif %}
 
 {% if queue.name != 'failed' %}
-    {{ job_table.render_html(queue.name, 'finished') }}
+    {{ job_table.render_html(queue.name, 'finished', newest_top) }}
 {% endif %}
 
 <div class="row">

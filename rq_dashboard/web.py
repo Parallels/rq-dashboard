@@ -227,7 +227,6 @@ def cancel_job_view(job_id):
 @blueprint.route('/job/<job_id>/<state>/requeue', methods=['POST'])
 @jsonify
 def requeue_job_view(job_id, state=None):
-    print(job_id, state)
     if not state:
         requeue_job(job_id, connection=current_app.redis_conn)
     elif state == 'finished':

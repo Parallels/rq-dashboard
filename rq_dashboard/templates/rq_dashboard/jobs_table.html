@@ -1,8 +1,8 @@
-{% macro render_html(queue_name, state_name) -%}
+{% macro render_html(queue_name, state_name, newest_top) -%}
 
 <div class="row" id="{{ state_name }}-jobs-table">
     <div class="span12">
-        <div class="section">
+      <div class="section">
             <h1>{% if queue_name != 'failed' %}{{ state_name }}{% endif %} jobs on 
               <strong>{{ queue_name }} <span class="job-count"></span></strong>
             </h1>
@@ -63,7 +63,7 @@
                         <div class="job_id"><%= d.id %></div>
                         <% if (d.exc_info) { %>
                         <span class="end_date">Failed <%= d.ended_at %></span>
-                        <pre class="exc_info"><%= $('<div/>').text(d.exc_info).html() %></pre>
+                        <pre class="exc_info" style="display:none"><%= $('<div/>').text(d.exc_info).html() %></pre>
                         <% } %>
                     </td>
                     <td><span class="creation_date"><%= d.created_at %></span></td>
