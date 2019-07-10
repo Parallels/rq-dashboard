@@ -213,7 +213,7 @@
         var $this = $(this),
             $row = $this.parents('tr'),
             job_id = $row.data('job-id'),
-            route_name = "{{ state_name }}" == 'finisehd' ? 'requeue_finished_job' : 'requeue_job',
+            route_name = "{{ state_name }}" == 'finished' ? 'requeue_finished_job' : 'requeue_job',
             url = url_for(route_name, job_id);
 
         $.post(url, function(data) {
