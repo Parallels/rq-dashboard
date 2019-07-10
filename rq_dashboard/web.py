@@ -382,7 +382,7 @@ def list_jobs(queue_name, state='pending', page=1):
     jobs = [serialize_job(job) for job in queue_jobs if job]
 
     if reverse_order:
-        jobs = sorted(jobs, key=lambda x: x.created_at, reverse=True)
+        jobs = sorted(jobs, key=lambda x: x['created_at'], reverse=True)
 
     return dict(name=queue.name, jobs=jobs, pagination=pagination, total_jobs=total_items)
 
