@@ -19,3 +19,5 @@ RQ_DASHBOARD_POLL_INTERVAL = 2500  #: Web interface poll period for updates in m
 DEBUG = False
 RQ_DASHBOARD_WEB_BACKGROUND = "black"
 RQ_DASHBOARD_DELETE_JOBS = False
+
+RQ_DASHBOARD_JOB_SORT_ORDER = '-age'

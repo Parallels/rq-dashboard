@@ -34,7 +34,7 @@
                   {% endif %}
 
                   This list below contains all the registered jobs on queue <strong>{{ queue_name }}</strong>, sorted by
-                  age (oldest on top).</p>
+                  age ({% if newest_top %}newest {% else %}oldest {% endif %} on top).</p>
 
             <table id="{{ state_name }}-jobs" class="table table-bordered">
                 <thead>

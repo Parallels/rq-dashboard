@@ -9,7 +9,7 @@
     {% include "rq_dashboard/queues.html" %} 
     {% include "rq_dashboard/workers.html" %}
 </div>
-
+                
 {% import 'rq_dashboard/jobs_table.html' as job_table %}
 
 {{ job_table.render_html(queue.name, 'pending') }}
