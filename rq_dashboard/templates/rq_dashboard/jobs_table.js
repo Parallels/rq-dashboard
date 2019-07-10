@@ -223,5 +223,11 @@
         return false;
     });
 
+
+    $tbody.on('click', 'tr[data-role="job"]', function() {
+      $(this).find('.exc_info').toggle();
+    });
+
+
 })($);
 {%- endmacro %}
