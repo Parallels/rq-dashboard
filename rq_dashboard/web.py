@@ -63,7 +63,12 @@ def get_queue(queue_name):
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
-    upgrade_config(current_app)  # we need to do It here instead of cli, since It may be embeded
+    # It's the only place where we can safely define default value for web background
+    # since It is used in template
+    current_app.config.setdefault('RQ_DASHBOARD_WEB_BACKGROUND', 'black')
+    # we need to do It here instead of cli, since It may be embeded
+    upgrade_config(current_app)
+    # Getting Redis connection parameters for RQ
     redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
     redis_sentinels = current_app.config.get('RQ_DASHBOARD_REDIS_SENTINELS')
     if isinstance(redis_url, list):
@@ -81,10 +86,10 @@ def setup_rq_connection():
         current_app.redis_conn = sentinel.master_for(redis_master)
     else:
         current_app.redis_conn = Redis(
-            host=current_app.config.get('RQ_DASHBOARD_REDIS_HOST'),
-            port=current_app.config.get('RQ_DASHBOARD_REDIS_PORT'),
+            host=current_app.config.get('RQ_DASHBOARD_REDIS_HOST', 'localhost'),
+            port=current_app.config.get('RQ_DASHBOARD_REDIS_PORT', 6379),
             password=current_app.config.get('RQ_DASHBOARD_REDIS_PASSWORD'),
-            db=current_app.config.get('RQ_DASHBOARD_REDIS_DB')
+            db=current_app.config.get('RQ_DASHBOARD_REDIS_DB', 0),
         )
 
 
@@ -184,7 +189,7 @@ def overview(queue_name, page):
 @blueprint.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
-    if current_app.config.get('RQ_DASHBOARD_DELETE_JOBS'):
+    if current_app.config.get('RQ_DASHBOARD_DELETE_JOBS', False):
         Job.fetch(job_id).delete()
     else:
         cancel_job(job_id)
@@ -340,5 +345,5 @@ def list_workers():
 
 @blueprint.context_processor
 def inject_interval():
-    interval = current_app.config.get('RQ_DASHBOARD_POLL_INTERVAL')
+    interval = current_app.config.get('RQ_DASHBOARD_POLL_INTERVAL', 2500)
     return dict(poll_interval=interval)
