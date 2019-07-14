@@ -57,7 +57,6 @@ table#queues {
 }
 
 table#jobs {
-  table-layout: fixed;
   word-wrap: break-word;
 }
 
