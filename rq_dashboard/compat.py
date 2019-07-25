@@ -33,7 +33,7 @@ class FailedQueue(Queue):
             job_ids = []
             for registry in self._registries:
                 job_ids.extend(registry.get_job_ids())
-            self._job_ids = job_ids
+            self._job_ids = job_ids[::-1] # most recent failures first
         # Dirty hack to turn redis range to python list range
         start = offset
         if length >= 0:
