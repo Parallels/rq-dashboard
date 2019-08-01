@@ -33,7 +33,10 @@ class FailedQueue(Queue):
             job_ids = []
             for registry in self._registries:
                 job_ids.extend(registry.get_job_ids())
+            # Sorting failed jobs globally
+            job_ids.sort(key=lambda job: job.created_at)
             self._job_ids = job_ids
+
         # Dirty hack to turn redis range to python list range
         start = offset
         if length >= 0:
