@@ -335,11 +335,10 @@ def list_workers():
             name=worker.name,
             queues=serialize_queue_names(worker),
             state=str(worker.get_state()),
-            current_job=serialize_current_job(
-                worker.get_current_job()),
+            current_job=serialize_current_job(worker.get_current_job()),
         )
         for worker in Worker.all()),
-        key=lambda w: (w['state'], w['name']))
+        key=lambda w: (w['state'], w['queues'], w['name']))
     return dict(workers=workers)
 
 
