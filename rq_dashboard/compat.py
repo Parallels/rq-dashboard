@@ -5,6 +5,7 @@ Compatibility with rq 1.0, quick and dirty solution to support 1.0 without tons 
 from rq.queue import Queue
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
+from rq.connections import resolve_connection
 
 
 class FailedQueue(Queue):
@@ -19,23 +20,32 @@ class FailedQueue(Queue):
             connection=connection,
         )
 
-        self._registries = (q.failed_job_registry for q in Queue.all())
+        self._registries = ((q, q.failed_job_registry) for q in Queue.all())
         self._job_ids = None
 
-    def get_job_ids(self, offset=0, length=-1):
+    def get_job_ids(self, offset=0, length=-1, sort_key='created_at', sort_order='asc'):
         """
         Builds list of all failed jobs.
 
         Will be incredibly slow and memory-consuming in case of too many failed jobs,
         but leaving It this way for simplicity.
         """
+        if sort_order not in ('asc', 'desc'):
+            raise ValueError('Invalid sort_order: %s' % sort_order)
         if self._job_ids is None:
-            job_ids = []
-            for registry in self._registries:
-                job_ids.extend(registry.get_job_ids())
+            result = []
+            key_template = 'rq:job:{job_id}'
+            for queue, registry in self._registries:
+                job_ids = registry.get_job_ids()
+                connection = resolve_connection(queue.connection)
+                pipeline = connection.pipeline()
+                for job_id in job_ids:
+                    pipeline.hget(key_template.format(job_id=job_id), sort_key)
+                creation_dates = pipeline.execute()
+                result.extend(zip(job_ids, creation_dates))
             # Sorting failed jobs globally
-            job_ids.sort(key=lambda job: job.created_at)
-            self._job_ids = job_ids
+            result.sort(key=lambda pair: pair[1], reverse=(sort_order == 'desc'))
+            self._job_ids = [pair[0] for pair in result]
 
         # Dirty hack to turn redis range to python list range
         start = offset
@@ -54,7 +64,7 @@ class FailedQueue(Queue):
             self.remove(job_id)
 
     def empty(self):
-        for registry in self._registries:
+        for _, registry in self._registries:
             job_ids = registry.get_job_ids()
             for job_id in job_ids:
                 job = Job.fetch(job_id)

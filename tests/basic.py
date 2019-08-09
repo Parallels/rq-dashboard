@@ -45,7 +45,6 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, HTTP_OK)
 
 
-
 __all__ = [
     'BasicTestCase',
 ]
