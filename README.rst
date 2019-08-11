@@ -74,6 +74,7 @@ Run the dashboard standalone, like this:
       --web-background TEXT           Background of the web interface
       --delete-jobs TEXT              Delete jobs instead of cancel
       --debug / --normal              Enter DEBUG mode
+      --verbose-logging TEXT          Make Flask logger verbose
       --help                          Show this message and exit.
 
 
