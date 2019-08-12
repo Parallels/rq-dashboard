@@ -25,10 +25,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    # Be specific about versions in requirements.txt and just name packages
-    # needed during run time here.
-    # See e.g. https://caremad.io/2013/07/setup-vs-requirement/
-    install_requires=['rq>=0.3.8', 'Flask', 'redis', 'arrow'],
+    install_requires=['rq>=1.0', 'Flask', 'redis', 'arrow'],
     entry_points={
         'console_scripts': [
             'rq-dashboard = rq_dashboard.cli:main'
@@ -59,6 +56,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Internet',
         'Topic :: Scientific/Engineering',
