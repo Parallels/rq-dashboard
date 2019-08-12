@@ -9,7 +9,7 @@ from rq import pop_connection, push_connection
 from rq import version as rq_version
 from rq_dashboard.compat import get_all_queues
 
-from .fixtures.rq_1_0 import fxt_failed, fxt_ready
+from .fixtures.rq_1_0 import fxt_all_failed, fxt_ready
 
 from rq_dashboard.cli import make_flask_app
 
@@ -21,7 +21,7 @@ class CompatTestCase(unittest.TestCase):
 
     def get_redis_client(self):
         if self.redis_client is None:
-            self.redis_client = redis.Redis(db=2)
+            self.redis_client = redis.Redis()
         return self.redis_client
 
     def setup_fixtures(self, fixtures):
@@ -60,7 +60,7 @@ class CompatTestCase(unittest.TestCase):
         self.assertItems(('high', 'medium', 'low', 'failed'), names)
 
     def test_failed_jobs(self):
-        self.setup_fixtures(fxt_failed)
+        self.setup_fixtures(fxt_all_failed)
         response = self.client.get('/jobs/failed/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
@@ -83,7 +83,7 @@ class CompatTestCase(unittest.TestCase):
 
         # Checking that original queue names are correct
         queue_names = [j['origin'] for j in jobs]
-        self.assertEqual(queue_names, ['high'] * 3 + ['medium'] * 3 + ['low'] * 3)
+        self.assertEqual(queue_names, ['low', 'medium', 'high'] * 3)
 
 
 __all__ = [
