@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import importlib
+import logging
 import os
 import sys
 
@@ -30,7 +31,8 @@ def add_basic_auth(blueprint, username, password, realm='RQ Dashboard'):
                 {'WWW-Authenticate': 'Basic realm="{}"'.format(realm)})
 
 
-def make_flask_app(config, username, password, url_prefix, compatibility_mode=True):
+def make_flask_app(config, username, password, url_prefix,
+                   compatibility_mode=True):
     """Return Flask app with default configuration and registered blueprint."""
     app = Flask(__name__)
 
@@ -106,12 +108,16 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
     '--delete-jobs', default=False, help='Delete jobs instead of cancel')
 @click.option(
     '--debug/--normal', default=False, help='Enter DEBUG mode')
+@click.option(
+    '--verbose-logging', is_flag=True, default=False,
+    help='Make Flask logger verbose')
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
         redis_sentinels, redis_master_name,
-        poll_interval, extra_path, web_background, debug, delete_jobs):
+        poll_interval, extra_path, web_background, debug, delete_jobs,
+        verbose_logging):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -148,6 +154,13 @@ def run(
         app.config["RQ_DASHBOARD_WEB_BACKGROUND"] = web_background
     if delete_jobs:
         app.config["RQ_DASHBOARD_DELETE_JOBS"] = delete_jobs
+    # Conditionally disable Flask console messages
+    # See: https://stackoverflow.com/questions/14888799
+    log = logging.getLogger('werkzeug')
+    if verbose_logging:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.ERROR)
 
     app.run(host=bind, port=port, debug=debug)
 
