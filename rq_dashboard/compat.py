@@ -44,7 +44,7 @@ class FailedQueue(Queue):
                 creation_dates = pipeline.execute()
                 result.extend(zip(job_ids, creation_dates))
             # Sorting failed jobs globally
-            result.sort(key=lambda pair: pair[1], reverse=(sort_order == 'desc'))
+            result.sort(key=lambda pair: pair[1] or b'', reverse=(sort_order == 'desc'))
             self._job_ids = [pair[0] for pair in result]
 
         # Dirty hack to turn redis range to python list range
