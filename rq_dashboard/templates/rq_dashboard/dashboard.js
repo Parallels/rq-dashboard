@@ -26,7 +26,7 @@ var api = {
             var instances = data.rq_instances;
             cb(instances);
         }).fail(function(err){
-            cb(null, err);
+            cb(null, err || true);
         });
     },
 
@@ -35,7 +35,7 @@ var api = {
             var queues = data.queues;
             cb(queues);
         }).fail(function(err){
-            cb(null, err);
+            cb(null, err || true);
         });
     },
 
@@ -45,7 +45,7 @@ var api = {
             var pagination = data.pagination;
             cb(jobs, pagination);
         }).fail(function(err){
-            cb(null, null, err);
+            cb(null, null, err || true);
         });
     },
 
@@ -54,7 +54,7 @@ var api = {
             var workers = data.workers;
             cb(workers);
         }).fail(function(err){
-            cb(null, err);
+            cb(null, err || true);
         });
     }
 };
