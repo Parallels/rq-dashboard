@@ -80,37 +80,30 @@ var modalConfirm = function(action, cb) {
 // RQ instances
 //
 (function($) {
+    var rqInstancesRow = $('#rq-instances-row');
     var $rqInstances = $('#rq-instances');
 
-    var resolve_rq_instances = function() {
-        api.getRqInstances(function(instances, err) {
-            // Return immediately in case of error
-            if (err) {
-                return;
-            }
+    api.getRqInstances(function(instances, err) {
+        // Return immediately in case of error
+        if (err) {
+            return;
+        }
 
-            if (!Array.isArray(instances)) {
-                $('#rq-instances-row').hide();
-                return;
-            }
-            $rqInstances.empty();
-            $.each(instances, function(i, instance) {
-                $rqInstances.append($('<option>', {
-                    value: i,
-                    text: instance
-                  }));
-            });
+        if (instances && instances.length > 0) {
+            $('#rq-instances-row').show();
+        }
+        $.each(instances, function(i, instance) {
+            $rqInstances.append($('<option>', {
+                value: i,
+                text: instance
+            }));
         });
-    };
+    });
 
     // Listen for changes on the select
     $rqInstances.change(function() {
         var url = url_for('rq-instance', $(this).val());
         $.post(url, function(data) {});
-    });
-
-    $(document).ready(function() {
-        resolve_rq_instances();
     });
 })($);
 
