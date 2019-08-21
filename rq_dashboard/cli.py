@@ -109,15 +109,14 @@ def make_flask_app(config, username, password, url_prefix,
 @click.option(
     '--debug/--normal', default=False, help='Enter DEBUG mode')
 @click.option(
-    '--verbose-logging', is_flag=True, default=False,
-    help='Make Flask logger verbose')
+    '-v', '--verbose', is_flag=True, default=False, help='Enable verbose logging')
 def run(
         bind, port, url_prefix, username, password,
         config,
         redis_host, redis_port, redis_password, redis_database, redis_url,
         redis_sentinels, redis_master_name,
         poll_interval, extra_path, web_background, debug, delete_jobs,
-        verbose_logging):
+        verbose):
     """Run the RQ Dashboard Flask server.
 
     All configuration can be set on the command line or through environment
@@ -157,7 +156,7 @@ def run(
     # Conditionally disable Flask console messages
     # See: https://stackoverflow.com/questions/14888799
     log = logging.getLogger('werkzeug')
-    if verbose_logging:
+    if verbose:
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.ERROR)
