@@ -146,19 +146,22 @@ The RQ dashboard is currently being developed and is in beta stage.
 Docker
 ------
 
-You can also run the dashboard inside of docker, simply build the image with
+You can also run the dashboard inside of docker:
 
 ::
 
-    $ make image
+    $ docker pull eoranged/rq-dashboard
+    $ docker run -p 9181:9181 eoranged/rq-dashboard
 
-and you can then run the image, possibly modifying it with the following environment
-variables from their default values
+and you can then run the image.
+You can pass additional options using environment variables with prefix RQ_DASHBOARD_*:
 
-* REDIS_URL=redis://redis
-* USERNAME=rq
-* PASSWORD=password
 
+* RQ_DASHBOARD_REDIS_URL=redis://redis:6379
+* RQ_DASHBOARD_USERNAME=rq
+* RQ_DASHBOARD_PASSWORD=password
+
+See more info how to pass environment variables in "Docker documentation":https://docs.docker.com/compose/environment-variables/
 
 .. _piptools: https://github.com/nvie/pip-tools
 .. _Flask: http://flask.pocoo.org/
