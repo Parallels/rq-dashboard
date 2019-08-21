@@ -161,7 +161,7 @@ You can pass additional options using environment variables with prefix RQ_DASHB
 * RQ_DASHBOARD_USERNAME=rq
 * RQ_DASHBOARD_PASSWORD=password
 
-See more info how to pass environment variables in "Docker documentation":https://docs.docker.com/compose/environment-variables/
+See more info how to pass environment variables in "Docker documentation":https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file
 
 .. _piptools: https://github.com/nvie/pip-tools
 .. _Flask: http://flask.pocoo.org/
