@@ -5,6 +5,7 @@ redis
 rq>=0.3.8
 arrow>=0.12.1
 six>=1.11.0
+werkzeug>=0.15.3
 
 # Compatibility
 backports.functools_lru_cache; python_version < '3.3'
