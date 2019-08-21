@@ -25,6 +25,8 @@ var api = {
         $.getJSON(url_for('rq-instances'), function(data) {
             var instances = data.rq_instances;
             cb(instances);
+        }).fail(function(err){
+            cb(null, err);
         });
     },
 
@@ -32,6 +34,8 @@ var api = {
         $.getJSON(url_for('queues'), function(data) {
             var queues = data.queues;
             cb(queues);
+        }).fail(function(err){
+            cb(null, err);
         });
     },
 
@@ -40,6 +44,8 @@ var api = {
             var jobs = data.jobs;
             var pagination = data.pagination;
             cb(jobs, pagination);
+        }).fail(function(err){
+            cb(null, null, err);
         });
     },
 
@@ -47,6 +53,8 @@ var api = {
         $.getJSON(url_for('workers'), function(data) {
             var workers = data.workers;
             cb(workers);
+        }).fail(function(err){
+            cb(null, err);
         });
     }
 };
@@ -75,7 +83,12 @@ var modalConfirm = function(action, cb) {
     var $rqInstances = $('#rq-instances');
 
     var resolve_rq_instances = function() {
-        api.getRqInstances(function(instances) {
+        api.getRqInstances(function(instances, err) {
+            // Return immediately in case of error
+            if (err) {
+                return;
+            }
+
             if (!Array.isArray(instances)) {
                 $('#rq-instances-row').hide();
                 return;
@@ -115,7 +128,11 @@ var modalConfirm = function(action, cb) {
         $placeholderEl.show();
 
         // Fetch the available queues
-        api.getQueues(function(queues) {
+        api.getQueues(function(queues, err) {
+            // Return immediately in case of error
+            if (err) {
+                return done();
+            }
             var html = '';
             var fqEl;
 
@@ -150,20 +167,18 @@ var modalConfirm = function(action, cb) {
         });
     };
 
-    var refresh_table = function() {
+    var refresh_table_loop = function() {
         $('span.loading').fadeIn('fast');
         reload_table(function() {
             $('span.loading').fadeOut('fast');
+            setTimeout(refresh_table_loop, POLL_INTERVAL);
         });
     };
 
     $(document).ready(function() {
-
-        reload_table();
-        $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, POLL_INTERVAL);
+        refresh_table_loop();
+        $('#refresh-button').click(reload_table);
         $('[data-toggle=tooltip]').tooltip();
-
     });
 })($);
 
@@ -182,7 +197,12 @@ var modalConfirm = function(action, cb) {
         $placeholderEl.show();
 
         // Fetch the available workers
-        api.getWorkers(function(workers) {
+        api.getWorkers(function(workers, err) {
+            // Return immediately in case of error
+            if (err) {
+                return done();
+            }
+
             var html = '';
 
             $tbody.empty();
@@ -210,19 +230,17 @@ var modalConfirm = function(action, cb) {
         });
     };
 
-    var refresh_table = function() {
+    var refresh_table_loop = function() {
         $('span.loading').fadeIn('fast');
         reload_table(function() {
             $('span.loading').fadeOut('fast');
+            setTimeout(refresh_table_loop, POLL_INTERVAL);
         });
     };
 
     $(document).ready(function() {
-
-        reload_table();
-        $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, POLL_INTERVAL);
-
+        refresh_table_loop();
+        $('#refresh-button').click(reload_table);
     });
 })($);
 
@@ -254,7 +272,11 @@ var modalConfirm = function(action, cb) {
         $placeholderEl.show();
 
         // Fetch the available jobs on the queue
-        api.getJobs({{ queue.name|tojson|safe }}, {{ page|tojson|safe }}, function(jobs, pagination) {
+        api.getJobs({{ queue.name|tojson|safe }}, {{ page|tojson|safe }}, function(jobs, pagination, err) {
+            // Return immediately in case of error
+            if (err) {
+                return done();
+            }
             onJobsLoaded(jobs, pagination, done);
         });
     };
@@ -332,24 +354,23 @@ var modalConfirm = function(action, cb) {
         }
     };
 
-    var refresh_table = function() {
+    var refresh_table_loop = function() {
         if (window.getSelection().toString()) {
             $('#alert-fixed').show();
             return;
         }
         $('#alert-fixed').hide();
         $('span.loading').fadeIn('fast');
+
         reload_table(function() {
             $('span.loading').fadeOut('fast');
+            setTimeout(refresh_table_loop, POLL_INTERVAL);
         });
     };
 
     $(document).ready(function() {
-
-        reload_table();
-        $('#refresh-button').click(refresh_table);
-        setInterval(refresh_table, POLL_INTERVAL);
-
+        refresh_table_loop();
+        $('#refresh-button').click(reload_table);
     });
 
     // Enable the AJAX behaviour of the empty button
