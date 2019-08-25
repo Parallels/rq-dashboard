@@ -193,7 +193,10 @@ var modalConfirm = function(action, cb) {
         api.getWorkers(function(workers, err) {
             // Return immediately in case of error
             if (err) {
-                return done();
+                if (done !== undefined) {
+                    done(0);
+                }
+                return;
             }
 
             var html = '';
@@ -218,7 +221,7 @@ var modalConfirm = function(action, cb) {
             }
 
             if (done !== undefined) {
-                done();
+                done(workers.length);
             }
         });
     };
@@ -232,8 +235,17 @@ var modalConfirm = function(action, cb) {
     };
 
     $(document).ready(function() {
-        refresh_table_loop();
-        $('#refresh-button').click(reload_table);
+        reload_table(function(workers_count) {
+            $('#refresh-button').click(reload_table);
+            // Hide list of workers If It's long
+            if (workers_count > 8) {  // magic constant, need to think It through
+                $('#workers').hide();
+            } else {
+                $('#workers').show();
+            }
+            // Start refreshing the list in a loop
+            refresh_table_loop();
+        });
     });
 })($);
 
