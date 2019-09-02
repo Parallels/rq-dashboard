@@ -13,8 +13,34 @@ It looks like this
 |image1|
 |image2|
 
-Installing
-----------
+Maturity notes
+--------------
+
+The RQ dashboard is currently being developed and is in beta stage.
+
+
+Installing with Docker
+----------------------
+
+You can also run the dashboard inside of docker:
+
+.. code:: console
+
+    $ docker pull eoranged/rq-dashboard
+    $ docker run -p 9181:9181 eoranged/rq-dashboard
+
+and you can then run the image.
+You can pass additional options using environment variables with prefix RQ_DASHBOARD_*:
+
+
+* RQ_DASHBOARD_REDIS_URL=redis://redis:6379
+* RQ_DASHBOARD_USERNAME=rq
+* RQ_DASHBOARD_PASSWORD=password
+
+See more info on how to pass environment variables in `Docker documentation`_
+
+Installing from PyPI
+--------------------
 
 .. code:: console
 
@@ -137,31 +163,11 @@ Develop in the normal way with
     $ python setup.py develop
 
 
-Maturity notes
---------------
+Stats
+-----
 
-The RQ dashboard is currently being developed and is in beta stage.
-
-
-Docker
-------
-
-You can also run the dashboard inside of docker:
-
-::
-
-    $ docker pull eoranged/rq-dashboard
-    $ docker run -p 9181:9181 eoranged/rq-dashboard
-
-and you can then run the image.
-You can pass additional options using environment variables with prefix RQ_DASHBOARD_*:
-
-
-* RQ_DASHBOARD_REDIS_URL=redis://redis:6379
-* RQ_DASHBOARD_USERNAME=rq
-* RQ_DASHBOARD_PASSWORD=password
-
-See more info on how to pass environment variables in `Docker documentation`_
+* `PyPI stats`_
+* `Github stats`_
 
 .. _piptools: https://github.com/nvie/pip-tools
 .. _Flask: http://flask.pocoo.org/
@@ -179,3 +185,5 @@ See more info on how to pass environment variables in `Docker documentation`_
    :target: https://i.imgur.com/nStM6H7.png
    :width: 47%
 .. _Docker documentation: https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file
+.. _PyPI stats: https://pypistats.org/packages/rq-dashboard
+.. _Github stats: https://github.com/eoranged/rq-dashboard/graphs/traffic
