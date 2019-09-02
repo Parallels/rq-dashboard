@@ -6,6 +6,7 @@ front-end to monitor your `RQ`_ queues, jobs, and workers in realtime.
 
 |Build Status|
 |Python Support|
+|PyPI Downloads|
 
 It looks like this
 ------------------
@@ -187,3 +188,5 @@ Stats
 .. _Docker documentation: https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file
 .. _PyPI stats: https://pypistats.org/packages/rq-dashboard
 .. _Github stats: https://github.com/eoranged/rq-dashboard/graphs/traffic
+.. |PyPI Downloads| image:: https://img.shields.io/pypi/dw/rq-dashboard
+
