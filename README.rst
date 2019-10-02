@@ -131,6 +131,12 @@ blueprint directly in the normal way, e.g.:
 If you start the Flask app on the default port, you can access the dashboard at http://localhost:5000/rq. The ``cli.py:main`` entry point provides a simple working example.
 
 
+Running on Heroku
+-----------------
+
+Consider using `rq-dashboard-on-heroku`_, which installs rq-dashboard from PyPI and wraps in in `Gunicorn`_ for deployment to Heroku. rq-dashboard-on-heroku is maintained indepdently.
+
+
 Developing
 ----------
 
@@ -173,6 +179,9 @@ Stats
 .. _piptools: https://github.com/nvie/pip-tools
 .. _Flask: http://flask.pocoo.org/
 .. _RQ: http://python-rq.org/
+.. _rq-dashboard-on-heroku: https://github.com/metabolize/rq-dashboard-on-heroku
+.. _gunicorn: https://gunicorn.org
+
 
 .. |Build Status| image:: https://travis-ci.org/eoranged/rq-dashboard.svg?branch=master
    :target: https://travis-ci.org/eoranged/rq-dashboard
