@@ -30,6 +30,7 @@ from rq import (Queue, Worker, cancel_job, pop_connection,
                 push_connection, requeue_job)
 from rq.job import Job
 from .legacy_config import upgrade_config
+from .version import VERSION
 
 
 def get_all_queues():
@@ -180,7 +181,8 @@ def overview(queue_name, page):
         queue=queue,
         page=page,
         queues=get_all_queues(),
-        rq_url_prefix=url_for('.overview')
+        rq_url_prefix=url_for('.overview'),
+        rqdVersion=VERSION
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
