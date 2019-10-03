@@ -5,4 +5,7 @@ dump.rdb
 /dist
 /build
 /.direnv
+/.vscode
 ._*
+
+.DS_Store
