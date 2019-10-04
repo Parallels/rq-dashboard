@@ -27,10 +27,10 @@ from flask import Blueprint, current_app, make_response, render_template, url_fo
 from redis import Redis, from_url
 from redis.sentinel import Sentinel
 from rq import (Queue, Worker, cancel_job, pop_connection,
-                push_connection, requeue_job)
+                push_connection, requeue_job, VERSION as rq_version)
 from rq.job import Job
 from .legacy_config import upgrade_config
-from .version import VERSION
+from .version import VERSION as rq_dashboard_version
 
 
 def get_all_queues():
@@ -182,7 +182,8 @@ def overview(queue_name, page):
         page=page,
         queues=get_all_queues(),
         rq_url_prefix=url_for('.overview'),
-        rqdVersion=VERSION
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r

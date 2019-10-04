@@ -5,7 +5,7 @@ dump.rdb
 /dist
 /build
 /.direnv
-/.vscode
+.VScode
+.DS_Store
 ._*
 
-.DS_Store
