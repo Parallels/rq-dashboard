@@ -182,7 +182,7 @@ def overview(queue_name, page):
         page=page,
         queues=get_all_queues(),
         rq_url_prefix=url_for('.overview'),
-        rqdVersion=VERSION
+        rq_dashboard_version=VERSION
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
