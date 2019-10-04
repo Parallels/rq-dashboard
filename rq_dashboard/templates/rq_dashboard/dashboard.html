@@ -206,9 +206,10 @@
 
 {% block footer %}
 
-<div class="container">
-    <p class="rq-dashboard and rq versions"><a href="https://github.com/Parallels/rq-dashboard">RQ-dashboard</a> version: {{ rq_dashboard_version }}<br>RQ version: {{ rq_version}}</p>
-</div>
+<footer>
+    <a href="https://github.com/Parallels/rq-dashboard">RQ-dashboard</a><span class="text-white"> version: {{ rq_dashboard_version }}</span><br>
+    <a href="http://python-rq.org">Python RQ</a><span class="text-white"> version: {{ rq_version}}</span>
+</footer>
 
 {% endblock %}
 
