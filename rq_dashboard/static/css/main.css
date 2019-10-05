@@ -132,3 +132,11 @@ span.loading {
     text-align: center;
     display: none;
 }
+
+footer {
+    text-align: center;
+}
+
+.text-white {
+    color: white;
+}
