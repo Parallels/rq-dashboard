@@ -5,4 +5,11 @@ dump.rdb
 /dist
 /build
 /.direnv
+<<<<<<< HEAD
 ._*
+=======
+.VScode
+.DS_Store
+._*
+
+>>>>>>> b4629e3... Added versions footer

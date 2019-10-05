@@ -204,6 +204,15 @@
 
 {% endblock %}
 
+{% block footer %}
+
+<footer>
+    <a href="https://github.com/Parallels/rq-dashboard">RQ-dashboard</a><span class="text-white"> version: {{ rq_dashboard_version }}</span><br>
+    <a href="http://python-rq.org">Python RQ</a><span class="text-white"> version: {{ rq_version }}</span>
+</footer>
+
+{% endblock %}
+
 
 {% block inline_js %}
 var POLL_INTERVAL = {{ poll_interval }};
