@@ -9,4 +9,6 @@ ADD . /
 RUN pip3 install -r requirements.txt
 RUN python3 setup.py develop
 
+EXPOSE 9181
+
 ENTRYPOINT ["python3", "-m", "rq_dashboard"]
