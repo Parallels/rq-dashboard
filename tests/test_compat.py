@@ -4,14 +4,13 @@ import json
 import unittest
 
 import redis
-
 from rq import pop_connection, push_connection
 from rq import version as rq_version
+
+from rq_dashboard.cli import make_flask_app
 from rq_dashboard.compat import get_all_queues
 
 from .fixtures.rq_1_0 import fxt_all_failed, fxt_ready
-
-from rq_dashboard.cli import make_flask_app
 
 HTTP_OK = 200
 

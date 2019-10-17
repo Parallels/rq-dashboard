@@ -339,6 +339,8 @@ def list_workers():
             queues=serialize_queue_names(worker),
             state=str(worker.get_state()),
             current_job=serialize_current_job(worker.get_current_job()),
+            version=getattr(worker, 'version', ''),
+            python_version=getattr(worker, 'python_version', '')
         )
         for worker in Worker.all()),
         key=lambda w: (w['state'], w['queues'], w['name']))
