@@ -160,6 +160,13 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
     return result
 
 
+def encode_escape_simbols_in_string(s):
+    s = s.replace('\\', '&#92;')
+    s = s.replace("'", '&#39;')
+    s = s.replace('"', '&#34;')
+    return s
+
+
 @blueprint.route('/', defaults={'queue_name': None, 'page': '1'})
 @blueprint.route('/<queue_name>', defaults={'page': '1'})
 @blueprint.route('/<queue_name>/<page>')
@@ -322,7 +329,7 @@ def serialize_current_job(job):
         return "idle"
     return dict(
         job_id=job.id,
-        description=job.description,
+        description=encode_escape_simbols_in_string(job.description),
         created_at=serialize_date(job.created_at)
     )
 
