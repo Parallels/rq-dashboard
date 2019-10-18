@@ -75,7 +75,7 @@
             <script name="worker-row" type="text/template">
                 <tr data-role="worker">
                     <td><i class="icon-<%= d.state %>" title="Job ID: <%= d.current_job.job_id %>&#013;&#010;Description: <%= d.current_job.description %>&#013;&#010;Created at: <%= d.current_job.created_at %>&#013;&#010;"></i></td>
-                    <td><%= d.name %></td>
+                    <td <% if (d.version && d.python_version) { %>title ="RQ <%= d.version %> / Python <%= d.python_version %>" <% } %>><%= d.name %></td>
                     <td><%= d.queues.join(', ') %></td>
                 </tr>
             </script>
