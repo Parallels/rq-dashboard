@@ -11,16 +11,21 @@ def get_version():
     raise RuntimeError('No version info found.')
 
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+
 setup(
     name='rq-dashboard',
     version=get_version(),
-    url='https://github.com/eoranged/rq-dashboard',
+    url='https://github.com/Parallels/rq-dashboard',
     license='BSD',
     author='Vincent Driessen',
     author_email='vincent@3rdcloud.com',
     description='rq-dashboard is a general purpose, lightweight, web interface'
                 ' to monitor your RQ queues, jobs, and workers in realtime.',
-    long_description=__doc__,
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=find_packages(exclude=('tests',)),
     include_package_data=True,
     zip_safe=False,
