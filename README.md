@@ -140,17 +140,6 @@ rq-dashboard-on-heroku is maintained indepdently.
 Developing
 ----------
 
-We use [piptools](https://github.com/nvie/pip-tools) to keep our
-development dependencies up to date
-
-    $ pip install --upgrade pip
-    $ pip install pip-tools
-
-Now make changes to the `requirements.in` file, and resolve all the
-2nd-level dependencies into `requirements.txt` like so:
-
-    $ pip-compile --annotate requirements.in
-
 Develop in a virtualenv and make sure you have all the necessary build
 time (and run time) dependencies with
 
