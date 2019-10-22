@@ -4,7 +4,7 @@ import json
 import unittest
 
 import redis
-from rq import Worker, pop_connection, push_connection
+from rq import Queue, Worker, pop_connection, push_connection
 
 from rq_dashboard.cli import make_flask_app
 
@@ -59,7 +59,8 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, HTTP_OK)
 
     def test_worker_python_version_field(self):
-        w = Worker(['q'])
+        q = Queue()
+        w = Worker([q], name='test_worker1')
         w.register_birth()
         response = self.client.get('/workers.json')
         data = json.loads(response.data.decode('utf8'))
@@ -69,7 +70,8 @@ class BasicTestCase(unittest.TestCase):
             self.assertEqual('', data['workers'][0]['python_version'])
 
     def test_worker_version_field(self):
-        w = Worker(['q'])
+        q = Queue()
+        w = Worker([q], name='test_worker2')
         w.register_birth()
         response = self.client.get('/workers.json')
         data = json.loads(response.data.decode('utf8'))

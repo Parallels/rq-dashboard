@@ -1,23 +1,25 @@
 language: python
-services:
-  - redis-server
-matrix:
-  fast_finish: true
-  include:
-  - python: "2.7"
-  - python: "3.4"
-  - python: "3.5"
-  - python: "3.6"
-  - python: "3.7"
-    dist: xenial
-  - python: "pypy"
+fast_finish: true
+python: 
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7
+  - pypy
+env: 
+  - RQ_VERSION="rq==0.12"
+  - RQ_VERSION="rq==1.0"
+  - RQ_VERSION="rq==1.1"
+  - RQ_VERSION="-e git+https://github.com/rq/rq#egg=rq"
 
-# command to install dependencies
-install:
-  - bash -c '[[ $(python -V) == "Python 3.4."* ]] && pip install setuptools==24.0.3 || :'
-  - pip install -r requirements.txt
-  - pip install flake8 pytest
-# command to run tests
-script:
+install: 
+  - "bash -c '[[ $(python -V) == \"Python 3.4.\"* ]] && pip install setuptools==24.0.3 || :'"
+  - "pip install -r requirements.txt"
+  - "pip install $RQ_VERSION"
+  - "pip install flake8 pytest"
+script: 
   - pytest
-  - flake8 rq_dashboard tests
+  - "flake8 rq_dashboard tests"
+services: 
+  - redis-server
