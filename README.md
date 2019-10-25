@@ -2,11 +2,11 @@ Introduction
 ============
 
 `rq-dashboard` is a general purpose, lightweight,
-[Flask](http://flask.pocoo.org/)-based web front-end to monitor your
+[Flask](https://flask.palletsprojects.com/)-based web front-end to monitor your
 [RQ](http://python-rq.org/) queues, jobs, and workers in realtime.
 
 [![Build
-Status](https://travis-ci.org/eoranged/rq-dashboard.svg?branch=master)](https://travis-ci.org/eoranged/rq-dashboard)
+Status](https://travis-ci.org/Parallels/rq-dashboard.svg?branch=master)](https://travis-ci.org/Parallels/rq-dashboard)
 [![Python
 Support](https://img.shields.io/pypi/pyversions/rq-dashboard.svg)](https://pypi.python.org/pypi/rq-dashboard)
 ![PyPI Downloads](https://img.shields.io/pypi/dw/rq-dashboard)
@@ -153,4 +153,4 @@ Stats
 -----
 
 -   [PyPI stats](https://pypistats.org/packages/rq-dashboard)
--   [Github stats](https://github.com/eoranged/rq-dashboard/graphs/traffic)
+-   [Github stats](https://github.com/Parallels/rq-dashboard/graphs/traffic)
