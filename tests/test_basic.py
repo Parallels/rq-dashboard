@@ -4,11 +4,12 @@ import json
 import unittest
 
 import redis
-from rq import Queue, Worker, pop_connection, push_connection
+from rq import Worker, pop_connection, push_connection
 
 from rq_dashboard.cli import make_flask_app
 
 HTTP_OK = 200
+HTTP_PERMANENT_REDIRECT = 308
 
 
 class BasicTestCase(unittest.TestCase):
@@ -54,13 +55,28 @@ class BasicTestCase(unittest.TestCase):
         self.assertIsInstance(data, dict)
         self.assertIn('workers', data)
 
-    def test_failed_jobs(self):
-        response = self.client.get('/failed')
+    def test_queued_jobs_list(self):
+        response_dashboard = self.client.get('default/registries')
+        self.assertEqual(response_dashboard.status_code, HTTP_OK)
+        response_queued_redirect = self.client.get('default/registries/queued')
+        self.assertEqual(response_queued_redirect.status_code, HTTP_PERMANENT_REDIRECT)
+        response = self.client.get('/jobs/default/registries/queued/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertIsInstance(data, dict)
+        self.assertIn('jobs', data)
+
+    def test_registry_jobs_list(self):
+        response_dashboard = self.client.get('/default/registries/failed')
+        self.assertEqual(response_dashboard.status_code, HTTP_OK)
+        response = self.client.get('/jobs/default/registries/failed/1.json')
+        self.assertEqual(response.status_code, HTTP_OK)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertIsInstance(data, dict)
+        self.assertIn('jobs', data)
 
     def test_worker_python_version_field(self):
-        q = Queue()
-        w = Worker([q], name='test_worker1')
+        w = Worker(['q'])
         w.register_birth()
         response = self.client.get('/workers.json')
         data = json.loads(response.data.decode('utf8'))
@@ -68,10 +84,10 @@ class BasicTestCase(unittest.TestCase):
             self.assertEqual(w.python_version, data['workers'][0]['python_version'])
         else:
             self.assertEqual('', data['workers'][0]['python_version'])
+        w.register_death()
 
     def test_worker_version_field(self):
-        q = Queue()
-        w = Worker([q], name='test_worker2')
+        w = Worker(['q'])
         w.register_birth()
         response = self.client.get('/workers.json')
         data = json.loads(response.data.decode('utf8'))
@@ -79,6 +95,7 @@ class BasicTestCase(unittest.TestCase):
             self.assertEqual(w.version, data['workers'][0]['version'])
         else:
             self.assertEqual('', data['workers'][0]['version'])
+        w.register_death()
 
 
 __all__ = [
