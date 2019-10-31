@@ -257,7 +257,7 @@ def list_instances():
         )
     elif isinstance(redis_url, string_types):
         return dict(
-            rq_instances=re.sub(r'://:[^@]*@', '://:***@', redis_url),
+            rq_instances=[re.sub(r'://:[^@]*@', '://:***@', redis_url)],
         )
     else:
         # TODO handle case when configuration is not in form of URL
