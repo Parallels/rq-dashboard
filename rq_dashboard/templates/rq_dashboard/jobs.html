@@ -1,97 +1,6 @@
 {% extends "rq_dashboard/base.html" %}
 
-
 {% block content %}
-<div class="row" id="rq-instances-row" style="display: none">
-    <div class="span12">
-        <div class="section">
-            <h1>RQ Instances</h1>
-            <p class="intro">Select below the RQ instance that you want to observe.</p>
-            <select id="rq-instances">
-            </select>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="span6">
-        <div class="section">
-
-            <h1>Queues</h1>
-            <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently
-                in the queue. Select a queue from above to view all jobs currently pending on the queue.</p>
-
-            <table id="queues" class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Queue</th>
-                    <th class="narrow">Queued jobs</th>
-                    <th class="narrow">Failed jobs</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr data-role="loading-placeholder">
-                    <td colspan="3">Loading...</td>
-                </tr>
-                </tbody>
-            </table>
-
-            <script name="queue-row" type="text/template">
-                <tr data-role="queue">
-                <td><i class="icon-inbox" style="opacity: .5;"></i> <%= d.name %></td>
-                <td class="narrow"> <a href="<%= d.url %>"><%= d.count %></a></td>
-                <td class ="failed"> <a href="<%= d.url + '/failed' %>"><%= d.failed_job_registry_count %></a></td>
-                </tr>
-            </script>
-
-            <script name="no-queues-row" type="text/template">
-                <tr>
-                    <td colspan="3">No queues.</td>
-                </tr>
-            </script>
-
-        </div>
-    </div>
-
-    <div class="span6">
-        <div class="section">
-
-            <h1>Workers <a id="workers-btn" href="#">(toggle)</a></h1>
-
-            <p id="workers-count" class="fixed intro">No workers registered!</p>
-
-            <table id="workers" class="table table-bordered" style="display: none;">
-                <thead>
-                <tr>
-                    <th style="width:48px">State</th>
-                    <th>Worker</th>
-                    <th>Queues</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr data-role="loading-placeholder">
-                    <td colspan="3">Loading...</td>
-                </tr>
-                </tbody>
-            </table>
-
-            <script name="worker-row" type="text/template">
-                <tr data-role="worker">
-                    <td><i class="icon-<%= d.state %>" title="Job ID: <%= d.current_job.job_id %>&#013;&#010;Description: <% if (d.current_job.description){ %> <%- d.current_job.description %> <% } %>&#013;&#010;Created at: <%= d.current_job.created_at %>&#013;&#010;"></i></td>
-                    <td <% if (d.version && d.python_version) { %>title ="RQ <%= d.version %> / Python <%= d.python_version %>" <% } %>><%= d.name %></td>
-                    <td><%= d.queues.join(', ') %></td>
-                </tr>
-            </script>
-
-            <script name="no-workers-row" type="text/template">
-                <tr>
-                    <td colspan="3">No workers.</td>
-                </tr>
-            </script>
-
-        </div>
-    </div>
-</div>
-
 <div class="row">
     <div class="span12">
         <div class="section">
@@ -206,21 +115,4 @@
         </div>
     </div>
 </div>
-
-
-{% endblock %}
-
-{% block footer %}
-
-<footer>
-    <a href="https://github.com/Parallels/rq-dashboard">RQ-dashboard</a><span class="text-white"> version: {{ rq_dashboard_version }}</span><br>
-    <a href="http://python-rq.org">Python RQ</a><span class="text-white"> version: {{ rq_version }}</span>
-</footer>
-
-{% endblock %}
-
-
-{% block inline_js %}
-var POLL_INTERVAL = {{ poll_interval }};
-{% include "rq_dashboard/dashboard.js" with context %}
 {% endblock %}

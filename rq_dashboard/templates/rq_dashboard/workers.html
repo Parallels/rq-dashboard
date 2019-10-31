@@ -1,0 +1,43 @@
+{% extends "rq_dashboard/base.html" %}
+
+{% block content %}
+<div class="span6">
+    <div class="section">
+
+        <h1>Workers <a id="workers-btn" href="#">(toggle)</a></h1>
+
+        <p id="workers-count" class="fixed intro">No workers registered!</p>
+
+        <table id="workers" class="table table-bordered" style="display: none;">
+            <thead>
+            <tr>
+                <th style="width:48px">State</th>
+                <th>Worker</th>
+                <th>Queues</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-role="loading-placeholder">
+                <td colspan="3">Loading...</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <script name="worker-row" type="text/template">
+            <tr data-role="worker">
+                <td><i class="icon-<%= d.state %>" title="Job ID: <%= d.current_job.job_id %>&#013;&#010;Description: <% if (d.current_job.description){ %> <%- d.current_job.description %> <% } %>&#013;&#010;Created at: <%= d.current_job.created_at %>&#013;&#010;"></i></td>
+                <td <% if (d.version && d.python_version) { %>title ="RQ <%= d.version %> / Python <%= d.python_version %>" <% } %>><%= d.name %></td>
+                <td><%= d.queues.join(', ') %></td>
+            </tr>
+        </script>
+
+        <script name="no-workers-row" type="text/template">
+            <tr>
+                <td colspan="3">No workers.</td>
+            </tr>
+        </script>
+
+    </div>
+</div>
+
+{% endblock %}

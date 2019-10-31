@@ -10,15 +10,24 @@
   <link href="{{ url_for('rq_dashboard.static', filename='css/main.css') }}" rel="stylesheet">
 </head>
 
-<body style="background-color:{{config.RQ_DASHBOARD_WEB_BACKGROUND}};">
+<body style="background-color:{{ config.RQ_DASHBOARD_WEB_BACKGROUND }};">
+
+
 
 <div id="alert-fixed" class="alert alert-error">
   <strong>Warning!</strong> Selection pauses information refresh
 </div>
 
+{% include "rq_dashboard/navbar.html" %}
+
 <div class="container">
 
-    {% block content %}{% endblock %}
+  {% block content %}{% endblock %}
+
+    {% include "rq_dashboard/rq_instances.html" %}
+    <div class="row">
+
+    </div>
 
 </div>
 
@@ -34,8 +43,7 @@
 </div>
 
   
-{% block footer %}{% endblock %}
-
+{% include "rq_dashboard/footer.html" %}
 
 {#- JavaScripts are loaded at the end -#}
 
@@ -45,8 +53,7 @@
 <script src="{{ url_for('rq_dashboard.static', filename='js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap-tooltip.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap-modal.js') }}" type="text/javascript"></script>
-<script type="text/javascript">
-{% block inline_js %}{% endblock %}
+<script type="text/javascript">{% include "rq_dashboard/inline_js.html" %}
 </script>
 
 </body>

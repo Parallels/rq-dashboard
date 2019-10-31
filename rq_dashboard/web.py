@@ -175,7 +175,7 @@ def overview(queue_name, registry_name, page):
     else:
         queue = Queue(queue_name)
     r = make_response(render_template(
-        'rq_dashboard/dashboard.html',
+        'rq_dashboard/queues.html',
         workers=Worker.all(),
         queue=queue,
         page=page,
