@@ -9,8 +9,8 @@ var url_for = function(name, param) {
     return url;
 };
 
-var url_for_jobs = function(param, page) {
-    var url = {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(param) + '/' + page + '.json';
+var url_for_jobs = function(queue_name, registry_name, page) {
+    var url = {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/registries/' + encodeURIComponent(registry_name) + '/' + page + '.json';
     return url;
 };
 
@@ -39,8 +39,8 @@ var api = {
         });
     },
 
-    getJobs: function(queue_name, page, cb) {
-        $.getJSON(url_for_jobs(queue_name, page), function(data) {
+    getJobs: function(queue_name, registry_name, page, cb) {
+        $.getJSON(url_for_jobs(queue_name, registry_name, page), function(data) {
             var jobs = data.jobs;
             var pagination = data.pagination;
             cb(jobs, pagination);
@@ -127,28 +127,14 @@ var modalConfirm = function(action, cb) {
                 return done();
             }
             var html = '';
-            var fqEl;
 
             $tbody.empty();
 
             if (queues.length > 0) {
                 $.each(queues, function(i, queue) {
                     var el = template({d: queue}, {variable: 'd'});
-
-                    // Special markup for the failed queue
-                    if (queue.name === 'failed' && queue.count > 0) {
-                        fqEl = el;
-                        return;
-                    }
-
                     html += el;
                 });
-
-                // Append the failed queue at the end, since it's a special queue
-                if (fqEl !== undefined) {
-                    html += fqEl;
-                }
-
                 $tbody.append(html);
             } else {
                 $tbody.append(noQueuesHtml);
@@ -277,7 +263,7 @@ var modalConfirm = function(action, cb) {
         $placeholderEl.show();
 
         // Fetch the available jobs on the queue
-        api.getJobs({{ queue.name|tojson|safe }}, {{ page|tojson|safe }}, function(jobs, pagination, err) {
+        api.getJobs({{ queue.name|tojson|safe }}, {{registry_name|tojson|safe}}, {{ page|tojson|safe }}, function(jobs, pagination, err) {
             // Return immediately in case of error
             if (err) {
                 return done();

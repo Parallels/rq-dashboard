@@ -21,31 +21,20 @@ from functools import wraps
 from math import ceil
 
 import arrow
-from six import string_types
-
-from flask import Blueprint, current_app, make_response, render_template, url_for
+from flask import (Blueprint, current_app, make_response, render_template,
+                   url_for)
 from redis import Redis, from_url
 from redis.sentinel import Sentinel
-from rq import (Queue, Worker, cancel_job, pop_connection,
-                push_connection, requeue_job, VERSION as rq_version)
+from rq import VERSION as rq_version
+from rq import (Queue, Worker, cancel_job, pop_connection, push_connection,
+                requeue_job)
 from rq.job import Job
+from rq.registry import (DeferredJobRegistry, FailedJobRegistry,
+                         FinishedJobRegistry, StartedJobRegistry)
+from six import string_types
+
 from .legacy_config import upgrade_config
 from .version import VERSION as rq_dashboard_version
-
-
-def get_all_queues():
-    """
-    Return list of all queues.
-
-    Redefined in compat module to also return magic failed queue.
-    """
-    return Queue.all()
-
-
-try:
-    from rq import get_failed_queue  # removed in 1.0
-except ImportError:
-    from .compat import get_failed_queue, get_all_queues  # noqa: F811
 
 blueprint = Blueprint(
     'rq_dashboard',
@@ -53,13 +42,6 @@ blueprint = Blueprint(
     template_folder='templates',
     static_folder='static',
 )
-
-
-def get_queue(queue_name):
-    if queue_name == 'failed':
-        return get_failed_queue()
-    else:
-        return Queue(queue_name)
 
 
 @blueprint.before_app_first_request
@@ -119,6 +101,7 @@ def serialize_queues(queues):
         dict(
             name=q.name,
             count=q.count,
+            failed_job_registry_count=q.failed_job_registry.count,
             url=url_for('.overview', queue_name=q.name))
         for q in queues
     ]
@@ -160,19 +143,35 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
     return result
 
 
-@blueprint.route('/', defaults={'queue_name': None, 'page': '1'})
-@blueprint.route('/<queue_name>', defaults={'page': '1'})
-@blueprint.route('/<queue_name>/<page>')
-def overview(queue_name, page):
-    if queue_name == 'failed':
-        queue = get_failed_queue()
-    elif queue_name is None:
-        # Show the failed queue by default if it contains any jobs
-        failed = get_failed_queue()
-        if not failed.is_empty():
-            queue = failed
-        else:
-            queue = Queue()
+def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
+    queue = Queue(queue_name)
+    if registry_name == 'failed':
+        current_queue = FailedJobRegistry(queue_name)
+    elif registry_name == 'deferred':
+        current_queue = DeferredJobRegistry(queue_name)
+    elif registry_name == 'started':
+        current_queue = StartedJobRegistry(queue_name)
+    elif registry_name == 'finished':
+        current_queue = FinishedJobRegistry(queue_name)
+    else:
+        current_queue = queue
+    total_items = current_queue.count
+
+    job_ids = current_queue.get_job_ids(offset, per_page)
+    current_queue_jobs = [queue.fetch_job(job_id) for job_id in job_ids]
+    jobs = [serialize_job(job) for job in current_queue_jobs]
+
+    return(total_items, jobs)
+
+
+@blueprint.route('/', defaults={'queue_name': None, 'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/<queue_name>/', defaults={'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/<queue_name>/registries', defaults={'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/<queue_name>/registries/<registry_name>', defaults={'page': '1'})
+@blueprint.route('/<queue_name>/registries/<registry_name>/<int:page>')
+def overview(queue_name, registry_name, page):
+    if queue_name is None:
+        queue = Queue()
     else:
         queue = Queue(queue_name)
     r = make_response(render_template(
@@ -180,7 +179,8 @@ def overview(queue_name, page):
         workers=Worker.all(),
         queue=queue,
         page=page,
-        queues=get_all_queues(),
+        queues=Queue.all(),
+        registry_name=registry_name,
         rq_url_prefix=url_for('.overview'),
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
@@ -206,11 +206,11 @@ def requeue_job_view(job_id):
     return dict(status='OK')
 
 
-@blueprint.route('/requeue-all', methods=['GET', 'POST'])
+@blueprint.route('/requeue/<queue_name>', methods=['GET', 'POST'])
 @jsonify
-def requeue_all():
-    fq = get_failed_queue()
-    job_ids = fq.job_ids
+def requeue_all(queue_name):
+    fq = Queue(queue_name).failed_job_registry
+    job_ids = fq.get_job_ids()
     count = len(job_ids)
     for job_id in job_ids:
         requeue_job(job_id, connection=current_app.redis_conn)
@@ -220,7 +220,7 @@ def requeue_all():
 @blueprint.route('/queue/<queue_name>/empty', methods=['POST'])
 @jsonify
 def empty_queue(queue_name):
-    q = get_queue(queue_name)
+    q = Queue(queue_name)
     q.empty()
     return dict(status='OK')
 
@@ -228,7 +228,7 @@ def empty_queue(queue_name):
 @blueprint.route('/queue/<queue_name>/compact', methods=['POST'])
 @jsonify
 def compact_queue(queue_name):
-    q = get_queue(queue_name)
+    q = Queue(queue_name)
     q.compact()
     return dict(status='OK')
 
@@ -267,21 +267,22 @@ def list_instances():
 @blueprint.route('/queues.json')
 @jsonify
 def list_queues():
-    queues = serialize_queues(sorted(get_all_queues()))
+    queues = serialize_queues(sorted(Queue.all()))
     return dict(queues=queues)
 
 
-@blueprint.route('/jobs/<queue_name>/<page>.json')
+@blueprint.route('/jobs/<queue_name>/registries/<registry_name>/<page>.json')
 @jsonify
-def list_jobs(queue_name, page):
+def list_jobs(queue_name, registry_name, page):
     current_page = int(page)
-    queue = get_queue(queue_name)
     per_page = 5
-    total_items = queue.count
+    offset = (current_page - 1) * per_page
+    total_items, jobs = get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page)
+
     pages_numbers_in_window = pagination_window(
         total_items, current_page, per_page)
     pages_in_window = [
-        dict(number=p, url=url_for('.overview', queue_name=queue_name, page=p))
+        dict(number=p, url=url_for('.overview', queue_name=queue_name, registry_name=registry_name, page=p))
         for p in pages_numbers_in_window
     ]
     last_page = int(ceil(total_items / float(per_page)))
@@ -289,15 +290,15 @@ def list_jobs(queue_name, page):
     prev_page = None
     if current_page > 1:
         prev_page = dict(url=url_for(
-            '.overview', queue_name=queue_name, page=(current_page - 1)))
+            '.overview', queue_name=queue_name, registry_name=registry_name, page=(current_page - 1)))
 
     next_page = None
     if current_page < last_page:
         next_page = dict(url=url_for(
-            '.overview', queue_name=queue_name, page=(current_page + 1)))
+            '.overview', queue_name=queue_name, registry_name=registry_name, page=(current_page + 1)))
 
-    first_page_link = dict(url=url_for('.overview', queue_name=queue_name, page=1))
-    last_page_link = dict(url=url_for('.overview', queue_name=queue_name, page=last_page))
+    first_page_link = dict(url=url_for('.overview', queue_name=queue_name, registry_name=registry_name, page=1))
+    last_page_link = dict(url=url_for('.overview', queue_name=queue_name, registry_name=registry_name, page=last_page))
 
     pagination = remove_none_values(
         dict(
@@ -311,10 +312,7 @@ def list_jobs(queue_name, page):
         )
     )
 
-    offset = (current_page - 1) * per_page
-    queue_jobs = queue.get_jobs(offset, per_page)
-    jobs = [serialize_job(job) for job in queue_jobs]
-    return dict(name=queue.name, jobs=jobs, pagination=pagination)
+    return dict(name=queue_name, registry_name=registry_name, jobs=jobs, pagination=pagination)
 
 
 def serialize_current_job(job):
@@ -332,7 +330,6 @@ def serialize_current_job(job):
 def list_workers():
     def serialize_queue_names(worker):
         return [q.name for q in worker.queues]
-
     workers = sorted((
         dict(
             name=worker.name,
