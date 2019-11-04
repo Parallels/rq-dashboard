@@ -11,7 +11,7 @@ flask==1.0.2
 itsdangerous==1.1.0       # via flask
 jinja2==2.10.3            # via flask
 markupsafe==1.1.1         # via jinja2
-python-dateutil==2.8.0    # via arrow
+python-dateutil==2.8.1    # via arrow
 redis==3.3.11
 rq==1.1.0
 six==1.12.0
