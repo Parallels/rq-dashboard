@@ -16,19 +16,22 @@ As a quick-and-dirty convenience, the command line invocation in ``cli.py``
 provides the option to require HTTP Basic Auth in a few lines of code.
 
 """
+import os
 import re
 from functools import wraps
 from math import ceil
 
 import arrow
-from six import string_types
-
-from flask import Blueprint, current_app, make_response, render_template, url_for
+from flask import (Blueprint, current_app, make_response, render_template,
+                   send_from_directory, url_for)
 from redis import Redis, from_url
 from redis.sentinel import Sentinel
-from rq import (Queue, Worker, cancel_job, pop_connection,
-                push_connection, requeue_job, VERSION as rq_version)
+from rq import VERSION as rq_version
+from rq import (Queue, Worker, cancel_job, pop_connection, push_connection,
+                requeue_job)
 from rq.job import Job
+from six import string_types
+
 from .legacy_config import upgrade_config
 from .version import VERSION as rq_dashboard_version
 
@@ -158,6 +161,12 @@ def pagination_window(total_items, cur_page, per_page=5, window_size=10):
         pages_window_end = pages_window_start + window_size
         result = all_pages[pages_window_start:pages_window_end]
     return result
+
+
+@blueprint.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(blueprint.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 @blueprint.route('/', defaults={'queue_name': None, 'page': '1'})
