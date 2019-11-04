@@ -11,12 +11,6 @@ Status](https://travis-ci.org/Parallels/rq-dashboard.svg?branch=master)](https:/
 Support](https://img.shields.io/pypi/pyversions/rq-dashboard.svg)](https://pypi.python.org/pypi/rq-dashboard)
 ![PyPI Downloads](https://img.shields.io/pypi/dw/rq-dashboard)
 
-It looks like this
-------------------
-
-![image1](https://i.imgur.com/XGmoKQA.png)
-![image2](https://i.imgur.com/nStM6H7.png?1)
-
 Maturity notes
 --------------
 
