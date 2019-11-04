@@ -101,8 +101,16 @@ def serialize_queues(queues):
         dict(
             name=q.name,
             count=q.count,
-            failed_job_registry_count=q.failed_job_registry.count,
-            url=url_for('.overview', content_name='queues', queue_name=q.name))
+            queued_url=url_for('.overview', content_name='jobs', queue_name=q.name),
+            failed_job_registry_count=FailedJobRegistry(q.name).count,
+            failed_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='failed'),
+            started_job_registry_count=StartedJobRegistry(q.name).count,
+            started_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='started'),
+            deferred_job_registry_count=DeferredJobRegistry(q.name).count,
+            deferred_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='deferred'),
+            finished_job_registry_count=FinishedJobRegistry(q.name).count,
+            finished_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='finished'),
+            )
         for q in queues
     ]
 
@@ -206,7 +214,7 @@ def workers_overview():
     return r
 
 
-@blueprint.route('/', defaults={'content_name': 'jobs', 'queue_name': None, 'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/', defaults={'content_name': 'queues', 'queue_name': None, 'registry_name': None, 'page': None})
 @blueprint.route('/<content_name>/', defaults={'queue_name': None, 'registry_name': 'queued', 'page': '1'})
 @blueprint.route('/<content_name>/<queue_name>/', defaults={'registry_name': 'queued', 'page': '1'})
 @blueprint.route('/<content_name>/<queue_name>/registries', defaults={'registry_name': 'queued', 'page': '1'})

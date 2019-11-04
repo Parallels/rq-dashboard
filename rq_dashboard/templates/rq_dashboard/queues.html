@@ -13,12 +13,15 @@
             <tr>
                 <th>Queue</th>
                 <th class="narrow">Queued jobs</th>
+                <th class="narrow">Deferred jobs</th>
+                <th class="narrow">Started jobs</th>
+                <th class="narrow">Finished jobs</th>
                 <th class="narrow">Failed jobs</th>
             </tr>
             </thead>
             <tbody>
             <tr data-role="loading-placeholder">
-                <td colspan="3">Loading...</td>
+                <td colspan="5">Loading...</td>
             </tr>
             </tbody>
         </table>
@@ -26,14 +29,17 @@
         <script name="queue-row" type="text/template">
             <tr data-role="queue">
             <td><i class="icon-inbox" style="opacity: .5;"></i> <%= d.name %></td>
-            <td class="narrow"> <a href="<%= d.url %>"><%= d.count %></a></td>
-            <td class ="failed"> <a href="<%= d.url + '/failed' %>"><%= d.failed_job_registry_count %></a></td>
+            <td class="narrow"> <a href="<%= d.queued_url %>"><%= d.count %></a></td>
+            <td class="narrow"> <a href="<%= d.deferred_url %>"><%= d.deferred_job_registry_count %></a></td>
+            <td class="narrow"> <a href="<%= d.started_url %>"><%= d.started_job_registry_count %></a></td>
+            <td class="narrow"> <a href="<%= d.finished_url %>"><%= d.finished_job_registry_count %></a></td>
+            <td class="failed"> <a href="<%= d.failed_url %>"><%= d.failed_job_registry_count %></a></td>
             </tr>
         </script>
 
         <script name="no-queues-row" type="text/template">
             <tr>
-                <td colspan="3">No queues.</td>
+                <td colspan="5">No queues.</td>
             </tr>
         </script>
 
