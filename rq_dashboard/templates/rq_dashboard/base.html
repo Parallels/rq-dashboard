@@ -21,13 +21,9 @@
 {% include "rq_dashboard/navbar.html" %}
 
 <div class="container">
-
+  
+  {% include "rq_dashboard/rq_instances.html" %}
   {% block content %}{% endblock %}
-
-    {% include "rq_dashboard/rq_instances.html" %}
-    <div class="row">
-
-    </div>
 
 </div>
 
@@ -53,7 +49,7 @@
 <script src="{{ url_for('rq_dashboard.static', filename='js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap-tooltip.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap-modal.js') }}" type="text/javascript"></script>
-<script type="text/javascript">{% include "rq_dashboard/inline_js.html" %}
+<script type="text/javascript">{% include "rq_dashboard/inline_js.html" %}{% block inline_js %}{% endblock %}
 </script>
 
 </body>

@@ -102,7 +102,7 @@ def serialize_queues(queues):
             name=q.name,
             count=q.count,
             failed_job_registry_count=q.failed_job_registry.count,
-            url=url_for('.overview', queue_name=q.name))
+            url=url_for('.overview', content_name='queues', queue_name=q.name))
         for q in queues
     ]
 
@@ -164,28 +164,62 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
     return(total_items, jobs)
 
 
-@blueprint.route('/', defaults={'queue_name': None, 'registry_name': 'queued', 'page': '1'})
-@blueprint.route('/<queue_name>/', defaults={'registry_name': 'queued', 'page': '1'})
-@blueprint.route('/<queue_name>/registries', defaults={'registry_name': 'queued', 'page': '1'})
-@blueprint.route('/<queue_name>/registries/<registry_name>', defaults={'page': '1'})
-@blueprint.route('/<queue_name>/registries/<registry_name>/<int:page>')
-def overview(queue_name, registry_name, page):
+def queues_overview():
+    r = make_response(render_template(
+        'rq_dashboard/queues.html',
+        queues=Queue.all(),
+        rq_url_prefix=url_for('.overview'),
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
+    ))
+    r.headers.set('Cache-Control', 'no-store')
+    return r
+
+
+def jobs_overview(queue_name, registry_name, page):
     if queue_name is None:
         queue = Queue()
     else:
         queue = Queue(queue_name)
     r = make_response(render_template(
-        'rq_dashboard/queues.html',
-        workers=Worker.all(),
+        'rq_dashboard/jobs.html',
         queue=queue,
         page=page,
-        queues=Queue.all(),
         registry_name=registry_name,
         rq_url_prefix=url_for('.overview'),
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
     ))
     r.headers.set('Cache-Control', 'no-store')
+    return r
+
+
+def workers_overview():
+    r = make_response(render_template(
+        'rq_dashboard/workers.html',
+        workers=Worker.all(),
+        rq_url_prefix=url_for('.overview'),
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
+    ))
+    r.headers.set('Cache-Control', 'no-store')
+    return r
+
+
+@blueprint.route('/', defaults={'content_name': 'jobs', 'queue_name': None, 'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/<content_name>/', defaults={'queue_name': None, 'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/<content_name>/<queue_name>/', defaults={'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/<content_name>/<queue_name>/registries', defaults={'registry_name': 'queued', 'page': '1'})
+@blueprint.route('/<content_name>/<queue_name>/registries/<registry_name>', defaults={'page': '1'})
+@blueprint.route('/<content_name>/<queue_name>/registries/<registry_name>/<int:page>')
+def overview(content_name, queue_name, registry_name, page):
+    r = 'error'
+    if content_name == 'queues':
+        r = queues_overview()
+    elif content_name == 'workers':
+        r = workers_overview()
+    elif content_name == 'jobs':
+        r = jobs_overview(queue_name, registry_name, page)
     return r
 
 
@@ -274,6 +308,7 @@ def list_queues():
 @blueprint.route('/jobs/<queue_name>/registries/<registry_name>/<page>.json')
 @jsonify
 def list_jobs(queue_name, registry_name, page):
+    content_name = 'jobs'
     current_page = int(page)
     per_page = 5
     offset = (current_page - 1) * per_page
@@ -282,7 +317,8 @@ def list_jobs(queue_name, registry_name, page):
     pages_numbers_in_window = pagination_window(
         total_items, current_page, per_page)
     pages_in_window = [
-        dict(number=p, url=url_for('.overview', queue_name=queue_name, registry_name=registry_name, page=p))
+        dict(number=p, url=url_for('.overview', content_name=content_name, queue_name=queue_name,
+             registry_name=registry_name, page=p))
         for p in pages_numbers_in_window
     ]
     last_page = int(ceil(total_items / float(per_page)))
@@ -290,15 +326,19 @@ def list_jobs(queue_name, registry_name, page):
     prev_page = None
     if current_page > 1:
         prev_page = dict(url=url_for(
-            '.overview', queue_name=queue_name, registry_name=registry_name, page=(current_page - 1)))
+            '.overview', content_name=content_name, queue_name=queue_name,
+            registry_name=registry_name, page=(current_page - 1)))
 
     next_page = None
     if current_page < last_page:
         next_page = dict(url=url_for(
-            '.overview', queue_name=queue_name, registry_name=registry_name, page=(current_page + 1)))
+            '.overview', content_name=content_name, queue_name=queue_name,
+            registry_name=registry_name, page=(current_page + 1)))
 
-    first_page_link = dict(url=url_for('.overview', queue_name=queue_name, registry_name=registry_name, page=1))
-    last_page_link = dict(url=url_for('.overview', queue_name=queue_name, registry_name=registry_name, page=last_page))
+    first_page_link = dict(url=url_for('.overview', content_name=content_name, queue_name=queue_name,
+                                       registry_name=registry_name, page=1))
+    last_page_link = dict(url=url_for('.overview', content_name=content_name, queue_name=queue_name,
+                                      registry_name=registry_name, page=last_page))
 
     pagination = remove_none_values(
         dict(
