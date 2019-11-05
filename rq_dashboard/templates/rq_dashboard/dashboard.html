@@ -96,6 +96,7 @@
 
             <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
             <p class="intro">
+                {% if queue.name != 'failed' %}
                 <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn"
                    class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip"
                    title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true><i
@@ -104,10 +105,12 @@
                    class="btn btn-small" style="float: right; margin-right: 8px;" data-toggle="tooltip"
                    title="Remove all stale jobs from this queue (non-destructive)"><i class="icon-resize-small"></i>
                     Compact</a>
+                {% else %}
                 <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small"
                    style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
                 This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by
                 age (oldest on top).</p>
+                {% endif %}
 
             <table id="jobs" class="table table-bordered">
                 <thead>
