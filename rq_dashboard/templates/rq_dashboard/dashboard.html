@@ -107,8 +107,8 @@
                    class="btn btn-small" style="float: right; margin-right: 8px;" data-toggle="tooltip"
                    title="Remove all stale jobs from this queue (non-destructive)"><i class="icon-resize-small"></i>
                     Compact</a>
-                {% else %}
-                <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small"
+                {% elif registry_name == 'failed' %}
+                <a href="{{ url_for('rq_dashboard.requeue_all', queue_name=queue.name) }}" id="requeue-all-btn" class="btn btn-small"
                    style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
                 {% endif %}
                 This list below contains all the queued jobs on queue <strong>{{ queue.name }}</strong>, sorted by
