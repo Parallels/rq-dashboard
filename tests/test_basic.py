@@ -56,9 +56,9 @@ class BasicTestCase(unittest.TestCase):
         self.assertIn('workers', data)
 
     def test_queued_jobs_list(self):
-        response_dashboard = self.client.get('default/registries')
+        response_dashboard = self.client.get('/jobs/default/registries')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
-        response_queued_redirect = self.client.get('default/registries/queued')
+        response_queued_redirect = self.client.get('/jobs/default/registries/queued')
         self.assertEqual(response_queued_redirect.status_code, HTTP_PERMANENT_REDIRECT)
         response = self.client.get('/jobs/default/registries/queued/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
@@ -67,7 +67,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertIn('jobs', data)
 
     def test_registry_jobs_list(self):
-        response_dashboard = self.client.get('/default/registries/failed')
+        response_dashboard = self.client.get('/jobs/default/registries/failed')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
         response = self.client.get('/jobs/default/registries/failed/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
