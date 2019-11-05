@@ -1,102 +1,53 @@
 {% extends "rq_dashboard/base.html" %}
 
 {% block content %}
-<div class="span12">
-    <div class="section">
+{% include "rq_dashboard/rq_instances.html" %}
 
-        <h1>Queues</h1>
-        <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently
-            in the queue. Select a queue from above to view all jobs currently pending on the queue.</p>
+<div class="section">
 
-        <table id="queues" class="table table-bordered">
-            <thead>
-            <tr>
-                <th>Queue</th>
-                <th class="narrow">Queued jobs</th>
-                <th class="narrow">Deferred jobs</th>
-                <th class="narrow">Started jobs</th>
-                <th class="narrow">Finished jobs</th>
-                <th class="narrow">Failed jobs</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr data-role="loading-placeholder">
-                <td colspan="5">Loading...</td>
-            </tr>
-            </tbody>
-        </table>
+    <h1>Queues</h1>
+    <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently
+                            in the queue. Select a queue from above to view all jobs currently pending on the queue.</p>
 
-        <script name="queue-row" type="text/template">
-            <tr data-role="queue">
-            <td><i class="icon-inbox" style="opacity: .5;"></i> <%= d.name %></td>
-            <td class="narrow"> <a href="<%= d.queued_url %>"><%= d.count %></a></td>
-            <td class="narrow"> <a href="<%= d.deferred_url %>"><%= d.deferred_job_registry_count %></a></td>
-            <td class="narrow"> <a href="<%= d.started_url %>"><%= d.started_job_registry_count %></a></td>
-            <td class="narrow"> <a href="<%= d.finished_url %>"><%= d.finished_job_registry_count %></a></td>
-            <td class="failed"> <a href="<%= d.failed_url %>"><%= d.failed_job_registry_count %></a></td>
-            </tr>
-        </script>
+    <table id="queues" class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Queue</th>
+            <th class="narrow">Queued jobs</th>
+            <th class="narrow">Deferred jobs</th>
+            <th class="narrow">Started jobs</th>
+            <th class="narrow">Finished jobs</th>
+            <th class="narrow">Failed jobs</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-role="loading-placeholder">
+            <td colspan="5">Loading...</td>
+        </tr>
+        </tbody>
+    </table>
 
-        <script name="no-queues-row" type="text/template">
-            <tr>
-                <td colspan="5">No queues.</td>
-            </tr>
-        </script>
+    <script name="queue-row" type="text/template">
+        <tr data-role="queue">
+        <td><i class="icon-inbox" style="opacity: .5;"></i> <%= d.name %></td>
+        <td class="narrow"> <a href="<%= d.queued_url %>"><%= d.count %></a></td>
+        <td class="narrow"> <a href="<%= d.deferred_url %>"><%= d.deferred_job_registry_count %></a></td>
+        <td class="narrow"> <a href="<%= d.started_url %>"><%= d.started_job_registry_count %></a></td>
+        <td class="narrow"> <a href="<%= d.finished_url %>"><%= d.finished_job_registry_count %></a></td>
+        <td class="failed"> <a href="<%= d.failed_url %>"><%= d.failed_job_registry_count %></a></td>
+        </tr>
+    </script>
 
-    </div>
+    <script name="no-queues-row" type="text/template">
+        <tr>
+            <td colspan="5">No queues.</td>
+        </tr>
+    </script>
+
 </div>
+
 {% endblock %}
 
-{% block inline_js %}
-
-(function($) {
-    var $raw_tpl = $('script[name=queue-row]').html();
-    var noQueuesHtml = $('script[name=no-queues-row]').html();
-    var template = _.template($raw_tpl);
-    var $tbody = $('table#queues tbody');
-    var $placeholderEl = $('tr[data-role=loading-placeholder]', $tbody);
-
-    var reload_table = function(done) {
-        $placeholderEl.show();
-
-        // Fetch the available queues
-        api.getQueues(function(queues, err) {
-            // Return immediately in case of error
-            if (err) {
-                return done();
-            }
-            var html = '';
-
-            $tbody.empty();
-
-            if (queues.length > 0) {
-                $.each(queues, function(i, queue) {
-                    var el = template({d: queue}, {variable: 'd'});
-                    html += el;
-                });
-                $tbody.append(html);
-            } else {
-                $tbody.append(noQueuesHtml);
-            }
-
-            if (done !== undefined) {
-                done();
-            }
-        });
-    };
-
-    var refresh_table_loop = function() {
-        $('span.loading').fadeIn('fast');
-        reload_table(function() {
-            $('span.loading').fadeOut('fast');
-            setTimeout(refresh_table_loop, POLL_INTERVAL);
-        });
-    };
-
-    $(document).ready(function() {
-        refresh_table_loop();
-        $('#refresh-button').click(reload_table);
-        $('[data-toggle=tooltip]').tooltip();
-    });
-})($);
+{% block content_scripts %}
+    {% include "rq_dashboard/scripts/queues.js" %}
 {% endblock%}
