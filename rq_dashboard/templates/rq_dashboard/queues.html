@@ -1,0 +1,53 @@
+{% extends "rq_dashboard/base.html" %}
+
+{% block content %}
+{% include "rq_dashboard/rq_instances.html" %}
+
+<div class="section">
+
+    <h1>Queues</h1>
+    <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently
+                            in the queue. Select a queue from above to view all jobs currently pending on the queue.</p>
+
+    <table id="queues" class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Queue</th>
+            <th class="narrow">Queued jobs</th>
+            <th class="narrow">Deferred jobs</th>
+            <th class="narrow">Started jobs</th>
+            <th class="narrow">Finished jobs</th>
+            <th class="narrow">Failed jobs</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-role="loading-placeholder">
+            <td colspan="5">Loading...</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <script name="queue-row" type="text/template">
+        <tr data-role="queue">
+        <td><i class="icon-inbox" style="opacity: .5;"></i> <%= d.name %></td>
+        <td class="narrow"> <a href="<%= d.queued_url %>"><%= d.count %></a></td>
+        <td class="narrow"> <a href="<%= d.deferred_url %>"><%= d.deferred_job_registry_count %></a></td>
+        <td class="narrow"> <a href="<%= d.started_url %>"><%= d.started_job_registry_count %></a></td>
+        <td class="narrow"> <a href="<%= d.finished_url %>"><%= d.finished_job_registry_count %></a></td>
+        <td class="failed"> <a href="<%= d.failed_url %>"><%= d.failed_job_registry_count %></a></td>
+        </tr>
+    </script>
+
+    <script name="no-queues-row" type="text/template">
+        <tr>
+            <td colspan="5">No queues.</td>
+        </tr>
+    </script>
+
+</div>
+
+{% endblock %}
+
+{% block content_scripts %}
+    {% include "rq_dashboard/scripts/queues.js" %}
+{% endblock%}
