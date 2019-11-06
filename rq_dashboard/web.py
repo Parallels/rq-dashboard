@@ -201,10 +201,14 @@ def overview(queue_name, page):
 @blueprint.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
-    if current_app.config.get('RQ_DASHBOARD_DELETE_JOBS', False):
-        Job.fetch(job_id).delete()
+    job = Job.fetch(job_id)
+    if job.is_queued:
+        if current_app.config.get('RQ_DASHBOARD_DELETE_JOBS', False):
+            job.delete()
+        else:
+            cancel_job(job_id)
     else:
-        cancel_job(job_id)
+        job.delete()
     return dict(status='OK')
 
 
