@@ -413,6 +413,15 @@ var modalConfirm = function(action, cb) {
         return false;
     });
 
+    $('#queues-btn').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $('#queues').toggle();
+
+        return false;
+    });
+
     $('#requeue-all-btn').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
