@@ -186,6 +186,7 @@ def queues_overview():
         rq_url_prefix=url_for('.overview'),
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
+        active_tab='queues',
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
@@ -198,12 +199,14 @@ def jobs_overview(queue_name, registry_name, page):
         queue = Queue(queue_name)
     r = make_response(render_template(
         'rq_dashboard/jobs.html',
+        queues=Queue.all(),
         queue=queue,
         page=page,
         registry_name=registry_name,
         rq_url_prefix=url_for('.overview'),
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
+        active_tab='jobs',
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
@@ -216,6 +219,7 @@ def workers_overview():
         rq_url_prefix=url_for('.overview'),
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
+        active_tab='workers',
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
