@@ -4,7 +4,23 @@
 
 <div class="section">
 
-    <h1><strong>{{ registry_name.title() }}</strong> jobs on <strong>{{ queue.name }}</strong></h1>
+    <h1>
+        <select id="select-registry">
+            <option {% if registry_name == 'queued' %} selected {% endif %}>queued</option>
+            <option {% if registry_name == 'deferred' %} selected {% endif %}>deferred</option>
+            <option {% if registry_name == 'started' %} selected {% endif %}>started</option>
+            <option {% if registry_name == 'finished' %} selected {% endif %}>finished</option>
+            <option {% if registry_name == 'failed' %} selected {% endif %}>failed</option>
+        </select> jobs on
+        <input list="queues_list" id="select-queue" value="{{ queue.name }}">
+            <datalist id="queues_list">
+                {% for selected_queue in queues %}
+                <option value="{{ selected_queue.name }}">
+                {% endfor %}
+            </datalist> queue,     
+        <input type="number" id="select-per-page" min="1" max="200" value="{{ per_page }}"> jobs per page
+        <input class="btn-danger" style="float: right" type="submit" id="filter-btn" value="Filter">
+    </h1>
     <p class="intro">
         {% if registry_name == 'queued' %}
         <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn"

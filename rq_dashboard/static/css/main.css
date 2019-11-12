@@ -140,3 +140,13 @@ footer {
 .text-white {
     color: white;
 }
+
+#rq-instances {
+    float: right;
+    margin-top: 3px;
+    width: auto;
+}
+
+#select-registry, #select-per-page, #select-queue {
+    width: auto;
+}
