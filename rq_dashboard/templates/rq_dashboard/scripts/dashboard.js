@@ -9,8 +9,8 @@ var url_for = function(name, param) {
     return url;
 };
 
-var url_for_jobs = function(queue_name, registry_name, page) {
-    var url = {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/registries/' + encodeURIComponent(registry_name) + '/' + page + '.json';
+var url_for_jobs = function(queue_name, registry_name, per_page, page) {
+    var url = {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/registries/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
     return url;
 };
 
@@ -39,8 +39,8 @@ var api = {
         });
     },
 
-    getJobs: function(queue_name, registry_name, page, cb) {
-        $.getJSON(url_for_jobs(queue_name, registry_name, page), function(data) {
+    getJobs: function(queue_name, registry_name, per_page, page, cb) {
+        $.getJSON(url_for_jobs(queue_name, registry_name, per_page, page), function(data) {
             var jobs = data.jobs;
             var pagination = data.pagination;
             cb(jobs, pagination);

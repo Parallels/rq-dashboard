@@ -56,13 +56,7 @@
     $(document).ready(function() {
         reload_table(function(workers_count) {
             $('#refresh-button').click(reload_table);
-            // Hide list of workers If It's long
-            if (workers_count > 8) {  // magic constant, need to think It through
-                $('#workers').hide();
-            } else {
-                $('#workers').show();
-            }
-            // Start refreshing the list in a loop
+            $('#workers').show();
             refresh_table_loop();
         });
     });
