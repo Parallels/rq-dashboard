@@ -1,12 +1,9 @@
-from __future__ import absolute_import
-
 import importlib
 import logging
 import os
 import sys
 
 import click
-
 from flask import Flask, Response, request
 
 from . import default_settings
