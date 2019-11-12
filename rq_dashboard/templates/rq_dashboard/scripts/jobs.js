@@ -22,7 +22,7 @@
         $placeholderEl.show();
 
         // Fetch the available jobs on the queue
-        api.getJobs({{ queue.name|tojson|safe }}, {{registry_name|tojson|safe}}, {{ page|tojson|safe }}, function(jobs, pagination, err) {
+        api.getJobs({{ queue.name|tojson|safe }}, {{registry_name|tojson|safe}}, {{ per_page|tojson|safe}}, {{ page|tojson|safe }}, function(jobs, pagination, err) {
             // Return immediately in case of error
             if (err) {
                 return done();
@@ -167,6 +167,18 @@
             $.post($this.attr('href'), function(data) {});
         });
         return false;
+    });
+
+    $('#filter-btn').click(function() {
+        $(document).ready( function() {
+            queue_name = $('#select-queue').val();
+            console.log(queue_name)
+            if (!queue_name) {
+                queue_name = 'default'
+            }
+            var url = url_for_jobs(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            $(location).attr("href", url.slice(0, -5));
+         });
     });
 
     // Enable the AJAX behaviour of the cancel button
