@@ -23,5 +23,5 @@ def upgrade_config(app):
     """
     for old_name, new_name in LEGACY_CONFIG_OPTIONS.items():
         if old_name in app.config:
-            warnings.warn(warning_template.format(old_name=old_name, new_name=new_name), DeprecationWarning)
+            warnings.warn(warning_template.format(old_name=old_name, new_name=new_name), UserWarning)
             app.config[new_name] = app.config[old_name]
