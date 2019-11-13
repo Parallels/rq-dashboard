@@ -6,7 +6,6 @@ import os
 import sys
 
 import click
-
 from flask import Flask, Response, request
 
 from . import default_settings
@@ -160,6 +159,7 @@ def run(
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.ERROR)
+        log.error(" * Running on {}:{}".format(bind, port))
 
     app.run(host=bind, port=port, debug=debug)
 
