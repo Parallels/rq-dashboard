@@ -160,14 +160,18 @@ def favicon():
 
 def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
     queue = Queue(queue_name)
-    if registry_name == 'failed':
-        current_queue = FailedJobRegistry(queue_name)
-    elif registry_name == 'deferred':
-        current_queue = DeferredJobRegistry(queue_name)
-    elif registry_name == 'started':
-        current_queue = StartedJobRegistry(queue_name)
-    elif registry_name == 'finished':
-        current_queue = FinishedJobRegistry(queue_name)
+    if registry_name != 'queued':
+        if per_page >= 0:
+            per_page = offset + (per_page - 1)
+
+        if registry_name == 'failed':
+            current_queue = FailedJobRegistry(queue_name)
+        elif registry_name == 'deferred':
+            current_queue = DeferredJobRegistry(queue_name)
+        elif registry_name == 'started':
+            current_queue = StartedJobRegistry(queue_name)
+        elif registry_name == 'finished':
+            current_queue = FinishedJobRegistry(queue_name)
     else:
         current_queue = queue
     total_items = current_queue.count
