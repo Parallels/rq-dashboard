@@ -163,12 +163,11 @@
     $('#filter-btn').click(function() {
         $(document).ready( function() {
             queue_name = $('#select-queue').val();
-            console.log(queue_name)
             if (!queue_name) {
                 queue_name = 'default'
             }
-            var url = url_for_jobs(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
-            $(location).attr("href", url.slice(0, -5));
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            $(location).attr("href", url);
          });
     });
 

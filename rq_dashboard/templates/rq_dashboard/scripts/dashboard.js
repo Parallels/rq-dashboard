@@ -1,16 +1,21 @@
 var url_for = function(name, param) {
     var url = {{ rq_url_prefix|tojson|safe }};
-    if (name == 'rq-instances') {url += 'rq-instances.json'; }
+    if (name == 'rq-instances') {url += 'data/rq-instances.json'; }
     else if (name == 'rq-instance') { url += 'rq-instance/' + encodeURIComponent(param); }
-    else if (name == 'queues') { url += 'queues.json'; }
-    else if (name == 'workers') { url += 'workers.json'; }
+    else if (name == 'queues') { url += 'data/queues.json'; }
+    else if (name == 'workers') { url += 'data/workers.json'; }
     else if (name == 'cancel_job') { url += 'job/' + encodeURIComponent(param) + '/cancel'; }
     else if (name == 'requeue_job') { url += 'job/' + encodeURIComponent(param) + '/requeue'; }
     return url;
 };
 
-var url_for_jobs = function(queue_name, registry_name, per_page, page) {
-    var url = {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/registries/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
+var url_for_jobs_data = function(queue_name, registry_name, per_page, page) {
+    var url = '/data' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
+    return url;
+};
+
+var url_for_jobs_view = function(queue_name, registry_name, per_page, page) {
+    var url = '/view' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page);
     return url;
 };
 
@@ -40,7 +45,7 @@ var api = {
     },
 
     getJobs: function(queue_name, registry_name, per_page, page, cb) {
-        $.getJSON(url_for_jobs(queue_name, registry_name, per_page, page), function(data) {
+        $.getJSON(url_for_jobs_data(queue_name, registry_name, per_page, page), function(data) {
             var jobs = data.jobs;
             var pagination = data.pagination;
             cb(jobs, pagination);
