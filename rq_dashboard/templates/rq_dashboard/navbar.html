@@ -4,9 +4,9 @@
             <a class="brand" href="">RQ-dashboard</a>
             <div class="nav-collapse collapse">
                 <ul class="nav">
-                    <li {% if active_tab == 'queues'%} class="active" {% endif %}><a href="/queues/">Queues</a></li>
-                    <li {% if active_tab == 'jobs'%} class="active" {% endif %}><a href="/jobs/">Jobs</a></li>
-                    <li {% if active_tab == 'workers'%} class="active" {% endif %}><a href="/workers/">Workers</a></li>
+                    <li {% if active_tab == 'queues'%} class="active" {% endif %}><a href="/view/queues">Queues</a></li>
+                    <li {% if active_tab == 'jobs'%} class="active" {% endif %}><a href="/view/jobs">Jobs</a></li>
+                    <li {% if active_tab == 'workers'%} class="active" {% endif %}><a href="/view/workers">Workers</a></li>
                 </ul>
                 <div id="rq-instances-row" style="display: none">
                     <select id="rq-instances"></select>

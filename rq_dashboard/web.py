@@ -102,15 +102,15 @@ def serialize_queues(queues):
         dict(
             name=q.name,
             count=q.count,
-            queued_url=url_for('.overview', content_name='jobs', queue_name=q.name),
+            queued_url=url_for('.jobs_overview', queue_name=q.name),
             failed_job_registry_count=FailedJobRegistry(q.name).count,
-            failed_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='failed'),
+            failed_url=url_for('.jobs_overview', queue_name=q.name, registry_name='failed'),
             started_job_registry_count=StartedJobRegistry(q.name).count,
-            started_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='started'),
+            started_url=url_for('.jobs_overview', queue_name=q.name, registry_name='started'),
             deferred_job_registry_count=DeferredJobRegistry(q.name).count,
-            deferred_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='deferred'),
+            deferred_url=url_for('.jobs_overview', queue_name=q.name, registry_name='deferred'),
             finished_job_registry_count=FinishedJobRegistry(q.name).count,
-            finished_url=url_for('.overview', content_name='jobs', queue_name=q.name, registry_name='finished'),
+            finished_url=url_for('.jobs_overview', queue_name=q.name, registry_name='finished'),
         )
         for q in queues
     ]
@@ -183,11 +183,14 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
     return(total_items, jobs)
 
 
+@blueprint.route('/')
+@blueprint.route('/view')
+@blueprint.route('/view/queues')
 def queues_overview():
     r = make_response(render_template(
         'rq_dashboard/queues.html',
         queues=Queue.all(),
-        rq_url_prefix=url_for('.overview'),
+        rq_url_prefix='/',
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
         active_tab='queues',
@@ -196,6 +199,25 @@ def queues_overview():
     return r
 
 
+@blueprint.route('/view/workers')
+def workers_overview():
+    r = make_response(render_template(
+        'rq_dashboard/workers.html',
+        workers=Worker.all(),
+        rq_url_prefix='/',
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
+        active_tab='workers',
+    ))
+    r.headers.set('Cache-Control', 'no-store')
+    return r
+
+
+@blueprint.route('/view/jobs', defaults={'queue_name': None, 'registry_name': 'queued', 'per_page': '8', 'page': '1'})
+@blueprint.route('/view/jobs/<queue_name>', defaults={'registry_name': 'queued', 'per_page': '8', 'page': '1'})
+@blueprint.route('/view/jobs/<queue_name>/<registry_name>', defaults={'per_page': '8', 'page': '1'})
+@blueprint.route('/view/jobs/<queue_name>/<registry_name>/<int:per_page>', defaults={'page': '1'})
+@blueprint.route('/view/jobs/<queue_name>/<registry_name>/<int:per_page>/<int:page>')
 def jobs_overview(queue_name, registry_name, per_page, page):
     if queue_name is None:
         queue = Queue()
@@ -208,43 +230,12 @@ def jobs_overview(queue_name, registry_name, per_page, page):
         per_page=per_page,
         page=page,
         registry_name=registry_name,
-        rq_url_prefix=url_for('.overview'),
+        rq_url_prefix='/',
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
         active_tab='jobs',
     ))
     r.headers.set('Cache-Control', 'no-store')
-    return r
-
-
-def workers_overview():
-    r = make_response(render_template(
-        'rq_dashboard/workers.html',
-        workers=Worker.all(),
-        rq_url_prefix=url_for('.overview'),
-        rq_dashboard_version=rq_dashboard_version,
-        rq_version=rq_version,
-        active_tab='workers',
-    ))
-    r.headers.set('Cache-Control', 'no-store')
-    return r
-
-
-@blueprint.route('/', defaults={'content_name': 'queues', 'queue_name': None, 'registry_name': None, 'per_page': None, 'page': None})
-@blueprint.route('/<content_name>/', defaults={'queue_name': None, 'registry_name': 'queued', 'per_page': '8', 'page': '1'})
-@blueprint.route('/<content_name>/<queue_name>/', defaults={'registry_name': 'queued', 'per_page': '8', 'page': '1'})
-@blueprint.route('/<content_name>/<queue_name>/registries', defaults={'registry_name': 'queued', 'per_page': '8', 'page': '1'})
-@blueprint.route('/<content_name>/<queue_name>/registries/<registry_name>', defaults={'per_page': '8', 'page': '1'})
-@blueprint.route('/<content_name>/<queue_name>/registries/<registry_name>/<int:per_page>', defaults={'page': '1'})
-@blueprint.route('/<content_name>/<queue_name>/registries/<registry_name>/<int:per_page>/<int:page>')
-def overview(content_name, queue_name, registry_name, per_page, page):
-    r = 'error'
-    if content_name == 'queues':
-        r = queues_overview()
-    elif content_name == 'workers':
-        r = workers_overview()
-    elif content_name == 'jobs':
-        r = jobs_overview(queue_name, registry_name, per_page, page)
     return r
 
 
@@ -310,7 +301,7 @@ def change_rq_instance(instance_number):
     return dict(status='OK')
 
 
-@blueprint.route('/rq-instances.json')
+@blueprint.route('/data/rq-instances.json')
 @jsonify
 def list_instances():
     redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
@@ -327,17 +318,16 @@ def list_instances():
         return dict(rq_instances=[])
 
 
-@blueprint.route('/queues.json')
+@blueprint.route('/data/queues.json')
 @jsonify
 def list_queues():
     queues = serialize_queues(sorted(Queue.all()))
     return dict(queues=queues)
 
 
-@blueprint.route('/jobs/<queue_name>/registries/<registry_name>/<per_page>/<page>.json')
+@blueprint.route('/data/jobs/<queue_name>/<registry_name>/<per_page>/<page>.json')
 @jsonify
 def list_jobs(queue_name, registry_name, per_page, page):
-    content_name = 'jobs'
     current_page = int(page)
     per_page = int(per_page)
     offset = (current_page - 1) * per_page
@@ -346,7 +336,7 @@ def list_jobs(queue_name, registry_name, per_page, page):
     pages_numbers_in_window = pagination_window(
         total_items, current_page, per_page)
     pages_in_window = [
-        dict(number=p, url=url_for('.overview', content_name=content_name, queue_name=queue_name,
+        dict(number=p, url=url_for('.jobs_overview', queue_name=queue_name,
              registry_name=registry_name, per_page=per_page, page=p))
         for p in pages_numbers_in_window
     ]
@@ -355,18 +345,18 @@ def list_jobs(queue_name, registry_name, per_page, page):
     prev_page = None
     if current_page > 1:
         prev_page = dict(url=url_for(
-            '.overview', content_name=content_name, queue_name=queue_name,
+            '.jobs_overview', queue_name=queue_name,
             registry_name=registry_name, per_page=per_page, page=(current_page - 1)))
 
     next_page = None
     if current_page < last_page:
         next_page = dict(url=url_for(
-            '.overview', content_name=content_name, queue_name=queue_name,
+            '.jobs_overview', queue_name=queue_name,
             registry_name=registry_name, per_page=per_page, page=(current_page + 1)))
 
-    first_page_link = dict(url=url_for('.overview', content_name=content_name, queue_name=queue_name,
+    first_page_link = dict(url=url_for('.jobs_overview', queue_name=queue_name,
                                        registry_name=registry_name, per_page=per_page, page=1))
-    last_page_link = dict(url=url_for('.overview', content_name=content_name, queue_name=queue_name,
+    last_page_link = dict(url=url_for('.jobs_overview', queue_name=queue_name,
                                       registry_name=registry_name, per_page=per_page, page=last_page))
 
     pagination = remove_none_values(
@@ -394,7 +384,7 @@ def serialize_current_job(job):
     )
 
 
-@blueprint.route('/workers.json')
+@blueprint.route('/data/workers.json')
 @jsonify
 def list_workers():
     def serialize_queue_names(worker):
