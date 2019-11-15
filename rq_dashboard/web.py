@@ -151,29 +151,39 @@ def favicon():
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
+def make_queue_registry(queue_name, registry_name):
+    if registry_name == 'failed':
+        current_queue = FailedJobRegistry(queue_name)
+    elif registry_name == 'deferred':
+        current_queue = DeferredJobRegistry(queue_name)
+    elif registry_name == 'started':
+        current_queue = StartedJobRegistry(queue_name)
+    elif registry_name == 'finished':
+        current_queue = FinishedJobRegistry(queue_name)
+    return(current_queue)
+
 def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
     queue = Queue(queue_name)
-    if registry_name != 'queued':
-        if per_page >= 0:
+    if per_page >= 0:
             per_page = offset + (per_page - 1)
-
-        if registry_name == 'failed':
-            current_queue = FailedJobRegistry(queue_name)
-        elif registry_name == 'deferred':
-            current_queue = DeferredJobRegistry(queue_name)
-        elif registry_name == 'started':
-            current_queue = StartedJobRegistry(queue_name)
-        elif registry_name == 'finished':
-            current_queue = FinishedJobRegistry(queue_name)
+    if registry_name != 'queued':
+        
+        current_queue = make_queue_registry(queue_name, registry_name)
     else:
         current_queue = queue
     total_items = current_queue.count
 
+    job_ids1 = current_queue.get_job_ids()
+    current_queue_jobs1 = [queue.fetch_job(job_id) for job_id in job_ids1]
+    jobs1 = [serialize_job(job) for job in current_queue_jobs1]
+    jobs1 = sorted(jobs1, key=lambda x: x['id'])
+    jobs1 = jobs1[offset:per_page+1]
+
     job_ids = current_queue.get_job_ids(offset, per_page)
     current_queue_jobs = [queue.fetch_job(job_id) for job_id in job_ids]
     jobs = [serialize_job(job) for job in current_queue_jobs]
-
-    return(total_items, jobs)
+    print(jobs==jobs1)
+    return(total_items, jobs1)
 
 
 @blueprint.route('/')
