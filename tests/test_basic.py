@@ -32,14 +32,14 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, HTTP_OK)
 
     def test_rq_instanses_list_json(self):
-        response = self.client.get('/rq-instances.json')
+        response = self.client.get('/data/rq-instances.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('rq_instances', data)
 
     def test_queues_list_json(self):
-        response = self.client.get('/queues.json')
+        response = self.client.get('/data/queues.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
@@ -47,27 +47,27 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.headers['Cache-Control'], 'no-store')
 
     def test_workers_list_json(self):
-        response = self.client.get('/workers.json')
+        response = self.client.get('data/workers.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('workers', data)
 
     def test_queued_jobs_list(self):
-        response_dashboard = self.client.get('/jobs/default/registries')
+        response_dashboard = self.client.get('/view/jobs/default')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
-        response_queued_redirect = self.client.get('/jobs/default/registries/queued')
+        response_queued_redirect = self.client.get('/view/jobs/default/queued')
         self.assertEqual(response_queued_redirect.status_code, HTTP_PERMANENT_REDIRECT)
-        response = self.client.get('/jobs/default/registries/queued/8/1.json')
+        response = self.client.get('/data/jobs/default/queued/8/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('jobs', data)
 
     def test_registry_jobs_list(self):
-        response_dashboard = self.client.get('/jobs/default/registries/failed')
+        response_dashboard = self.client.get('/view/jobs/default/failed')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
-        response = self.client.get('/jobs/default/registries/failed/8/1.json')
+        response = self.client.get('/data/jobs/default/failed/8/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
@@ -76,7 +76,7 @@ class BasicTestCase(unittest.TestCase):
     def test_worker_python_version_field(self):
         w = Worker(['q'])
         w.register_birth()
-        response = self.client.get('/workers.json')
+        response = self.client.get('/data/workers.json')
         data = json.loads(response.data.decode('utf8'))
         if getattr(w, 'python_version', None):
             self.assertEqual(w.python_version, data['workers'][0]['python_version'])
@@ -87,7 +87,7 @@ class BasicTestCase(unittest.TestCase):
     def test_worker_version_field(self):
         w = Worker(['q'])
         w.register_birth()
-        response = self.client.get('/workers.json')
+        response = self.client.get('/data/workers.json')
         data = json.loads(response.data.decode('utf8'))
         if getattr(w, 'version', None):
             self.assertEqual(w.version, data['workers'][0]['version'])
