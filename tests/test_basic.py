@@ -7,7 +7,6 @@ from rq import Worker, pop_connection, push_connection
 from rq_dashboard.cli import make_flask_app
 
 HTTP_OK = 200
-HTTP_PERMANENT_REDIRECT = 308
 
 
 class BasicTestCase(unittest.TestCase):
@@ -54,10 +53,10 @@ class BasicTestCase(unittest.TestCase):
         self.assertIn('workers', data)
 
     def test_queued_jobs_list(self):
-        response_dashboard = self.client.get('/view/jobs/default')
+        response_dashboard = self.client.get('/view/jobs')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
-        response_queued_redirect = self.client.get('/view/jobs/default/queued')
-        self.assertEqual(response_queued_redirect.status_code, HTTP_PERMANENT_REDIRECT)
+        response_queued = self.client.get('/view/jobs/default/queued/8/1')
+        self.assertEqual(response_queued.status_code, HTTP_OK)
         response = self.client.get('/data/jobs/default/queued/8/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
@@ -65,8 +64,6 @@ class BasicTestCase(unittest.TestCase):
         self.assertIn('jobs', data)
 
     def test_registry_jobs_list(self):
-        response_dashboard = self.client.get('/view/jobs/default/failed')
-        self.assertEqual(response_dashboard.status_code, HTTP_OK)
         response = self.client.get('/data/jobs/default/failed/8/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
