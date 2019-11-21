@@ -10,20 +10,22 @@
         This list below contains all the registered workers with their state and work queues.
     </p>
 
-    <table id="workers" class="table table-bordered" style="display: none;">
-        <thead>
-        <tr>
-            <th style="width:48px">State</th>
-            <th>Worker</th>
-            <th>Queues</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr data-role="loading-placeholder">
-            <td colspan="3">Loading...</td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive-md">
+        <table id="workers" class="table table-bordered" style="display: none;">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width:48px">State</th>
+                    <th>Worker</th>
+                    <th>Queues</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="3">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <script name="worker-row" type="text/template">
         <tr data-role="worker">

@@ -49,7 +49,7 @@ blueprint = Blueprint(
 def setup_rq_connection():
     # It's the only place where we can safely define default value for web background
     # since It is used in template
-    current_app.config.setdefault('RQ_DASHBOARD_WEB_BACKGROUND', 'black')
+    current_app.config.setdefault('RQ_DASHBOARD_WEB_BACKGROUND', '#f8f9fa')
     # we need to do It here instead of cli, since It may be embeded
     upgrade_config(current_app)
     # Getting Redis connection parameters for RQ
@@ -102,15 +102,15 @@ def serialize_queues(queues):
         dict(
             name=q.name,
             count=q.count,
-            queued_url=url_for('.jobs_overview', queue_name=q.name),
+            queued_url=url_for('.jobs_overview', queue_name=q.name, registry_name='queued', per_page='8', page='1'),
             failed_job_registry_count=FailedJobRegistry(q.name).count,
-            failed_url=url_for('.jobs_overview', queue_name=q.name, registry_name='failed'),
+            failed_url=url_for('.jobs_overview', queue_name=q.name, registry_name='failed', per_page='8', page='1'),
             started_job_registry_count=StartedJobRegistry(q.name).count,
-            started_url=url_for('.jobs_overview', queue_name=q.name, registry_name='started'),
+            started_url=url_for('.jobs_overview', queue_name=q.name, registry_name='started', per_page='8', page='1'),
             deferred_job_registry_count=DeferredJobRegistry(q.name).count,
-            deferred_url=url_for('.jobs_overview', queue_name=q.name, registry_name='deferred'),
+            deferred_url=url_for('.jobs_overview', queue_name=q.name, registry_name='deferred', per_page='8', page='1'),
             finished_job_registry_count=FinishedJobRegistry(q.name).count,
-            finished_url=url_for('.jobs_overview', queue_name=q.name, registry_name='finished'),
+            finished_url=url_for('.jobs_overview', queue_name=q.name, registry_name='finished', per_page='8', page='1'),
         )
         for q in queues
     ]
@@ -214,9 +214,6 @@ def workers_overview():
 
 
 @blueprint.route('/view/jobs', defaults={'queue_name': None, 'registry_name': 'queued', 'per_page': '8', 'page': '1'})
-@blueprint.route('/view/jobs/<queue_name>', defaults={'registry_name': 'queued', 'per_page': '8', 'page': '1'})
-@blueprint.route('/view/jobs/<queue_name>/<registry_name>', defaults={'per_page': '8', 'page': '1'})
-@blueprint.route('/view/jobs/<queue_name>/<registry_name>/<int:per_page>', defaults={'page': '1'})
 @blueprint.route('/view/jobs/<queue_name>/<registry_name>/<int:per_page>/<int:page>')
 def jobs_overview(queue_name, registry_name, per_page, page):
     if queue_name is None:
@@ -271,11 +268,28 @@ def requeue_all(queue_name):
     return dict(status='OK', count=count)
 
 
-@blueprint.route('/queue/<queue_name>/empty', methods=['POST'])
+@blueprint.route('/queue/<queue_name>/<registry_name>/empty', methods=['POST'])
 @jsonify
-def empty_queue(queue_name):
-    q = Queue(queue_name)
-    q.empty()
+def empty_queue(queue_name, registry_name):
+    if registry_name == 'queued':
+        q = Queue(queue_name)
+        q.empty()
+    elif registry_name == 'failed':
+        ids = FailedJobRegistry(queue_name).get_job_ids()
+        for id in ids:
+            cancel_job_view(id)
+    elif registry_name == 'deferred':
+        ids = DeferredJobRegistry(queue_name).get_job_ids()
+        for id in ids:
+            cancel_job_view(id)
+    elif registry_name == 'started':
+        ids = StartedJobRegistry(queue_name).get_job_ids()
+        for id in ids:
+            cancel_job_view(id)
+    elif registry_name == 'finished':
+        ids = FinishedJobRegistry(queue_name).get_job_ids()
+        for id in ids:
+            cancel_job_view(id)
     return dict(status='OK')
 
 

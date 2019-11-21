@@ -1,7 +1,7 @@
 /* @override http://localhost:9181/static/css/main.css */
 
 body {
-    background-color: black;
+    background-color: #f8f9fa;
 }
 
 .container {
@@ -15,6 +15,7 @@ body {
 
 .section
 {
+    border: solid 1px #ddd;
     padding: 2em;
 }
 
@@ -32,7 +33,6 @@ h1 {
     font-family: 'Helvetica Neue', helvetica, sans-serif;
     font-weight: 300;
     color: steelblue;
-    text-shadow: 0 -1px #229;
 }
 
 h1 strong {
@@ -134,11 +134,8 @@ span.loading {
 }
 
 footer {
-    text-align: center;
-}
-
-.text-white {
-    color: white;
+    text-align: left;
+    padding-left: 6%;
 }
 
 #rq-instances {
@@ -150,3 +147,23 @@ footer {
 #select-registry, #select-per-page, #select-queue {
     width: auto;
 }
+
+.navbar {
+    border-bottom: solid 1px #ddd;
+}
+
+#navbar-dashboard {
+    background-color: #ececec;
+}
+
+.container {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+#filter-form {
+    width: fit-content;
+    margin-left: 0;
+    margin-right: auto;
+}
+

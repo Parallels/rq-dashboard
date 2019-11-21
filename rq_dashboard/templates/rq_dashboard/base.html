@@ -1,56 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="initial-scale=1.0">
-  <title>RQ dashboard</title>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1.0">
+        <title>RQ dashboard</title>
 
-  {# Le styles -#}
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link rel="stylesheet" href="{{ url_for('rq_dashboard.static', filename='css/bootstrap.min.css') }}">
-  <link href="{{ url_for('rq_dashboard.static', filename='css/main.css') }}" rel="stylesheet">
-</head>
+        {# Le styles -#}
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" href="{{ url_for('rq_dashboard.static', filename='css/bootstrap.min.css') }}">
+        <link href="{{ url_for('rq_dashboard.static', filename='css/main.css') }}" rel="stylesheet">
+    </head>
 
-<body style="background-color:{{ config.RQ_DASHBOARD_WEB_BACKGROUND }};">
+    <body>
 
-<div id="alert-fixed" class="alert alert-error">
-  <strong>Warning!</strong> Selection pauses information refresh
-</div>
+        <div id="alert-fixed" class="alert alert-danger">
+            <strong>Warning!</strong> Selection pauses information refresh
+        </div>
 
-{% include "rq_dashboard/navbar.html" %}
+        {% include "rq_dashboard/navbar.html" %}
 
-<div class="container">
-  
-  {% block content %}{% endblock %}
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
 
-</div>
+        <div id="confirmation-modal" class="modal fade">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Do you really want to <span id="confirmation-modal-action"></span>?</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="confirmation-modal-no" class="btn">No</button>
+                        <button type="button" id="confirmation-modal-yes" class="btn btn-primary">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div id="confirmation-modal" class="modal hide fade">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Do you really want to <span id="confirmation-modal-action"></span>?</h3>
-  </div>
-  <div class="modal-footer">
-    <button id="confirmation-modal-no" class="btn">No</button>
-    <button id="confirmation-modal-yes" class="btn btn-primary">Yes</button>
-  </div>
-</div>
+        {% include "rq_dashboard/footer.html" %}
+        <script src="{{ url_for('rq_dashboard.static', filename='js/jquery-3.4.1.min.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('rq_dashboard.static', filename='js/underscore-min.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('rq_dashboard.static', filename='js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
+        <script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap.bundle.min.js') }}" type="text/javascript"></script>
+        <script type="text/javascript">
+            {% include "rq_dashboard/inline_js.html" %}
+            {% block content_scripts %}{% endblock %}
+        </script>
 
-  
-{% include "rq_dashboard/footer.html" %}
 
-{#- JavaScripts are loaded at the end -#}
-
-{#- Custom JS -#}
-<script src="{{ url_for('rq_dashboard.static', filename='js/jquery.min.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('rq_dashboard.static', filename='js/underscore-min.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('rq_dashboard.static', filename='js/sugar-1.2.1.min.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap-tooltip.js') }}" type="text/javascript"></script>
-<script src="{{ url_for('rq_dashboard.static', filename='js/bootstrap-modal.js') }}" type="text/javascript"></script>
-<script type="text/javascript">
-  {% include "rq_dashboard/inline_js.html" %}
-  {% block content_scripts %}{% endblock %}
-</script>
-
-</body>
+        
+    </body>
 </html>

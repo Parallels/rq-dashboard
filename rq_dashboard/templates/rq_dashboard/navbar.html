@@ -1,17 +1,25 @@
-<div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <a class="brand" href="">RQ-dashboard</a>
-            <div class="nav-collapse collapse">
-                <ul class="nav">
-                    <li {% if active_tab == 'queues'%} class="active" {% endif %}><a href="/view/queues">Queues</a></li>
-                    <li {% if active_tab == 'jobs'%} class="active" {% endif %}><a href="/view/jobs">Jobs</a></li>
-                    <li {% if active_tab == 'workers'%} class="active" {% endif %}><a href="/view/workers">Workers</a></li>
+<div id="navbar-dashboard" class="navbar navbar-expand-lg navbar-light">
+            <a class="navbar-brand">RQ-dashboard</a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item{% if active_tab == 'queues'%} active{% endif %}" >
+                        <a href="/view/queues" class="nav-link">Queues</a>
+                    </li>
+                    <li class="nav-item{% if active_tab == 'jobs'%} active{% endif %}">
+                        <a href="/view/jobs" class="nav-link">Jobs</a>
+                    </li>
+                    <li class="nav-item{% if active_tab == 'workers'%} active{% endif %}">
+                        <a href="/view/workers" class="nav-link">Workers</a>
+                    </li>
                 </ul>
                 <div id="rq-instances-row" style="display: none">
                     <select id="rq-instances"></select>
                 </div>
+
             </div>
-        </div>
-    </div>
 </div>

@@ -54,13 +54,13 @@
         // first page
         html = template_first_page(pagination.first_page);
         $el = $(html);
-        if (pagination.current_page == 1) {
+        if ((pagination.current_page == 1) || (pagination.num_pages == 0)) {
             $el.addClass('disabled');
         }
         $ul.append($el);
 
         // prev page
-        if (pagination.prev_page !== undefined ) {
+        if ((pagination.prev_page !== undefined ) && (pagination.num_pages != 0)) {
             html = template_prev_page(pagination.prev_page);
             $el = $(html);
             $ul.append($el);
@@ -94,7 +94,7 @@
         // last page
         html = template_last_page(pagination.last_page);
         $el = $(html);
-        if (pagination.current_page == pagination.num_pages) {
+        if ((pagination.current_page == pagination.num_pages) || (pagination.num_pages == 0)) {
             $el.addClass('disabled');
         }
         $ul.append($el);
@@ -160,17 +160,6 @@
         return false;
     });
 
-    $('#filter-btn').click(function() {
-        $(document).ready( function() {
-            queue_name = $('#select-queue').val();
-            if (!queue_name) {
-                queue_name = 'default'
-            }
-            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
-            $(location).attr("href", url);
-         });
-    });
-
     // Enable the AJAX behaviour of the cancel button
     $tbody.on('click', '[data-role=cancel-job-btn]', function(e) {
         e.preventDefault();
@@ -205,6 +194,49 @@
         });
 
         return false;
+    });
+
+    $('#select-queue').on('click', function() {
+        $(this).val("");
+    });
+
+    $('#select-queue').on('mouseleave', function() {
+        if ($(this).val() == '') {
+            $(this).val('{{ queue.name }}');
+        }
+    });
+
+    $('#select-queue').change(function() {
+        $(document).ready( function() {
+            queue_name = $('#select-queue').val();
+            if (!queue_name) {
+                queue_name = 'default'
+            }
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            $(location).attr("href", url);
+         });
+    });
+
+    $('#select-registry').change(function() {
+        $(document).ready( function() {
+            queue_name = $('#select-queue').val();
+            if (!queue_name) {
+                queue_name = 'default'
+            }
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            $(location).attr("href", url);
+         });
+    });
+
+    $('#select-per-page').change(function() {
+        $(document).ready( function() {
+            queue_name = $('#select-queue').val();
+            if (!queue_name) {
+                queue_name = 'default'
+            }
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            $(location).attr("href", url);
+         });
     });
 
 })($);
