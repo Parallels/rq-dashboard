@@ -7,24 +7,25 @@
     <h1>Queues</h1>
     <p class="fixed intro">This list below contains all the registered queues with the number of jobs currently
                             in the queue. Select a queue from above to view all jobs currently pending on the queue.</p>
-
-    <table id="queues" class="table table-bordered">
-        <thead>
-        <tr>
-            <th>Queue</th>
-            <th class="narrow">Queued jobs</th>
-            <th class="narrow">Deferred jobs</th>
-            <th class="narrow">Started jobs</th>
-            <th class="narrow">Finished jobs</th>
-            <th class="narrow">Failed jobs</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr data-role="loading-placeholder">
-            <td colspan="5">Loading...</td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive-md">
+        <table id="queues" class="table table-bordered">
+            <thead class="thead-light">
+            <tr>
+                <th>Queue</th>
+                <th class="narrow">Queued&nbsp;jobs</th>
+                <th class="narrow">Deferred&nbsp;jobs</th>
+                <th class="narrow">Started&nbsp;jobs</th>
+                <th class="narrow">Finished&nbsp;jobs</th>
+                <th class="narrow">Failed&nbsp;jobs</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr data-role="loading-placeholder">
+                    <td colspan="6">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <script name="queue-row" type="text/template">
         <tr data-role="queue">
