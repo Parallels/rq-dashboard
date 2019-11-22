@@ -1,0 +1,43 @@
+{% extends "rq_dashboard/base.html" %}
+
+{% block content %}
+
+<div class="section">
+        <h1><strong>Job ID</strong>: {{id}}</h1>
+        <h2><strong>Origin queue</strong>: {{origin}}</h2>
+        <h3><strong>Description</strong>: {{description}}</h3>
+    </tr>
+
+    <table id="jobs" class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Info</th>
+                <th>Result</th>
+                <th>Dates</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    {% if exc_info%}
+                        <pre class="exc_info">{{exc_info}}</pre>
+                    {% else %}
+                        <p>{{exc_info}}</p>
+                    {% endif %}
+                </td>
+                <td>{{result}}</td>
+                <td>
+                    <p><strong>Created at</strong>:<br> {{created_at}}</p>
+                    <p><strong>Enqueued at</strong>:<br> {{enqueued_at}}</p>
+                    <p><strong>Ended at</strong>:<br> {{ended_at}}</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block content_scripts %}
+
+{% endblock %}

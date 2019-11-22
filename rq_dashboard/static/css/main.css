@@ -35,13 +35,16 @@ h1 {
     color: steelblue;
 }
 
-h1 strong {
-    font-weight: 500;
+h2 {
+    font-family: 'Helvetica Neue', helvetica, sans-serif;
+    font-weight: 300;
+    color: steelblue;
 }
 
-h1 strong.failed {
-    color: red;
-    text-shadow: 0 -1px #922;
+h3 {
+    font-family: 'Helvetica Neue', helvetica, sans-serif;
+    font-weight: 300;
+    color: steelblue;
 }
 
 table, table tr, table tr td {
@@ -86,6 +89,7 @@ table#jobs pre.exc_info {
     margin-left: 24px;
     border-left: 2px solid darkorange;
     background-color: lightgoldenrodyellow;
+    white-space: pre-wrap;
 }
 
 table#jobs span.creation_date {
