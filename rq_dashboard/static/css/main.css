@@ -35,13 +35,16 @@ h1 {
     color: steelblue;
 }
 
-h1 strong {
-    font-weight: 500;
+h2 {
+    font-family: 'Helvetica Neue', helvetica, sans-serif;
+    font-weight: 300;
+    color: steelblue;
 }
 
-h1 strong.failed {
-    color: red;
-    text-shadow: 0 -1px #922;
+h3 {
+    font-family: 'Helvetica Neue', helvetica, sans-serif;
+    font-weight: 300;
+    color: steelblue;
 }
 
 table, table tr, table tr td {
@@ -80,12 +83,13 @@ table#jobs div.job_id {
     margin-left: 24px;
 }
 
-table#jobs pre.exc_info {
+pre.exc_info {
     font-size: 80%;
     color: #555;
     margin-left: 24px;
     border-left: 2px solid darkorange;
     background-color: lightgoldenrodyellow;
+    white-space: pre-wrap;
 }
 
 table#jobs span.creation_date {
@@ -165,5 +169,12 @@ footer {
     width: fit-content;
     margin-left: 0;
     margin-right: auto;
+}
+
+.ellipsify {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%; 
 }
 

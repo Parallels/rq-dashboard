@@ -9,6 +9,13 @@ var url_for = function(name, param) {
     return url;
 };
 
+//Show full string in title if string too long
+document.querySelectorAll('.ellipsify').forEach(function (elem) {
+    if (parseFloat(window.getComputedStyle(elem).width) === parseFloat(window.getComputedStyle(elem.parentElement).width)) {
+      elem.setAttribute('title', elem.textContent);
+    }
+});
+
 var url_for_jobs_data = function(queue_name, registry_name, per_page, page) {
     var url = '/data' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
     return url;
@@ -19,11 +26,22 @@ var url_for_jobs_view = function(queue_name, registry_name, per_page, page) {
     return url;
 };
 
+var url_for_single_job_data = function(job_id) {
+    var url = '/data/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id) + '.json'
+    return url;
+}
+
 var toRelative = function(universal_date_string) {
     var tzo = new Date().getTimezoneOffset();
     var d = Date.create(universal_date_string).rewind({ minutes: tzo });
     return d.relative();
 };
+
+var toShort = function(universal_date_string) {
+    var tzo = new Date().getTimezoneOffset();
+    var d = Date.create(universal_date_string).rewind({ minutes: tzo });
+    return d.format()
+}
 
 var api = {
     getRqInstances: function(cb) {
@@ -51,6 +69,15 @@ var api = {
             cb(jobs, pagination);
         }).fail(function(err){
             cb(null, null, err || true);
+        });
+    },
+
+    getJob: function(job_id, cb) {
+        $.getJSON(url_for_single_job_data(job_id), function(data) {
+            var job = data;
+            cb(job);
+        }).fail(function(err){
+            cb(null, err || true);
         });
     },
 
