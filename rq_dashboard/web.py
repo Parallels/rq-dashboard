@@ -134,6 +134,17 @@ def serialize_job(job, need_result=False, need_exc_info=False):
         description=job.description)
 
 
+def serialize_current_job(job):
+    if job is None:
+        return "idle"
+    return dict(
+        job_id=job.id,
+        description=job.description,
+        created_at=serialize_date(job.created_at),
+        call_string=job.get_call_string(),
+    )
+
+
 def remove_none_values(input_dict):
     return dict(((k, v) for k, v in input_dict.items() if v is not None))
 
@@ -423,16 +434,6 @@ def job_info(job_id):
         result=job._result,
         exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description,
-    )
-
-
-def serialize_current_job(job):
-    if job is None:
-        return "idle"
-    return dict(
-        job_id=job.id,
-        description=job.description,
-        created_at=serialize_date(job.created_at)
     )
 
 

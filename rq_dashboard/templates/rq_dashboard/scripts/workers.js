@@ -56,7 +56,6 @@
     $(document).ready(function() {
         reload_table(function(workers_count) {
             $('#refresh-button').click(reload_table);
-            $('#workers').show();
             refresh_table_loop();
         });
     });
