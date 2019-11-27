@@ -242,17 +242,9 @@ def job_view(job_id):
     r = make_response(render_template(
         'rq_dashboard/job.html',
         id=job.id,
-        created_at=serialize_date(job.created_at),
-        enqueued_at=serialize_date(job.enqueued_at),
-        ended_at=serialize_date(job.ended_at),
-        origin=job.origin,
-        result=job._result,
-        exc_info=str(job.exc_info) if job.exc_info else None,
-        description=job.description,
         rq_url_prefix='/',
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
-        active_tab='',
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
@@ -420,6 +412,7 @@ def job_info(job_id):
         enqueued_at=serialize_date(job.enqueued_at),
         ended_at=serialize_date(job.ended_at),
         origin=job.origin,
+        status=job.get_status(),
         result=job._result,
         exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description,
