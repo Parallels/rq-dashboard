@@ -213,7 +213,7 @@
                 queue_name = 'default'
             }
             var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
-            $(location).attr("href", url);
+            $(location).attr('href', url);
          });
     });
 
@@ -224,7 +224,7 @@
                 queue_name = 'default'
             }
             var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
-            $(location).attr("href", url);
+            $(location).attr('href', url);
          });
     });
 
@@ -235,7 +235,7 @@
                 queue_name = 'default'
             }
             var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
-            $(location).attr("href", url);
+            $(location).attr('href', url);
          });
     });
 

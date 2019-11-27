@@ -1,0 +1,50 @@
+{% extends "rq_dashboard/base.html" %}
+
+{% block content %}
+<div class="section">
+    <div class="row">
+        <span class="col-10">
+                <h2><strong>Job ID</strong>: {{ id }}</h2>
+            </span>
+            
+            <span class="col-2">
+                    <button id="requeue-job-btn" class="btn btn-outline-warning btn-sm">Requeue</button>
+                    <button id="cancel-job-btn" class="btn btn-outline-danger btn-sm">Cancel</button>
+            </span>
+        </div>
+    <div id="job-data" class="row"></div>
+    
+
+    <script name="job-info" type="text/template">
+
+        
+
+        <span class="col-6">
+            <p class="ellipsify"><strong>Description</strong>:<br><%= d.description %></p>
+            <p><strong>Origin queue</strong>:<br><%= d.origin %></p>
+            <% if (d.result) { %>
+            <p><strong>Result</strong>:<br><%= d.result %></p>
+            <% } %>
+        </span>
+
+        <span class="col-6">
+            <p><strong>Created at</strong>:<br> <%= d.created_at %></p>
+            <p><strong>Enqueued at</strong>:<br> <%= d.enqueued_at %></p>
+            <% if (d.exc_info) { %>
+            <p><strong>Ended at</strong>:<br> <%= d.ended_at %></p>
+            <% } %>
+        </span>
+
+        <% if (d.exc_info) { %>
+        <div class = "row col-12">
+            <pre class="exc_info col-12"><%= d.exc_info %></pre>
+        </div>
+        <% } %>
+    </script>
+</div>
+
+{% endblock %}
+
+{% block content_scripts %}
+    {% include "rq_dashboard/scripts/job.js" %}
+{% endblock %}

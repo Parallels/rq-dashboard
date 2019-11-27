@@ -122,7 +122,7 @@ def serialize_date(dt):
     return arrow.get(dt).to('UTC').datetime.isoformat()
 
 
-def serialize_job(job):
+def serialize_job(job, need_result=False, need_exc_info=False):
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
@@ -231,6 +231,28 @@ def jobs_overview(queue_name, registry_name, per_page, page):
         rq_dashboard_version=rq_dashboard_version,
         rq_version=rq_version,
         active_tab='jobs',
+    ))
+    r.headers.set('Cache-Control', 'no-store')
+    return r
+
+
+@blueprint.route('/view/job/<job_id>')
+def job_view(job_id):
+    job = Job.fetch(job_id)
+    r = make_response(render_template(
+        'rq_dashboard/job.html',
+        id=job.id,
+        created_at=serialize_date(job.created_at),
+        enqueued_at=serialize_date(job.enqueued_at),
+        ended_at=serialize_date(job.ended_at),
+        origin=job.origin,
+        result=job._result,
+        exc_info=str(job.exc_info) if job.exc_info else None,
+        description=job.description,
+        rq_url_prefix='/',
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
+        active_tab='',
     ))
     r.headers.set('Cache-Control', 'no-store')
     return r
@@ -386,6 +408,22 @@ def list_jobs(queue_name, registry_name, per_page, page):
     )
 
     return dict(name=queue_name, registry_name=registry_name, jobs=jobs, pagination=pagination)
+
+
+@blueprint.route('/data/job/<job_id>.json')
+@jsonify
+def job_info(job_id):
+    job = Job.fetch(job_id)
+    return dict(
+        id=job.id,
+        created_at=serialize_date(job.created_at),
+        enqueued_at=serialize_date(job.enqueued_at),
+        ended_at=serialize_date(job.ended_at),
+        origin=job.origin,
+        result=job._result,
+        exc_info=str(job.exc_info) if job.exc_info else None,
+        description=job.description,
+    )
 
 
 def serialize_current_job(job):
