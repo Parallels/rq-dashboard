@@ -22,17 +22,17 @@ from functools import wraps
 from math import ceil
 
 import arrow
+from six import string_types
+
 from flask import (Blueprint, current_app, make_response, render_template,
                    send_from_directory, url_for)
-from redis import Redis, from_url
-from redis.sentinel import Sentinel
+from redis_sentinel_url import connect as from_url
 from rq import VERSION as rq_version
 from rq import (Queue, Worker, cancel_job, pop_connection, push_connection,
                 requeue_job)
 from rq.job import Job
 from rq.registry import (DeferredJobRegistry, FailedJobRegistry,
                          FinishedJobRegistry, StartedJobRegistry)
-from six import string_types
 
 from .legacy_config import upgrade_config
 from .version import VERSION as rq_dashboard_version
@@ -54,27 +54,12 @@ def setup_rq_connection():
     upgrade_config(current_app)
     # Getting Redis connection parameters for RQ
     redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
-    redis_sentinels = current_app.config.get('RQ_DASHBOARD_REDIS_SENTINELS')
-    if isinstance(redis_url, list):
-        current_app.redis_conn = from_url(redis_url[0])
+    if isinstance(redis_url, (tuple, list)):
+        _, current_app.redis_conn = from_url(redis_url[0])
     elif isinstance(redis_url, string_types):
-        current_app.redis_conn = from_url(redis_url)
-    elif redis_sentinels:
-        redis_master = current_app.config.get('RQ_DASHBOARD_REDIS_MASTER_NAME')
-        password = current_app.config.get('RQ_DASHBOARD_REDIS_PASSWORD')
-        db = current_app.config.get('RQ_DASHBOARD_REDIS_DB')
-        sentinel_hosts = [tuple(sentinel.split(':', 1))
-                          for sentinel in redis_sentinels.split(',')]
-
-        sentinel = Sentinel(sentinel_hosts, db=db, password=password)
-        current_app.redis_conn = sentinel.master_for(redis_master)
+        _, current_app.redis_conn = from_url(redis_url)
     else:
-        current_app.redis_conn = Redis(
-            host=current_app.config.get('RQ_DASHBOARD_REDIS_HOST', 'localhost'),
-            port=current_app.config.get('RQ_DASHBOARD_REDIS_PORT', 6379),
-            password=current_app.config.get('RQ_DASHBOARD_REDIS_PASSWORD'),
-            db=current_app.config.get('RQ_DASHBOARD_REDIS_DB', 0),
-        )
+        raise RuntimeError('No Redis configuration!')
 
 
 @blueprint.before_request
@@ -327,7 +312,7 @@ def compact_queue(queue_name):
 @jsonify
 def change_rq_instance(instance_number):
     redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
-    if not isinstance(redis_url, list):
+    if not isinstance(redis_url, (list, tuple)):
         return dict(status='Single RQ. Not Permitted.')
     if int(instance_number) >= len(redis_url):
         raise LookupError('Index exceeds RQ list. Not Permitted.')
@@ -341,7 +326,7 @@ def change_rq_instance(instance_number):
 @jsonify
 def list_instances():
     redis_url = current_app.config.get('RQ_DASHBOARD_REDIS_URL')
-    if isinstance(redis_url, list):
+    if isinstance(redis_url, (list, tuple)):
         return dict(
             rq_instances=[re.sub(r'://:[^@]*@', '://:***@', x) for x in redis_url],
         )

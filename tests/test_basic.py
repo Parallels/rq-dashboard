@@ -20,8 +20,10 @@ class BasicTestCase(unittest.TestCase):
     def setUp(self):
         self.app = make_flask_app(None, None, None, '')
         self.app.testing = True
-        self.client = self.app.test_client()
+        self.app.config['RQ_DASHBOARD_REDIS_URL'] = 'redis://127.0.0.1'
+        self.app.redis_conn = self.get_redis_client()
         push_connection(self.get_redis_client())
+        self.client = self.app.test_client()
 
     def tearDown(self):
         pop_connection()

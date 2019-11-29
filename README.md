@@ -77,16 +77,8 @@ Options:
   --password TEXT                 HTTP Basic Auth password
   -c, --config TEXT               Configuration file (Python module on search
                                   path)
-  -H, --redis-host TEXT           IP address or hostname of Redis server
-  -P, --redis-port INTEGER        Port of Redis server
-  --redis-password TEXT           Password for Redis server
-  -D, --redis-database INTEGER    Database of Redis server
-  -u, --redis-url TEXT            Redis URL connection (overrides other
-                                  individual settings)
-  --redis-sentinels TEXT          List of redis sentinels. Each should be
-                                  formatted: <host>:<port>
-  --redis-master-name TEXT        Name of redis master. Only needed when using
-                                  sentinels
+  -u, --redis-url TEXT            Redis URL. Can be specified multiple times.
+                                  Default: redis://127.0.0.1:6379
   --poll-interval, --interval INTEGER
                                   Refresh interval in ms
   --extra-path TEXT               Append specified directories to sys.path
@@ -125,7 +117,7 @@ provides a simple working example.
 Running on Heroku
 -----------------
 
-Consider using
+Consider using third-party project
 [rq-dashboard-on-heroku](https://github.com/metabolize/rq-dashboard-on-heroku),
 which installs rq-dashboard from PyPI and wraps in in
 [Gunicorn](https://gunicorn.org) for deployment to Heroku.
