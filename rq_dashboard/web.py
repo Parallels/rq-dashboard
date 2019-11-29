@@ -126,10 +126,7 @@ def serialize_job(job, need_result=False, need_exc_info=False):
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
-        enqueued_at=serialize_date(job.enqueued_at),
         ended_at=serialize_date(job.ended_at),
-        origin=job.origin,
-        result=job._result,
         exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description)
 

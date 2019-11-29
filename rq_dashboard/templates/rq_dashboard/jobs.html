@@ -61,9 +61,6 @@
         <tr data-role="job" data-job-id="<%= d.id %>">
             <td>
                 <span class="description ellipsify"><%= $('<div/>').text(d.description).html() %></span>
-                <% if (d.exc_info) { %>
-                <span class="origin">from <strong><%= d.origin %></strong></span>
-                <% } %>
                 <div class="job_id"><a href="/view/job/<%= d.id %>"><%= d.id %></a></div>
                 <% if (d.exc_info) { %>
                 <span class="end_date">Failed <%= d.ended_at %></span>
