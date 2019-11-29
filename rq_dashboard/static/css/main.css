@@ -143,8 +143,8 @@ footer {
 }
 
 #rq-instances {
-    float: right;
-    margin-top: 3px;
+    margin-left: 15px;
+    margin-right: 13px;
     width: auto;
 }
 
@@ -177,3 +177,10 @@ footer {
     white-space: nowrap;
     max-width: 100%; 
 }
+
+#autorefresh-intro {
+    margin-bottom: 0;
+    font-size: 90%;
+    color: #888;
+}
+

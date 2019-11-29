@@ -35,9 +35,13 @@
     };
 
     var refresh_loop = function() {
-        reload_job_info(function() {
+        if (AUTOREFRESH_FLAG) {
+            reload_job_info(function() {
+                setTimeout(refresh_loop, POLL_INTERVAL);
+            });
+        } else {
             setTimeout(refresh_loop, POLL_INTERVAL);
-        });
+        }
     };
 
     $(document).ready(function() {

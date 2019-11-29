@@ -144,3 +144,12 @@ var modalConfirm = function(action, cb) {
     });
 })($);
 
+(function ($) {
+    $('#autorefresh-switch').change(function() {
+        if ($('#autorefresh-switch').prop('checked')){
+            AUTOREFRESH_FLAG = 1;
+        } else {
+            AUTOREFRESH_FLAG = 0;
+        }
+    });
+})($);
