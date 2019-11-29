@@ -11,11 +11,11 @@
     </p>
 
     <div class="table-responsive-md">
-        <table id="workers" class="table table-bordered" style="display: none;">
+        <table id="workers" class="table table-bordered">
             <thead class="thead-light">
                 <tr>
-                    <th style="width:48px">State</th>
                     <th>Worker</th>
+                    <th>Current&nbsp;job</th>
                     <th>Queues</th>
                 </tr>
             </thead>
@@ -29,8 +29,20 @@
 
     <script name="worker-row" type="text/template">
         <tr data-role="worker">
-            <td><i class="icon-<%= d.state %>" title="Job ID: <%= d.current_job.job_id %>&#013;&#010;Description: <% if (d.current_job.description){ %> <%- d.current_job.description %> <% } %>&#013;&#010;Created at: <%= d.current_job.created_at %>&#013;&#010;"></i></td>
-            <td <% if (d.version && d.python_version) { %>title ="RQ <%= d.version %> / Python <%= d.python_version %>" <% } %>><%= d.name %></td>
+            <td <% if (d.version && d.python_version) { %>title ="RQ <%= d.version %> / Python <%= d.python_version %>" <% } %>>
+                <%= d.name %>
+            </td>
+            
+            <% if (d.current_job !== 'idle') { %>
+            <td title="Job ID: <%= d.current_job.job_id %>&#013;&#010;Description: <% if (d.current_job.description){ %> <%- d.current_job.description %> <% } %>&#013;&#010;Created at: <%= toRelative(d.current_job.created_at) %>&#013;&#010;">
+                <a href="<%= url_for_single_job_view(d.current_job.job_id) %>">
+                    <%= d.current_job.call_string %>
+                </a>
+            </td>
+            <% } else { %>
+            <td><%= d.current_job %></td>
+            <% } %>
+
             <td><%= d.queues.join(', ') %></td>
         </tr>
     </script>

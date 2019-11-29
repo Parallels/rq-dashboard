@@ -27,7 +27,12 @@ var url_for_jobs_view = function(queue_name, registry_name, per_page, page) {
 };
 
 var url_for_single_job_data = function(job_id) {
-    var url = '/data/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id) + '.json'
+    var url = '/data/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id) + '.json';
+    return url;
+}
+
+var url_for_single_job_view = function(job_id) {
+    var url = '/view/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id);
     return url;
 }
 
