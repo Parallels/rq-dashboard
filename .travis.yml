@@ -4,19 +4,19 @@ python:
   - 3.5
   - 3.6
   - 3.7
-  - pypy
-env: 
+  - pypy3
+env:
   - RQ_VERSION="rq==1.0"
   - RQ_VERSION="rq==1.1"
   - RQ_VERSION="-e git+https://github.com/rq/rq#egg=rq"
 
-install: 
+install:
   - "bash -c '[[ $(python -V) == \"Python 3.4.\"* ]] && pip install setuptools==24.0.3 || :'"
   - "pip install -r requirements.txt"
   - "pip install $RQ_VERSION"
   - "pip install flake8 pytest"
-script: 
+script:
   - pytest
   - "flake8 rq_dashboard tests"
-services: 
+services:
   - redis-server
