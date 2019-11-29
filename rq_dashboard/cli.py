@@ -2,6 +2,7 @@ import importlib
 import logging
 import os
 import sys
+from urllib.parse import urlunparse, quote as urlquote
 
 import click
 from flask import Flask, Response, request
@@ -72,26 +73,26 @@ def make_flask_app(config, username, password, url_prefix,
     '-c', '--config', default=None,
     help='Configuration file (Python module on search path)')
 @click.option(
-    '-H', '--redis-host', default=None,
-    help='IP address or hostname of Redis server')
+    '-H', '--redis-host', default=None, hidden=True,
+    help='[DEPRECATED] IP address or hostname of Redis server. Use --redis-url instead')
 @click.option(
-    '-P', '--redis-port', default=None, type=int,
-    help='Port of Redis server')
+    '-P', '--redis-port', default=None, type=int, hidden=True,
+    help='[DEPRECATED] Port of Redis server. Use --redis-url instead')
 @click.option(
-    '--redis-password', default=None,
-    help='Password for Redis server')
+    '--redis-password', default=None, hidden=True,
+    help='[DEPRECATED] Password for Redis server. Use --redis-url instead')
 @click.option(
-    '-D', '--redis-database', default=None, type=int,
-    help='Database of Redis server')
+    '-D', '--redis-database', default=None, type=int, hidden=True,
+    help='[DEPRECATED] Database of Redis server, Use --redis-url instead')
 @click.option(
-    '-u', '--redis-url', default=None,
-    help='Redis URL connection (overrides other individual settings)')
+    '-u', '--redis-url', default=None, multiple=True,
+    help='Redis URL. Can be specified multiple times. Default: redis://127.0.0.1:6379')
 @click.option(
-    '--redis-sentinels', default=None,
-    help='List of redis sentinels. Each should be formatted: <host>:<port>')
+    '--redis-sentinels', default=None, hidden=True,
+    help='[DEPRECATED] List of redis sentinels. Use --redis-url instead')
 @click.option(
-    '--redis-master-name', default=None,
-    help='Name of redis master. Only needed when using sentinels')
+    '--redis-master-name', default=None, hidden=True,
+    help='[DEPRECATED] Name of redis master. Only needed when using sentinels. Use --redis-url instead')
 @click.option(
     '--poll-interval', '--interval', 'poll_interval', default=None, type=int,
     help='Refresh interval in ms')
@@ -130,20 +131,23 @@ def run(
 
     click.echo('RQ Dashboard version {}'.format(VERSION))
     app = make_flask_app(config, username, password, url_prefix)
+    app.config['DEPRECATED_OPTIONS'] = []
     if redis_url:
         app.config['RQ_DASHBOARD_REDIS_URL'] = redis_url
+    else:
+        app.config['RQ_DASHBOARD_REDIS_URL'] = 'redis://127.0.0.1:6379'
     if redis_host:
-        app.config['RQ_DASHBOARD_REDIS_HOST'] = redis_host
+        app.config['DEPRECATED_OPTIONS'].append('--redis-host')
     if redis_port:
-        app.config['RQ_DASHBOARD_REDIS_PORT'] = redis_port
+        app.config['DEPRECATED_OPTIONS'].append('--redis-port')
     if redis_password:
-        app.config['RQ_DASHBOARD_REDIS_PASSWORD'] = redis_password
+        app.config['DEPRECATED_OPTIONS'].append('--redis-password')
     if redis_database:
-        app.config['RQ_DASHBOARD_REDIS_DB'] = redis_database
+        app.config['DEPRECATED_OPTIONS'].append('--redis-database')
     if redis_sentinels:
-        app.config['RQ_DASHBOARD_REDIS_SENTINELS'] = redis_sentinels
+        app.config['DEPRECATED_OPTIONS'].append('--redis-sentinels')
     if redis_master_name:
-        app.config['RQ_DASHBOARD_REDIS_MASTER_NAME'] = redis_master_name
+        app.config['DEPRECATED_OPTIONS'].append('--redis-master-name')
     if poll_interval:
         app.config['RQ_DASHBOARD_POLL_INTERVAL'] = poll_interval
     if web_background:
@@ -158,6 +162,27 @@ def run(
     else:
         log.setLevel(logging.ERROR)
         log.error(" * Running on {}:{}".format(bind, port))
+
+    if app.config['DEPRECATED_OPTIONS'] and not redis_url:
+        # redis+sentinel://[:password@]host:port[,host2:port2,...][/service_name[/db]][?param1=value1[&param2=value=2&...]]
+        scheme = 'redis+sentinel' if redis_sentinels else 'redis'
+        if redis_sentinels:
+            netloc = redis_sentinels
+        else:
+            netloc = redis_host or 'localhost'
+            if redis_port:
+                netloc = '%s:%s' % (netloc, redis_port)
+        if redis_password:
+            netloc = urlquote(redis_password) + '@' + netloc
+        path = ''
+        if redis_master_name:
+            path += '/%s' % urlquote(redis_master_name)
+        if redis_database:
+            path += '/%s' % redis_database
+        url = urlunparse((scheme, netloc, path, '', '', ''))
+        log.error('Use --redis-url=%s configuration option '
+                  'instead of specifying host, port and other parameters separately', url)
+        app.config['RQ_DASHBOARD_REDIS_URL'] = url
 
     app.run(host=bind, port=port, debug=debug)
 
