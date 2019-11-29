@@ -182,7 +182,7 @@ def run(
         url = urlunparse((scheme, netloc, path, '', '', ''))
         log.error('Use --redis-url=%s configuration option '
                   'instead of specifying host, port and other parameters separately', url)
-        exit(1)
+        app.config['RQ_DASHBOARD_REDIS_URL'] = url
 
     app.run(host=bind, port=port, debug=debug)
 
