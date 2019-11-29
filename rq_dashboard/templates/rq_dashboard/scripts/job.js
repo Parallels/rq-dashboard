@@ -5,7 +5,7 @@
     var job_id = {{ id|tojson|safe }};
     var html;
 
-    var reload_job = function(done) {
+    var reload_job_info = function(done) {
         api.getJob({{ id|tojson|safe }}, function(job, err) {
             if (err) {
                 return done();
@@ -35,14 +35,14 @@
     };
 
     var refresh_loop = function() {
-        reload_job(function() {
-            setTimeout(refresh_table_loop, POLL_INTERVAL);
+        reload_job_info(function() {
+            setTimeout(refresh_loop, POLL_INTERVAL);
         });
     };
 
     $(document).ready(function() {
         refresh_loop();
-        $('#refresh-button').click(reload_table);
+        $('#refresh-button').click(reload_job_info);
     });
 
     $("#cancel-job-btn").click(function() {
