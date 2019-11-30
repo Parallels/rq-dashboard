@@ -47,10 +47,14 @@
 
     var refresh_table_loop = function() {
         $('span.loading').fadeIn('fast');
-        reload_table(function() {
-            $('span.loading').fadeOut('fast');
+        if (AUTOREFRESH_FLAG){
+            reload_table(function() {
+                $('span.loading').fadeOut('fast');
+                setTimeout(refresh_table_loop, POLL_INTERVAL);
+            });
+        } else {
             setTimeout(refresh_table_loop, POLL_INTERVAL);
-        });
+        }
     };
 
     $(document).ready(function() {
