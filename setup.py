@@ -30,7 +30,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     platforms='any',
-    install_requires=['rq>=1.0', 'Flask', 'redis', 'arrow'],
+    install_requires=['rq>=1.0', 'Flask', 'redis', 'arrow', 'redis-sentinel-url'],
     entry_points={
         'console_scripts': [
             'rq-dashboard = rq_dashboard.cli:main'

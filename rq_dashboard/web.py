@@ -317,7 +317,7 @@ def change_rq_instance(instance_number):
     if int(instance_number) >= len(redis_url):
         raise LookupError('Index exceeds RQ list. Not Permitted.')
     pop_connection()
-    current_app.redis_conn = from_url(redis_url[int(instance_number)])
+    _, current_app.redis_conn = from_url(redis_url[int(instance_number)])
     push_rq_connection()
     return dict(status='OK')
 
