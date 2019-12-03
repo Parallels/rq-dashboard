@@ -8,3 +8,6 @@ dump.rdb
 .VScode
 .DS_Store
 ._*
+.tox/
+
+.python-version
