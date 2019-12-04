@@ -227,33 +227,31 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
 @blueprint.route("/view")
 @blueprint.route("/view/queues")
 def queues_overview():
-    r = make_response(
-        render_template(
-            "rq_dashboard/queues.html",
-            queues=Queue.all(),
-            rq_url_prefix="/",
-            rq_dashboard_version=rq_dashboard_version,
-            rq_version=rq_version,
-            active_tab="queues",
-        )
-    )
-    r.headers.set("Cache-Control", "no-store")
+    r = make_response(render_template(
+        'rq_dashboard/queues.html',
+        queues=Queue.all(),
+        rq_url_prefix='/',
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
+        active_tab='queues',
+        deprecation_options_usage=True if current_app.config.get('DEPRECATED_OPTIONS') else False,
+    ))
+    r.headers.set('Cache-Control', 'no-store')
     return r
 
 
 @blueprint.route("/view/workers")
 def workers_overview():
-    r = make_response(
-        render_template(
-            "rq_dashboard/workers.html",
-            workers=Worker.all(),
-            rq_url_prefix="/",
-            rq_dashboard_version=rq_dashboard_version,
-            rq_version=rq_version,
-            active_tab="workers",
-        )
-    )
-    r.headers.set("Cache-Control", "no-store")
+    r = make_response(render_template(
+        'rq_dashboard/workers.html',
+        workers=Worker.all(),
+        rq_url_prefix='/',
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
+        active_tab='workers',
+        deprecation_options_usage=True if current_app.config.get('DEPRECATED_OPTIONS') else False,
+    ))
+    r.headers.set('Cache-Control', 'no-store')
     return r
 
 
@@ -272,21 +270,20 @@ def jobs_overview(queue_name, registry_name, per_page, page):
         queue = Queue()
     else:
         queue = Queue(queue_name)
-    r = make_response(
-        render_template(
-            "rq_dashboard/jobs.html",
-            queues=Queue.all(),
-            queue=queue,
-            per_page=per_page,
-            page=page,
-            registry_name=registry_name,
-            rq_url_prefix="/",
-            rq_dashboard_version=rq_dashboard_version,
-            rq_version=rq_version,
-            active_tab="jobs",
-        )
-    )
-    r.headers.set("Cache-Control", "no-store")
+    r = make_response(render_template(
+        'rq_dashboard/jobs.html',
+        queues=Queue.all(),
+        queue=queue,
+        per_page=per_page,
+        page=page,
+        registry_name=registry_name,
+        rq_url_prefix='/',
+        rq_dashboard_version=rq_dashboard_version,
+        rq_version=rq_version,
+        active_tab='jobs',
+        deprecation_options_usage=True if current_app.config.get('DEPRECATED_OPTIONS') else False,
+    ))
+    r.headers.set('Cache-Control', 'no-store')
     return r
 
 
