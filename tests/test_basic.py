@@ -6,6 +6,7 @@ from rq import Worker, pop_connection, push_connection
 
 from rq_dashboard.cli import make_flask_app
 
+
 HTTP_OK = 200
 
 
