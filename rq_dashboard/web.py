@@ -235,7 +235,7 @@ def queues_overview():
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="queues",
-            deprecation_options_usage=True
+            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
             if current_app.config.get("DEPRECATED_OPTIONS")
             else False,
         )
@@ -254,7 +254,7 @@ def workers_overview():
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="workers",
-            deprecation_options_usage=True
+            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
             if current_app.config.get("DEPRECATED_OPTIONS")
             else False,
         )
@@ -290,7 +290,7 @@ def jobs_overview(queue_name, registry_name, per_page, page):
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="jobs",
-            deprecation_options_usage=True
+            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
             if current_app.config.get("DEPRECATED_OPTIONS")
             else False,
         )
@@ -309,6 +309,9 @@ def job_view(job_id):
             rq_url_prefix="/",
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
+            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
+            if current_app.config.get("DEPRECATED_OPTIONS")
+            else False,
         )
     )
     r.headers.set("Cache-Control", "no-store")
