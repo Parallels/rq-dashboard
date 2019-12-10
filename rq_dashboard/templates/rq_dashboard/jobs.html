@@ -42,20 +42,22 @@
         This list below contains all the queued jobs on queue <strong>{{ queue.name }}</strong>, sorted by
         age (oldest on top).</p>
 
-        <table id="jobs" class="table table-bordered">
-            <thead class="thead-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th class="narrow">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr data-role="loading-placeholder">
-                    <td colspan="3">Loading...</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table id="jobs" class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th class="narrow">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-role="loading-placeholder">
+                        <td colspan="3">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
     <script name="job-row" type="text/template">
         <tr data-role="job" data-job-id="<%= d.id %>">
@@ -83,7 +85,7 @@
         </tr>
     </script>
 
-    <span class="input-group" style="width: fit-content; float: right">
+    <span class="input-group" style="width: fit-content; float: right;">
         <span class="input-group-prepend">
             <div class="input-group-text">On page:</div>
         </span>

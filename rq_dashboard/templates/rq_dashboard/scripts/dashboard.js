@@ -125,10 +125,7 @@ var modalConfirm = function(action, cb) {
         if (err) {
             return;
         }
-
-        if (instances && instances.length > 0) {
-            $('#rq-instances-row').show();
-        }
+        
         $.each(instances, function(i, instance) {
             $rqInstances.append($('<option>', {
                 value: i,
