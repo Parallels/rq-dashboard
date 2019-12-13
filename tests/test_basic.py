@@ -33,15 +33,8 @@ class BasicTestCase(unittest.TestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, HTTP_OK)
 
-    def test_rq_instanses_list_json(self):
-        response = self.client.get('/data/rq-instances.json')
-        self.assertEqual(response.status_code, HTTP_OK)
-        data = json.loads(response.data.decode('utf8'))
-        self.assertIsInstance(data, dict)
-        self.assertIn('rq_instances', data)
-
     def test_queues_list_json(self):
-        response = self.client.get('/data/queues.json')
+        response = self.client.get('/0/data/queues.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
@@ -49,25 +42,25 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.headers['Cache-Control'], 'no-store')
 
     def test_workers_list_json(self):
-        response = self.client.get('data/workers.json')
+        response = self.client.get('/0/data/workers.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('workers', data)
 
     def test_queued_jobs_list(self):
-        response_dashboard = self.client.get('/view/jobs')
+        response_dashboard = self.client.get('/0/view/jobs')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
-        response_queued = self.client.get('/view/jobs/default/queued/8/1')
+        response_queued = self.client.get('/0/view/jobs/default/queued/8/1')
         self.assertEqual(response_queued.status_code, HTTP_OK)
-        response = self.client.get('/data/jobs/default/queued/8/1.json')
+        response = self.client.get('/0/data/jobs/default/queued/8/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('jobs', data)
 
     def test_registry_jobs_list(self):
-        response = self.client.get('/data/jobs/default/failed/8/1.json')
+        response = self.client.get('/0/data/jobs/default/failed/8/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
@@ -76,7 +69,7 @@ class BasicTestCase(unittest.TestCase):
     def test_worker_python_version_field(self):
         w = Worker(['q'])
         w.register_birth()
-        response = self.client.get('/data/workers.json')
+        response = self.client.get('/0/data/workers.json')
         data = json.loads(response.data.decode('utf8'))
         if getattr(w, 'python_version', None):
             self.assertEqual(w.python_version, data['workers'][0]['python_version'])
@@ -87,7 +80,7 @@ class BasicTestCase(unittest.TestCase):
     def test_worker_version_field(self):
         w = Worker(['q'])
         w.register_birth()
-        response = self.client.get('/data/workers.json')
+        response = self.client.get('/0/data/workers.json')
         data = json.loads(response.data.decode('utf8'))
         if getattr(w, 'version', None):
             self.assertEqual(w.version, data['workers'][0]['version'])
