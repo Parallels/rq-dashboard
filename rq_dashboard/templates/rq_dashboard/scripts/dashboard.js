@@ -1,9 +1,9 @@
 var url_for = function(name, param) {
     var url = {{ rq_url_prefix|tojson|safe }};
-    if (name == 'rq-instances') {url += 'data/rq-instances.json'; }
-    else if (name == 'rq-instance') { url += 'rq-instance/' + encodeURIComponent(param); }
-    else if (name == 'queues') { url += 'data/queues.json'; }
-    else if (name == 'workers') { url += 'data/workers.json'; }
+    if (name == 'queues') { url += {{ current_instance|tojson|safe }} + '/data/queues.json'; }
+    else if (name == 'queues_view') { url += {{ current_instance|tojson|safe }} + '/view/queues'; }
+    else if (name == 'workers') { url += {{ current_instance|tojson|safe }} + '/data/workers.json'; }
+    else if (name == 'workers_view') { url += {{ current_instance|tojson|safe }} + '/view/workers'; }
     else if (name == 'cancel_job') { url += 'job/' + encodeURIComponent(param) + '/cancel'; }
     else if (name == 'requeue_job') { url += 'job/' + encodeURIComponent(param) + '/requeue'; }
     return url;
@@ -17,23 +17,30 @@ document.querySelectorAll('.ellipsify').forEach(function (elem) {
 });
 
 var url_for_jobs_data = function(queue_name, registry_name, per_page, page) {
-    var url = '/data' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
+    var url = '/' + {{ current_instance|tojson|safe }} + '/data' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
     return url;
 };
 
 var url_for_jobs_view = function(queue_name, registry_name, per_page, page) {
-    var url = '/view' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page);
+    var url = '/' + {{ current_instance|tojson|safe }} + '/view' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page);
     return url;
 };
 
 var url_for_single_job_data = function(job_id) {
-    var url = '/data/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id) + '.json';
+    var url = '/' + {{ current_instance|tojson|safe }} + '/data/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id) + '.json';
     return url;
 }
 
 var url_for_single_job_view = function(job_id) {
-    var url = '/view/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id);
+    var url = '/' + {{ current_instance|tojson|safe }} + '/view/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id);
     return url;
+}
+
+var url_for_new_instance = function(new_instance_number) {
+    var url = window.location.pathname.slice(1);
+    url = url.slice(url.indexOf('/'));
+    url = new_instance_number + url;
+    return url
 }
 
 var toRelative = function(universal_date_string) {
@@ -136,8 +143,9 @@ var modalConfirm = function(action, cb) {
 
     // Listen for changes on the select
     $rqInstances.change(function() {
-        var url = url_for('rq-instance', $(this).val());
-        $.post(url, function(data) {});
+        var new_instance_number = $('#rq-instances').find(':selected').data('instance-number');
+        var url = url_for_new_instance(new_instance_number);
+        $(location).attr('pathname', url);
     });
 })($);
 

@@ -7,14 +7,14 @@
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item{% if active_tab == 'queues'%} active{% endif %}" >
-                        <a href="/view/queues" class="nav-link">Queues</a>
+                    <li class="nav-item{% if active_tab == 'queues'%} active{% endif %}">
+                        <a href="/{{ current_instance }}/view/queues" class="nav-link">Queues</a>
                     </li>
                     <li class="nav-item{% if active_tab == 'jobs'%} active{% endif %}">
-                        <a href="/view/jobs" class="nav-link">Jobs</a>
+                        <a href="/{{ current_instance }}/view/jobs" class="nav-link">Jobs</a>
                     </li>
                     <li class="nav-item{% if active_tab == 'workers'%} active{% endif %}">
-                        <a href="/view/workers" class="nav-link">Workers</a>
+                        <a href="/{{ current_instance }}/view/workers" class="nav-link">Workers</a>
                     </li>
                 </ul>
                 <div>
@@ -24,7 +24,11 @@
                 </div>
                 </div>
                 <div id="rq-instances-row">
-                    <select id="rq-instances"></select>
+                    <select id="rq-instances">
+                        {% for instance in instance_list %}
+                        <option data-instance-number="{{ instance_list.index(instance) }}" {% if instance_list[current_instance] == instance %} selected {% endif %}>[{{ instance_list.index(instance) }}] {{ instance }}</option>
+                        {% endfor%}
+                    </select>
                 </div>
             </div>
 </div>
