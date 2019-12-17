@@ -27,6 +27,7 @@ from flask import (
     current_app,
     make_response,
     render_template,
+    request,
     send_from_directory,
     url_for,
 )
@@ -67,17 +68,28 @@ def setup_rq_connection():
     upgrade_config(current_app)
     # Getting Redis connection parameters for RQ
     redis_url = current_app.config.get("RQ_DASHBOARD_REDIS_URL")
-    if isinstance(redis_url, (tuple, list)):
+    if isinstance(redis_url, string_types):
+        current_app.config["RQ_DASHBOARD_REDIS_URL"] = (redis_url,)
+        _, current_app.redis_conn = from_url((redis_url,)[0])
+    elif isinstance(redis_url, (tuple, list)):
         _, current_app.redis_conn = from_url(redis_url[0])
-    elif isinstance(redis_url, string_types):
-        _, current_app.redis_conn = from_url(redis_url)
     else:
         raise RuntimeError("No Redis configuration!")
 
 
 @blueprint.before_request
 def push_rq_connection():
-    push_connection(current_app.redis_conn)
+    new_instance_number = request.view_args.get("instance_number")
+    if new_instance_number is not None:
+        redis_url = current_app.config.get("RQ_DASHBOARD_REDIS_URL")
+        if new_instance_number < len(redis_url):
+            _, new_instance = from_url(redis_url[new_instance_number])
+        else:
+            raise LookupError("Index exceeds RQ list. Not Permitted.")
+    else:
+        new_instance = current_app.redis_conn
+    push_connection(new_instance)
+    current_app.redis_conn = new_instance
 
 
 @blueprint.teardown_request
@@ -96,13 +108,14 @@ def jsonify(f):
     return _wrapped
 
 
-def serialize_queues(queues):
+def serialize_queues(instance_number, queues):
     return [
         dict(
             name=q.name,
             count=q.count,
             queued_url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=q.name,
                 registry_name="queued",
                 per_page="8",
@@ -111,6 +124,7 @@ def serialize_queues(queues):
             failed_job_registry_count=FailedJobRegistry(q.name).count,
             failed_url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=q.name,
                 registry_name="failed",
                 per_page="8",
@@ -119,6 +133,7 @@ def serialize_queues(queues):
             started_job_registry_count=StartedJobRegistry(q.name).count,
             started_url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=q.name,
                 registry_name="started",
                 per_page="8",
@@ -127,6 +142,7 @@ def serialize_queues(queues):
             deferred_job_registry_count=DeferredJobRegistry(q.name).count,
             deferred_url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=q.name,
                 registry_name="deferred",
                 per_page="8",
@@ -135,6 +151,7 @@ def serialize_queues(queues):
             finished_job_registry_count=FinishedJobRegistry(q.name).count,
             finished_url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=q.name,
                 registry_name="finished",
                 per_page="8",
@@ -151,7 +168,7 @@ def serialize_date(dt):
     return arrow.get(dt).to("UTC").datetime.isoformat()
 
 
-def serialize_job(job, need_result=False, need_exc_info=False):
+def serialize_job(job):
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
@@ -223,13 +240,24 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
     return (total_items, jobs)
 
 
-@blueprint.route("/")
-@blueprint.route("/view")
-@blueprint.route("/view/queues")
-def queues_overview():
+def escape_format_instance_list(url_list):
+    if isinstance(url_list, (list, tuple)):
+        url_list = [re.sub(r"://:[^@]*@", "://:***@", x) for x in url_list]
+    elif isinstance(url_list, string_types):
+        url_list = [re.sub(r"://:[^@]*@", "://:***@", url_list)]
+    return url_list
+
+
+@blueprint.route("/", defaults={"instance_number": 0})
+@blueprint.route("/<int:instance_number>/")
+@blueprint.route("/<int:instance_number>/view")
+@blueprint.route("/<int:instance_number>/view/queues")
+def queues_overview(instance_number):
     r = make_response(
         render_template(
             "rq_dashboard/queues.html",
+            current_instance=instance_number,
+            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
             queues=Queue.all(),
             rq_url_prefix="/",
             rq_dashboard_version=rq_dashboard_version,
@@ -244,11 +272,13 @@ def queues_overview():
     return r
 
 
-@blueprint.route("/view/workers")
-def workers_overview():
+@blueprint.route("/<int:instance_number>/view/workers")
+def workers_overview(instance_number):
     r = make_response(
         render_template(
             "rq_dashboard/workers.html",
+            current_instance=instance_number,
+            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
             workers=Worker.all(),
             rq_url_prefix="/",
             rq_dashboard_version=rq_dashboard_version,
@@ -264,7 +294,7 @@ def workers_overview():
 
 
 @blueprint.route(
-    "/view/jobs",
+    "/<int:instance_number>/view/jobs",
     defaults={
         "queue_name": None,
         "registry_name": "queued",
@@ -272,8 +302,10 @@ def workers_overview():
         "page": "1",
     },
 )
-@blueprint.route("/view/jobs/<queue_name>/<registry_name>/<int:per_page>/<int:page>")
-def jobs_overview(queue_name, registry_name, per_page, page):
+@blueprint.route(
+    "/<int:instance_number>/view/jobs/<queue_name>/<registry_name>/<int:per_page>/<int:page>"
+)
+def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
     if queue_name is None:
         queue = Queue()
     else:
@@ -281,6 +313,8 @@ def jobs_overview(queue_name, registry_name, per_page, page):
     r = make_response(
         render_template(
             "rq_dashboard/jobs.html",
+            current_instance=instance_number,
+            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
             queues=Queue.all(),
             queue=queue,
             per_page=per_page,
@@ -299,12 +333,14 @@ def jobs_overview(queue_name, registry_name, per_page, page):
     return r
 
 
-@blueprint.route("/view/job/<job_id>")
-def job_view(job_id):
+@blueprint.route("/<int:instance_number>/view/job/<job_id>")
+def job_view(instance_number, job_id):
     job = Job.fetch(job_id)
     r = make_response(
         render_template(
             "rq_dashboard/job.html",
+            current_instance=instance_number,
+            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
             id=job.id,
             rq_url_prefix="/",
             rq_dashboard_version=rq_dashboard_version,
@@ -383,45 +419,18 @@ def compact_queue(queue_name):
     return dict(status="OK")
 
 
-@blueprint.route("/rq-instance/<instance_number>", methods=["POST"])
+@blueprint.route("/<int:instance_number>/data/queues.json")
 @jsonify
-def change_rq_instance(instance_number):
-    redis_url = current_app.config.get("RQ_DASHBOARD_REDIS_URL")
-    if not isinstance(redis_url, (list, tuple)):
-        return dict(status="Single RQ. Not Permitted.")
-    if int(instance_number) >= len(redis_url):
-        raise LookupError("Index exceeds RQ list. Not Permitted.")
-    pop_connection()
-    _, current_app.redis_conn = from_url(redis_url[int(instance_number)])
-    push_rq_connection()
-    return dict(status="OK")
-
-
-@blueprint.route("/data/rq-instances.json")
-@jsonify
-def list_instances():
-    redis_url = current_app.config.get("RQ_DASHBOARD_REDIS_URL")
-    if isinstance(redis_url, (list, tuple)):
-        return dict(
-            rq_instances=[re.sub(r"://:[^@]*@", "://:***@", x) for x in redis_url],
-        )
-    elif isinstance(redis_url, string_types):
-        return dict(rq_instances=[re.sub(r"://:[^@]*@", "://:***@", redis_url)],)
-    else:
-        # TODO handle case when configuration is not in form of URL
-        return dict(rq_instances=[])
-
-
-@blueprint.route("/data/queues.json")
-@jsonify
-def list_queues():
-    queues = serialize_queues(sorted(Queue.all()))
+def list_queues(instance_number):
+    queues = serialize_queues(instance_number, sorted(Queue.all()))
     return dict(queues=queues)
 
 
-@blueprint.route("/data/jobs/<queue_name>/<registry_name>/<per_page>/<page>.json")
+@blueprint.route(
+    "/<int:instance_number>/data/jobs/<queue_name>/<registry_name>/<per_page>/<page>.json"
+)
 @jsonify
-def list_jobs(queue_name, registry_name, per_page, page):
+def list_jobs(instance_number, queue_name, registry_name, per_page, page):
     current_page = int(page)
     per_page = int(per_page)
     offset = (current_page - 1) * per_page
@@ -435,6 +444,7 @@ def list_jobs(queue_name, registry_name, per_page, page):
             number=p,
             url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=queue_name,
                 registry_name=registry_name,
                 per_page=per_page,
@@ -450,6 +460,7 @@ def list_jobs(queue_name, registry_name, per_page, page):
         prev_page = dict(
             url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=queue_name,
                 registry_name=registry_name,
                 per_page=per_page,
@@ -462,6 +473,7 @@ def list_jobs(queue_name, registry_name, per_page, page):
         next_page = dict(
             url=url_for(
                 ".jobs_overview",
+                instance_number=instance_number,
                 queue_name=queue_name,
                 registry_name=registry_name,
                 per_page=per_page,
@@ -472,6 +484,7 @@ def list_jobs(queue_name, registry_name, per_page, page):
     first_page_link = dict(
         url=url_for(
             ".jobs_overview",
+            instance_number=instance_number,
             queue_name=queue_name,
             registry_name=registry_name,
             per_page=per_page,
@@ -481,6 +494,7 @@ def list_jobs(queue_name, registry_name, per_page, page):
     last_page_link = dict(
         url=url_for(
             ".jobs_overview",
+            instance_number=instance_number,
             queue_name=queue_name,
             registry_name=registry_name,
             per_page=per_page,
@@ -505,9 +519,9 @@ def list_jobs(queue_name, registry_name, per_page, page):
     )
 
 
-@blueprint.route("/data/job/<job_id>.json")
+@blueprint.route("/<int:instance_number>/data/job/<job_id>.json")
 @jsonify
-def job_info(job_id):
+def job_info(instance_number, job_id):
     job = Job.fetch(job_id)
     return dict(
         id=job.id,
@@ -522,9 +536,9 @@ def job_info(job_id):
     )
 
 
-@blueprint.route("/data/workers.json")
+@blueprint.route("/<int:instance_number>/data/workers.json")
 @jsonify
-def list_workers():
+def list_workers(instance_number):
     def serialize_queue_names(worker):
         return [q.name for q in worker.queues]
 
