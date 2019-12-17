@@ -82,8 +82,6 @@ Options:
   --poll-interval, --interval INTEGER
                                   Refresh interval in ms
   --extra-path TEXT               Append specified directories to sys.path
-  --web-background TEXT           Background of the web interface
-  --delete-jobs TEXT              Delete jobs instead of cancel
   --debug / --normal              Enter DEBUG mode
   -v, --verbose                   Enable verbose logging
   --help                          Show this message and exit.

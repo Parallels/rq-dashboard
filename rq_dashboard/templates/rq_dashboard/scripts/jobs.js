@@ -158,17 +158,17 @@
         return false;
     });
 
-    // Enable the AJAX behaviour of the cancel button
-    $tbody.on('click', '[data-role=cancel-job-btn]', function(e) {
+    // Enable the AJAX behaviour of the delete button
+    $tbody.on('click', '[data-role=delete-job-btn]', function(e) {
         e.preventDefault();
         e.stopPropagation();
 
         var $this = $(this),
             $row = $this.parents('tr'),
             job_id = $row.data('job-id'),
-            url = url_for('cancel_job', job_id);
+            url = url_for('delete_job', job_id);
 
-        modalConfirm('cancel job', function() {
+        modalConfirm('delete job', function() {
             $.post(url, function(data) {
                 $row.fadeOut('fast', function() { $row.remove(); });
             });
