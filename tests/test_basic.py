@@ -2,13 +2,12 @@ import json
 import unittest
 
 import redis
-from rq import Worker, pop_connection, push_connection
+from rq import Queue, Worker, pop_connection, push_connection
 
 from rq_dashboard.cli import make_flask_app
 
 
 HTTP_OK = 200
-
 
 class BasicTestCase(unittest.TestCase):
     redis_client = None
@@ -58,6 +57,25 @@ class BasicTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('jobs', data)
+
+    def test_single_job_view(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job = q.enqueue(some_work)
+        job_url = '/0/view/job/' + job.id
+        response = self.client.get(job_url)
+        self.assertEqual(response.status_code, HTTP_OK)
+        job.delete()
+
+    def test_del_job_mechanism(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job = q.enqueue(some_work)
+        job_del_url = '/job/' + job.id + '/delete'
+        response_del = self.client.post(job_del_url)
+        self.assertEqual(response_del.status_code, HTTP_OK)
 
     def test_registry_jobs_list(self):
         response = self.client.get('/0/data/jobs/default/failed/8/1.json')
