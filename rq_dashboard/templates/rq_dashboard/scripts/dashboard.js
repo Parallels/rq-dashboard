@@ -17,22 +17,22 @@ document.querySelectorAll('.ellipsify').forEach(function (elem) {
 });
 
 var url_for_jobs_data = function(queue_name, registry_name, per_page, page) {
-    var url = '/' + {{ current_instance|tojson|safe }} + '/data' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
+    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/data/jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
     return url;
 };
 
 var url_for_jobs_view = function(queue_name, registry_name, per_page, page) {
-    var url = '/' + {{ current_instance|tojson|safe }} + '/view' + {{ rq_url_prefix|tojson|safe }} + 'jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page);
+    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/view/jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page);
     return url;
 };
 
 var url_for_single_job_data = function(job_id) {
-    var url = '/' + {{ current_instance|tojson|safe }} + '/data/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id) + '.json';
+    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/data/job/' + encodeURIComponent(job_id) + '.json';
     return url;
 }
 
 var url_for_single_job_view = function(job_id) {
-    var url = '/' + {{ current_instance|tojson|safe }} + '/view/job' + {{ rq_url_prefix|tojson|safe }} + encodeURIComponent(job_id);
+    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/view/job/' + encodeURIComponent(job_id);
     return url;
 }
 
