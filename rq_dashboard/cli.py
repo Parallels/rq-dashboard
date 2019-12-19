@@ -139,9 +139,17 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
     help="Append specified directories to sys.path",
 )
 @click.option(
-    "--web-background", default="black", help="Background of the web interface"
+    "--web-background",
+    default=None,
+    hidden=True,
+    help="[DEPRECATED] Background of the web interface",
 )
-@click.option("--delete-jobs", default=False, help="Delete jobs instead of cancel")
+@click.option(
+    "--delete-jobs",
+    default=None,
+    hidden=True,
+    help="[DEPRECATED] Delete jobs instead of cancel",
+)
 @click.option("--debug/--normal", default=False, help="Enter DEBUG mode")
 @click.option(
     "-v", "--verbose", is_flag=True, default=False, help="Enable verbose logging"
@@ -200,12 +208,12 @@ def run(
         app.config["DEPRECATED_OPTIONS"].append("--redis-sentinels")
     if redis_master_name:
         app.config["DEPRECATED_OPTIONS"].append("--redis-master-name")
+    if web_background:
+        app.config["DEPRECATED_OPTIONS"].append("--web-background")
+    if delete_jobs is not None:
+        app.config["DEPRECATED_OPTIONS"].append("--delete-jobs")
     if poll_interval:
         app.config["RQ_DASHBOARD_POLL_INTERVAL"] = poll_interval
-    if web_background:
-        app.config["RQ_DASHBOARD_WEB_BACKGROUND"] = web_background
-    if delete_jobs:
-        app.config["RQ_DASHBOARD_DELETE_JOBS"] = delete_jobs
     # Conditionally disable Flask console messages
     # See: https://stackoverflow.com/questions/14888799
     log = logging.getLogger("werkzeug")

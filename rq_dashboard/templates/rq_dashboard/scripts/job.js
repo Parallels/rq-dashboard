@@ -49,10 +49,10 @@
         $('#refresh-button').click(reload_job_info);
     });
 
-    $("#cancel-job-btn").click(function() {
-        var url = url_for('cancel_job', job_id);
+    $("#delete-job-btn").click(function() {
+        var url = url_for('delete_job', job_id);
 
-        modalConfirm('cancel job', function() {
+        modalConfirm('delete job', function() {
             $.post(url);
             $(location).attr("href", '/view/queues');
         });

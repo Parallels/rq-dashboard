@@ -36,7 +36,6 @@ from rq import (
     VERSION as rq_version,
     Queue,
     Worker,
-    cancel_job,
     pop_connection,
     push_connection,
     requeue_job,
@@ -61,9 +60,6 @@ blueprint = Blueprint(
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
-    # It's the only place where we can safely define default value for web background
-    # since It is used in template
-    current_app.config.setdefault("RQ_DASHBOARD_WEB_BACKGROUND", "#f8f9fa")
     # we need to do It here instead of cli, since It may be embeded
     upgrade_config(current_app)
     # Getting Redis connection parameters for RQ
@@ -263,9 +259,9 @@ def queues_overview(instance_number):
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="queues",
-            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
-            if current_app.config.get("DEPRECATED_OPTIONS")
-            else False,
+            deprecation_options_usage=current_app.config.get(
+                "DEPRECATED_OPTIONS", False
+            ),
         )
     )
     r.headers.set("Cache-Control", "no-store")
@@ -284,9 +280,9 @@ def workers_overview(instance_number):
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="workers",
-            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
-            if current_app.config.get("DEPRECATED_OPTIONS")
-            else False,
+            deprecation_options_usage=current_app.config.get(
+                "DEPRECATED_OPTIONS", False
+            ),
         )
     )
     r.headers.set("Cache-Control", "no-store")
@@ -324,9 +320,9 @@ def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="jobs",
-            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
-            if current_app.config.get("DEPRECATED_OPTIONS")
-            else False,
+            deprecation_options_usage=current_app.config.get(
+                "DEPRECATED_OPTIONS", False
+            ),
         )
     )
     r.headers.set("Cache-Control", "no-store")
@@ -345,26 +341,20 @@ def job_view(instance_number, job_id):
             rq_url_prefix="/",
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
-            deprecation_options_usage=current_app.config.get("DEPRECATED_OPTIONS")
-            if current_app.config.get("DEPRECATED_OPTIONS")
-            else False,
+            deprecation_options_usage=current_app.config.get(
+                "DEPRECATED_OPTIONS", False
+            ),
         )
     )
     r.headers.set("Cache-Control", "no-store")
     return r
 
 
-@blueprint.route("/job/<job_id>/cancel", methods=["POST"])
+@blueprint.route("/job/<job_id>/delete", methods=["POST"])
 @jsonify
-def cancel_job_view(job_id):
+def delete_job_view(job_id):
     job = Job.fetch(job_id)
-    if job.is_queued:
-        if current_app.config.get("RQ_DASHBOARD_DELETE_JOBS", False):
-            job.delete()
-        else:
-            cancel_job(job_id)
-    else:
-        job.delete()
+    job.delete()
     return dict(status="OK")
 
 
@@ -395,19 +385,19 @@ def empty_queue(queue_name, registry_name):
     elif registry_name == "failed":
         ids = FailedJobRegistry(queue_name).get_job_ids()
         for id in ids:
-            cancel_job_view(id)
+            delete_job_view(id)
     elif registry_name == "deferred":
         ids = DeferredJobRegistry(queue_name).get_job_ids()
         for id in ids:
-            cancel_job_view(id)
+            delete_job_view(id)
     elif registry_name == "started":
         ids = StartedJobRegistry(queue_name).get_job_ids()
         for id in ids:
-            cancel_job_view(id)
+            delete_job_view(id)
     elif registry_name == "finished":
         ids = FinishedJobRegistry(queue_name).get_job_ids()
         for id in ids:
-            cancel_job_view(id)
+            delete_job_view(id)
     return dict(status="OK")
 
 
