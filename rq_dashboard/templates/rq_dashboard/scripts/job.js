@@ -53,10 +53,10 @@
         var url = url_for('delete_job', job_id);
 
         modalConfirm('delete job', function() {
-            $.post(url);
-            $(location).attr("href", '/view/queues');
+            $.post(url, {}, function(){
+                $(location).attr("href", url_for('queues_view'));
+            });
         });
-
         return false;
     });
 
