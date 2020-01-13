@@ -192,3 +192,7 @@ span.loading {
 p.alert-danger {
     border-bottom: solid 1px #721b245c;
 }
+
+#rq-instances:disabled {
+    color: black;
+}

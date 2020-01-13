@@ -30,6 +30,9 @@
         if (job.ended_at !== undefined) {
             job.ended_at = toRelative(Date.create(job.ended_at)) + ' / ' + toShort(Date.create(job.ended_at));
         }
+        if (job.status === "failed") {
+            $("#requeue-job-btn").show()
+        }
         html += template({d: job}, {variable: 'd'});
         $job_data[0].innerHTML = html;
     };
