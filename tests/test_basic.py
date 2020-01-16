@@ -2,7 +2,7 @@ import json
 import unittest
 
 import redis
-from rq import Queue, Worker, pop_connection, push_connection
+from rq import Queue, Worker, pop_connection, push_connection, version
 
 from rq_dashboard.cli import make_flask_app
 
@@ -83,6 +83,13 @@ class BasicTestCase(unittest.TestCase):
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
         self.assertIn('jobs', data)
+
+    @unittest.skipIf(not version.VERSION.startswith('1.2'), 'Skipping 1.2 tests, because running with %s' % version.VERSION )
+    def test_scheduled_registry_jobs_list(self):
+        response = self.client.get('/0/data/jobs/default/scheduled/8/1.json')
+        self.assertEqual(response.status_code, HTTP_OK)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertIsInstance(data, dict)
 
     def test_worker_python_version_field(self):
         w = Worker(['q'])

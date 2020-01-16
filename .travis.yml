@@ -8,6 +8,7 @@ python:
 env:
   - RQ_VERSION="rq==1.0"
   - RQ_VERSION="rq==1.1"
+  - RQ_VERSION="rq==1.2"
   - RQ_VERSION="-e git+https://github.com/rq/rq#egg=rq"
 
 install:
