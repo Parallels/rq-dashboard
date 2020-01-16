@@ -14,6 +14,9 @@
                 <th>Queue</th>
                 <th class="narrow">Queued&nbsp;jobs</th>
                 <th class="narrow">Deferred&nbsp;jobs</th>
+                {% if scheduler_is_here %}
+                <th class="narrow">Scheduled&nbsp;jobs</th>
+                {% endif %}
                 <th class="narrow">Started&nbsp;jobs</th>
                 <th class="narrow">Finished&nbsp;jobs</th>
                 <th class="narrow">Failed&nbsp;jobs</th>
@@ -21,7 +24,11 @@
             </thead>
             <tbody>
                 <tr data-role="loading-placeholder">
-                    <td colspan="6">Loading...</td>
+                    {% if scheduler_is_here %}
+                        <td colspan="7">Loading...</td>
+                    {% else %}
+                        <td colspan="6">Loading...</td>
+                    {% endif %}
                 </tr>
             </tbody>
         </table>
@@ -32,6 +39,9 @@
         <td><%= d.name %></td>
         <td class="narrow"> <a href="<%= d.queued_url %>"><%= d.count %></a></td>
         <td class="narrow"> <a href="<%= d.deferred_url %>"><%= d.deferred_job_registry_count %></a></td>
+        {% if scheduler_is_here %}
+        <td class="narrow"> <a href="<%= d.scheduled_url %>"><%= d.scheduled_job_registry_count %></a></td>
+        {% endif %}
         <td class="narrow"> <a href="<%= d.started_url %>"><%= d.started_job_registry_count %></a></td>
         <td class="narrow"> <a href="<%= d.finished_url %>"><%= d.finished_job_registry_count %></a></td>
         <td class="failed"> <a href="<%= d.failed_url %>"><%= d.failed_job_registry_count %></a></td>
@@ -40,7 +50,11 @@
 
     <script name="no-queues-row" type="text/template">
         <tr>
-            <td colspan="6">No queues.</td>
+            {% if scheduler_is_here %}
+                <td colspan="7">No queues.</td>
+            {% else %}
+                <td colspan="6">No queues.</td>
+            {% endif %}
         </tr>
     </script>
 

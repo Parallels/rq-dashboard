@@ -53,6 +53,13 @@ from .legacy_config import upgrade_config
 from .version import VERSION as rq_dashboard_version
 
 
+# Quick import solution for backward compat
+scheduler_is_here = True
+try:
+    from rq.registry import ScheduledJobRegistry
+except ImportError:
+    scheduler_is_here = False
+
 blueprint = Blueprint(
     "rq_dashboard", __name__, template_folder="templates", static_folder="static",
 )
@@ -105,57 +112,120 @@ def jsonify(f):
 
 
 def serialize_queues(instance_number, queues):
-    return [
-        dict(
-            name=q.name,
-            count=q.count,
-            queued_url=url_for(
-                ".jobs_overview",
-                instance_number=instance_number,
-                queue_name=q.name,
-                registry_name="queued",
-                per_page="8",
-                page="1",
-            ),
-            failed_job_registry_count=FailedJobRegistry(q.name).count,
-            failed_url=url_for(
-                ".jobs_overview",
-                instance_number=instance_number,
-                queue_name=q.name,
-                registry_name="failed",
-                per_page="8",
-                page="1",
-            ),
-            started_job_registry_count=StartedJobRegistry(q.name).count,
-            started_url=url_for(
-                ".jobs_overview",
-                instance_number=instance_number,
-                queue_name=q.name,
-                registry_name="started",
-                per_page="8",
-                page="1",
-            ),
-            deferred_job_registry_count=DeferredJobRegistry(q.name).count,
-            deferred_url=url_for(
-                ".jobs_overview",
-                instance_number=instance_number,
-                queue_name=q.name,
-                registry_name="deferred",
-                per_page="8",
-                page="1",
-            ),
-            finished_job_registry_count=FinishedJobRegistry(q.name).count,
-            finished_url=url_for(
-                ".jobs_overview",
-                instance_number=instance_number,
-                queue_name=q.name,
-                registry_name="finished",
-                per_page="8",
-                page="1",
-            ),
-        )
-        for q in queues
-    ]
+    if scheduler_is_here:
+        result_list = [
+            dict(
+                name=q.name,
+                count=q.count,
+                queued_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="queued",
+                    per_page="8",
+                    page="1",
+                ),
+                failed_job_registry_count=FailedJobRegistry(q.name).count,
+                failed_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="failed",
+                    per_page="8",
+                    page="1",
+                ),
+                started_job_registry_count=StartedJobRegistry(q.name).count,
+                started_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="started",
+                    per_page="8",
+                    page="1",
+                ),
+                deferred_job_registry_count=DeferredJobRegistry(q.name).count,
+                deferred_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="deferred",
+                    per_page="8",
+                    page="1",
+                ),
+                finished_job_registry_count=FinishedJobRegistry(q.name).count,
+                finished_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="finished",
+                    per_page="8",
+                    page="1",
+                ),
+                scheduled_job_registry_count=ScheduledJobRegistry(q.name).count,
+                scheduled_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="scheduled",
+                    per_page="8",
+                    page="1",
+                ),
+            )
+            for q in queues
+        ]
+    else:
+        result_list = [
+            dict(
+                name=q.name,
+                count=q.count,
+                queued_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="queued",
+                    per_page="8",
+                    page="1",
+                ),
+                failed_job_registry_count=FailedJobRegistry(q.name).count,
+                failed_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="failed",
+                    per_page="8",
+                    page="1",
+                ),
+                started_job_registry_count=StartedJobRegistry(q.name).count,
+                started_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="started",
+                    per_page="8",
+                    page="1",
+                ),
+                deferred_job_registry_count=DeferredJobRegistry(q.name).count,
+                deferred_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="deferred",
+                    per_page="8",
+                    page="1",
+                ),
+                finished_job_registry_count=FinishedJobRegistry(q.name).count,
+                finished_url=url_for(
+                    ".jobs_overview",
+                    instance_number=instance_number,
+                    queue_name=q.name,
+                    registry_name="finished",
+                    per_page="8",
+                    page="1",
+                ),
+            )
+            for q in queues
+        ]
+    return result_list
 
 
 def serialize_date(dt):
@@ -165,9 +235,15 @@ def serialize_date(dt):
 
 
 def serialize_job(job):
+    enqueued_at = (
+        job.enqueued_at
+        if job.enqueued_at
+        else ScheduledJobRegistry(job.origin).get_scheduled_time(job)
+    )
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
+        enqueued_at=serialize_date(enqueued_at),
         ended_at=serialize_date(job.ended_at),
         exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description,
@@ -225,6 +301,8 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
             current_queue = StartedJobRegistry(queue_name)
         elif registry_name == "finished":
             current_queue = FinishedJobRegistry(queue_name)
+        elif registry_name == "scheduled":
+            current_queue = ScheduledJobRegistry(queue_name)
     else:
         current_queue = queue
     total_items = current_queue.count
@@ -259,6 +337,7 @@ def queues_overview(instance_number):
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="queues",
+            scheduler_is_here=scheduler_is_here,
             deprecation_options_usage=current_app.config.get(
                 "DEPRECATED_OPTIONS", False
             ),
@@ -320,6 +399,7 @@ def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
             active_tab="jobs",
+            scheduler_is_here=scheduler_is_here,
             deprecation_options_usage=current_app.config.get(
                 "DEPRECATED_OPTIONS", False
             ),
@@ -396,6 +476,10 @@ def empty_queue(queue_name, registry_name):
             delete_job_view(id)
     elif registry_name == "finished":
         ids = FinishedJobRegistry(queue_name).get_job_ids()
+        for id in ids:
+            delete_job_view(id)
+    elif registry_name == "scheduled":
+        ids = ScheduledJobRegistry(queue_name).get_job_ids()
         for id in ids:
             delete_job_view(id)
     return dict(status="OK")
@@ -513,10 +597,15 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
 @jsonify
 def job_info(instance_number, job_id):
     job = Job.fetch(job_id)
+    enqueued_at = (
+        job.enqueued_at
+        if job.enqueued_at
+        else ScheduledJobRegistry(job.origin).get_scheduled_time(job)
+    )
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
-        enqueued_at=serialize_date(job.enqueued_at),
+        enqueued_at=serialize_date(enqueued_at),
         ended_at=serialize_date(job.ended_at),
         origin=job.origin,
         status=job.get_status(),

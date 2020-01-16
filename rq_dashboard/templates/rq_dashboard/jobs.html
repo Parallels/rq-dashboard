@@ -23,6 +23,9 @@
             <option {% if registry_name == 'started' %} selected {% endif %}>started</option>
             <option {% if registry_name == 'finished' %} selected {% endif %}>finished</option>
             <option {% if registry_name == 'failed' %} selected {% endif %}>failed</option>
+            {% if scheduler_is_here %}
+            <option {% if registry_name == 'scheduled' %} selected {% endif %}>scheduled</option>
+            {% endif %}
         </select> 
     </div>
 
@@ -47,7 +50,7 @@
                 <thead class="thead-light">
                     <tr>
                         <th>Name</th>
-                        <th>Age</th>
+                        <th>Created at{% if registry_name == 'scheduled' %} / Enqueued at{% endif %}</th>
                         <th class="narrow">Actions</th>
                     </tr>
                 </thead>
@@ -69,7 +72,12 @@
                 <pre class="exc_info"><%= $('<div/>').text(d.exc_info).html() %></pre>
                 <% } %>
             </td>
-            <td><span class="creation_date"><%= d.created_at %></span></td>
+            <td>
+                <span class="creation_date" title='<%= d.long_created_at %>'><%= d.created_at %></span>
+                <% if (d.long_created_at !== d.long_enqueued_at) { %>
+                    <span class="creation_date" title='<%= d.long_enqueued_at %>'>/ <%= d.enqueued_at %></span>
+                <% } %>
+            </td>
             <td class="actions narrow">
                 <% if (d.exc_info) { %>
                 <a href="#" data-role="requeue-job-btn" class="btn btn-outline-warning btn-sm btn-block">Requeue</a>

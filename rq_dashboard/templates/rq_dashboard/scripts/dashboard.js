@@ -52,7 +52,7 @@ var toRelative = function(universal_date_string) {
 var toShort = function(universal_date_string) {
     var tzo = new Date().getTimezoneOffset();
     var d = Date.create(universal_date_string).rewind({ minutes: tzo });
-    return d.format()
+    return d.format('{d} {Month}, {yyyy}, {hh}:{mm}')
 }
 
 var api = {
