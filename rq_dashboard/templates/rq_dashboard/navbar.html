@@ -24,10 +24,10 @@
                 </div>
                 </div>
                 <div id="rq-instances-row">
-                    <select id="rq-instances">
+                    <select {% if instance_list|length == 1 %} disabled {% endif %} id="rq-instances">
                         {% for instance in instance_list %}
                         <option data-instance-number="{{ instance_list.index(instance) }}" {% if instance_list[current_instance] == instance %} selected {% endif %}>[{{ instance_list.index(instance) }}] {{ instance }}</option>
-                        {% endfor%}
+                        {% endfor %}
                     </select>
                 </div>
             </div>
