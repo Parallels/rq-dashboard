@@ -235,15 +235,19 @@ def serialize_date(dt):
 
 
 def serialize_job(job):
-    enqueued_at = (
-        job.enqueued_at
-        if job.enqueued_at
-        else ScheduledJobRegistry(job.origin).get_scheduled_time(job)
-    )
+    if job.is_deferred:
+        enqueued_at = "Awaiting completion: " + job._dependency_id
+    elif (
+        not job.enqueued_at  # This means that the job is scheduled cause only deferred or scheduled jobs enqueued_at field is Null
+    ):
+        enqueued_at = ScheduledJobRegistry(job.origin).get_scheduled_time(job)
+        enqueued_at = serialize_date(enqueued_at)
+    else:
+        enqueued_at = serialize_date(job.enqueued_at)
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
-        enqueued_at=serialize_date(enqueued_at),
+        enqueued_at=enqueued_at,
         ended_at=serialize_date(job.ended_at),
         exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description,
@@ -597,15 +601,19 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
 @jsonify
 def job_info(instance_number, job_id):
     job = Job.fetch(job_id)
-    enqueued_at = (
-        job.enqueued_at
-        if job.enqueued_at
-        else ScheduledJobRegistry(job.origin).get_scheduled_time(job)
-    )
+    if job.is_deferred:
+        enqueued_at = job._dependency_id
+    elif (
+        not job.enqueued_at  # This means that the job is scheduled cause only deferred or scheduled jobs enqueued_at field is Null
+    ):
+        enqueued_at = ScheduledJobRegistry(job.origin).get_scheduled_time(job)
+        enqueued_at = serialize_date(enqueued_at)
+    else:
+        enqueued_at = serialize_date(job.enqueued_at)
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
-        enqueued_at=serialize_date(enqueued_at),
+        enqueued_at=enqueued_at,
         ended_at=serialize_date(job.ended_at),
         origin=job.origin,
         status=job.get_status(),

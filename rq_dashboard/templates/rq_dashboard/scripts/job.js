@@ -20,7 +20,7 @@
         $job_data.empty();
 
         job.created_at = toRelative(Date.create(job.created_at)) + ' / ' + toShort(Date.create(job.created_at));
-        if (job.enqueued_at !== undefined) {
+        if (job.enqueued_at !== undefined & job.status !== "deferred") {
             job.enqueued_at = toRelative(Date.create(job.enqueued_at)) + ' / ' + toShort(Date.create(job.enqueued_at));
         }
         if (job.ended_at !== undefined) {

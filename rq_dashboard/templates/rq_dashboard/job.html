@@ -28,7 +28,18 @@
 
         <span class="col-6">
             <p><strong>Created at</strong>:<br> <%= d.created_at %></p>
-            <p><strong>Enqueued at</strong>:<br> <%= d.enqueued_at %></p>
+            <% if (d.status === 'deferred') { %>
+                <p>
+                    <strong>Dependant jobs</strong>:<br>
+                    <a href='<%= url_for_single_job_view(d.enqueued_at) %>'>
+                        <%= d.enqueued_at %>
+                    </a>
+            <% } else { %>
+                <p>
+                    <strong>Enqueued at</strong>:<br>
+                    <%= d.enqueued_at %>
+                </p>
+            <% } %>
             <% if (d.exc_info) { %>
             <p><strong>Ended at</strong>:<br> <%= d.ended_at %></p>
             <% } %>
