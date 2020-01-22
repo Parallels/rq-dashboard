@@ -15,6 +15,7 @@ Maturity notes
 --------------
 
 The RQ dashboard is currently being developed and is in beta stage.
+How migrate to version 1.0 you can find [here](https://github.com/Parallels/rq-dashboard/wiki/How-to-migrate-to-1.0)
 
 Installing with Docker
 ----------------------
@@ -29,7 +30,7 @@ $ docker run -p 9181:9181 eoranged/rq-dashboard
 and you can then run the image. You can pass additional options using
 environment variables with prefix `RQ_DASHBOARD_*`:
 
-    - RQ_DASHBOARD_REDIS_URL=redis://<redis:6379>
+    - RQ_DASHBOARD_REDIS_URL=redis+sentinel://[:password@]host:port[,host2:port2,...][/service_name[/db]][?param1=value1[&param2=value=2&...]]
     - RQ_DASHBOARD_USERNAME=rq
     - RQ_DASHBOARD_PASSWORD=password
 
