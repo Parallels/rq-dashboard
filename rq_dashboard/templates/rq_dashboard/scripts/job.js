@@ -12,10 +12,6 @@
             }
             onJobLoaded(job, done);
         });
-
-        if (done !== undefined) {
-            done();
-        }
     };
 
     var onJobLoaded = function(job, done) {
@@ -35,6 +31,10 @@
         }
         html += template({d: job}, {variable: 'd'});
         $job_data[0].innerHTML = html;
+
+        if (done !== undefined) {
+            done();
+        }
     };
 
     var refresh_loop = function() {
