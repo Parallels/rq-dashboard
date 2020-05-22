@@ -14,6 +14,6 @@ markupsafe==1.1.1         # via jinja2
 python-dateutil==2.8.1    # via arrow
 redis==3.3.11
 rq==1.2.0
-six==1.13.0
+six==1.15.0
 werkzeug==0.16.0
 Redis-Sentinel-Url==1.0.1
