@@ -11,3 +11,4 @@ dump.rdb
 .tox/
 
 .python-version
+venv/
