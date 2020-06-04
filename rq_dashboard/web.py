@@ -174,7 +174,7 @@ def serialize_job(job):
     )
 
 
-def serialize_current_job(job):
+def serialize_(job):
     if job is None:
         return "idle"
     return dict(
@@ -529,16 +529,22 @@ def job_info(instance_number, job_id):
 @blueprint.route("/<int:instance_number>/data/workers.json")
 @jsonify
 def list_workers(instance_number):
-    def serialize_queue_names(worker):
+    def (worker):
         return [q.name for q in worker.queues]
 
     workers = sorted(
         (
             dict(
                 name=worker.name,
+                pid=worker.pid,
                 queues=serialize_queue_names(worker),
                 state=str(worker.get_state()),
                 current_job=serialize_current_job(worker.get_current_job()),
+                last_heartbeat=worker.last_heartbeat,
+                birth_date=worker.birth_date,
+                successful_job_count=worker.successful_job_count,
+                failed_job_count=worker.failed_job_count,
+                total_working_time=worker.total_working_time,
                 version=getattr(worker, "version", ""),
                 python_version=getattr(worker, "python_version", ""),
             )
