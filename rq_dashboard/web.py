@@ -174,7 +174,7 @@ def serialize_job(job):
     )
 
 
-def serialize_(job):
+def serialize_current_job(job):
     if job is None:
         return "idle"
     return dict(
