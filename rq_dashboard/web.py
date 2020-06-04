@@ -529,7 +529,7 @@ def job_info(instance_number, job_id):
 @blueprint.route("/<int:instance_number>/data/workers.json")
 @jsonify
 def list_workers(instance_number):
-    def (worker):
+    def serialize_queue_names(worker):
         return [q.name for q in worker.queues]
 
     workers = sorted(
