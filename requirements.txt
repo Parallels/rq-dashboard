@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements.in
 #
-arrow==0.15.5
+arrow==0.15.7
 backports.functools-lru-cache==1.5 ; python_version < "3.3"
 click==7.0
 flask==1.1.1
