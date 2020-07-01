@@ -28,7 +28,7 @@ pycrypto==2.6.1           # via paramiko
 pyflakes==0.8.1           # via flake8
 python-dateutil==2.4.2    # via arrow
 redis==2.10.3
--e git+https://github.com/vy-labs/rq.git#egg=rq
+-e git+https://github.com/vy-labs/rq.git@v0.8.1#egg=rq
 six==1.9.0                # via python-dateutil
 werkzeug==0.10.4          # via flask
 wheel==0.24.0
