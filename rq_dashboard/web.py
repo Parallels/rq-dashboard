@@ -57,11 +57,13 @@ blueprint = Blueprint(
     "rq_dashboard", __name__, template_folder="templates", static_folder="static",
 )
 
+if current_app.config.get("RQ_DASHBOARD_USERNAME") and current_app.config.get("RQ_DASHBOARD_PASSWORD"):
+  add_basic_auth(blueprint, current_app.config.get("RQ_DASHBOARD_USERNAME"), current_app.config.get("RQ_DASHBOARD_PASSWORD"))
 
 @blueprint.before_app_first_request
 def setup_rq_connection():
     # we need to do It here instead of cli, since It may be embeded
-    upgrade_config(current_app)
+    # upgrade_config(current_app)
     # Getting Redis connection parameters for RQ
     redis_url = current_app.config.get("RQ_DASHBOARD_REDIS_URL")
     if isinstance(redis_url, string_types):
@@ -242,7 +244,6 @@ def escape_format_instance_list(url_list):
     elif isinstance(url_list, string_types):
         url_list = [re.sub(r"://:[^@]*@", "://:***@", url_list)]
     return url_list
-
 
 @blueprint.route("/", defaults={"instance_number": 0})
 @blueprint.route("/<int:instance_number>/")
