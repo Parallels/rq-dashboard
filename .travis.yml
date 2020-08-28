@@ -4,10 +4,13 @@ python:
   - 3.5
   - 3.6
   - 3.7
+  - 3.8
   - pypy3
 env:
-  - RQ_VERSION="rq==1.0"
+  - RQ_VERSION="rq==1.3"
+  - RQ_VERSION="rq==1.2"
   - RQ_VERSION="rq==1.1"
+  - RQ_VERSION="rq==1.0"
   - RQ_VERSION="-e git+https://github.com/rq/rq#egg=rq"
 
 install:
