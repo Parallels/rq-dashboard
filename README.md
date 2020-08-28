@@ -16,14 +16,16 @@ Maturity notes
 
 The RQ dashboard is currently being developed and is in beta stage.
 
+This is legacy 0.x version, please update to stable version if you don't have specific legacy requirements.
+
 Installing with Docker
 ----------------------
 
 You can also run the dashboard inside of docker:
 
 ``` {.console}
-$ docker pull eoranged/rq-dashboard
-$ docker run -p 9181:9181 eoranged/rq-dashboard
+$ docker pull eoranged/rq-dashboard:legacy
+$ docker run -p 9181:9181 eoranged/rq-dashboard:legacy
 ```
 
 and you can then run the image. You can pass additional options using
