@@ -569,3 +569,7 @@ def list_workers(instance_number):
 def inject_interval():
     interval = current_app.config.get("RQ_DASHBOARD_POLL_INTERVAL", 2500)
     return dict(poll_interval=interval)
+
+@blueprint.route("/status")
+def status():
+    return dict(status="OK")
