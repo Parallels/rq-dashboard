@@ -21,9 +21,10 @@
             <option {% if registry_name == 'queued' %} selected {% endif %}>queued</option>
             <option {% if registry_name == 'deferred' %} selected {% endif %}>deferred</option>
             <option {% if registry_name == 'started' %} selected {% endif %}>started</option>
+            <option {% if registry_name == 'scheduled' %} selected {% endif %}>scheduled</option>
             <option {% if registry_name == 'finished' %} selected {% endif %}>finished</option>
             <option {% if registry_name == 'failed' %} selected {% endif %}>failed</option>
-        </select> 
+        </select>
     </div>
 
     <p class="intro">

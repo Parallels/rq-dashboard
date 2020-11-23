@@ -46,6 +46,7 @@ from rq.registry import (
     FailedJobRegistry,
     FinishedJobRegistry,
     StartedJobRegistry,
+    ScheduledJobRegistry
 )
 from six import string_types
 
@@ -132,6 +133,15 @@ def serialize_queues(instance_number, queues):
                 instance_number=instance_number,
                 queue_name=q.name,
                 registry_name="started",
+                per_page="8",
+                page="1",
+            ),
+            scheduled_job_registry_count=ScheduledJobRegistry(q.name).count,
+            scheduled_url=url_for(
+                ".jobs_overview",
+                instance_number=instance_number,
+                queue_name=q.name,
+                registry_name="scheduled",
                 per_page="8",
                 page="1",
             ),
@@ -225,6 +235,8 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
             current_queue = StartedJobRegistry(queue_name)
         elif registry_name == "finished":
             current_queue = FinishedJobRegistry(queue_name)
+        elif registry_name == "scheduled":
+            current_queue = ScheduledJobRegistry(queue_name)
     else:
         current_queue = queue
     total_items = current_queue.count
@@ -392,6 +404,10 @@ def empty_queue(queue_name, registry_name):
             delete_job_view(id)
     elif registry_name == "started":
         ids = StartedJobRegistry(queue_name).get_job_ids()
+        for id in ids:
+            delete_job_view(id)
+    elif registry_name == "scheduled":
+        ids = ScheduledJobRegistry(queue_name).get_job_ids()
         for id in ids:
             delete_job_view(id)
     elif registry_name == "finished":
