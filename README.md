@@ -121,6 +121,40 @@ which installs rq-dashboard from PyPI and wraps in in
 [Gunicorn](https://gunicorn.org) for deployment to Heroku.
 rq-dashboard-on-heroku is maintained indepdently.
 
+Running behind a Reverse Proxy
+-------------------------------
+You can run the dashboard as a `systemd` service in Linux or via a `suprevisor`
+script and then use Apache or NGINX to direct traffic to the dashboard.
+
+_This is for *non-production* functionality!_
+
+Apache Reverse Proxy example:
+```
+ProxyPass /rq http://127.0.0.1:5001/rq
+ProxyPassReverse /rq http://127.0.0.1:5001/rq
+```
+
+Systemd service example:
+```
+[Unit]
+Description=Redis Queue Dashboard
+[Install]
+
+WantedBy=multi-user.target
+[Service]
+ExecStart=/bin/rq-dashboard -b 127.0.0.1 -p 5001 --url-prefix /rq -c rq_settings_dashboard --debug -v
+StandardOutput=file:/var/log/redis/rq-dasbhoard.log
+StandardError=file:/var/log/redis/rq-dashboard.log
+User=redis-dash
+Group=redis-dash
+RemainAfterExit=yes
+Type=simple
+PermissionsStartOnly=false
+PrivateTmp=no
+```
+* `--debug`,`-v` are optional -- they will write `stdout` to your specified files.
+* `rq_settings_dashboard` is a Python file, with settings defined. You can use options that are available as environmental variables. (EX. `RQ_DASHBOARD_REDIS_PASSWORD = password`)
+
 Developing
 ----------
 
