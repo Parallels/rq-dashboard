@@ -253,7 +253,7 @@ def queues_overview(instance_number):
         render_template(
             "rq_dashboard/queues.html",
             current_instance=instance_number,
-            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
+            instance_list=escape_format_instance_list(current_app.config.get("RQ_DASHBOARD_REDIS_URL")),
             queues=Queue.all(),
             rq_url_prefix=url_for(".queues_overview"),
             rq_dashboard_version=rq_dashboard_version,
@@ -274,7 +274,7 @@ def workers_overview(instance_number):
         render_template(
             "rq_dashboard/workers.html",
             current_instance=instance_number,
-            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
+            instance_list=escape_format_instance_list(current_app.config.get("RQ_DASHBOARD_REDIS_URL")),
             workers=Worker.all(),
             rq_url_prefix=url_for(".queues_overview"),
             rq_dashboard_version=rq_dashboard_version,
@@ -310,7 +310,7 @@ def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
         render_template(
             "rq_dashboard/jobs.html",
             current_instance=instance_number,
-            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
+            instance_list=escape_format_instance_list(current_app.config.get("RQ_DASHBOARD_REDIS_URL")),
             queues=Queue.all(),
             queue=queue,
             per_page=per_page,
@@ -336,7 +336,7 @@ def job_view(instance_number, job_id):
         render_template(
             "rq_dashboard/job.html",
             current_instance=instance_number,
-            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
+            instance_list=escape_format_instance_list(current_app.config.get("RQ_DASHBOARD_REDIS_URL")),
             id=job.id,
             rq_url_prefix=url_for(".queues_overview"),
             rq_dashboard_version=rq_dashboard_version,
