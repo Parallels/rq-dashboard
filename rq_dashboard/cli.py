@@ -233,7 +233,7 @@ def run(
             if redis_port:
                 netloc = "%s:%s" % (netloc, redis_port)
         if redis_password:
-            netloc = urlquote(redis_password) + "@" + netloc
+            netloc = ":" + urlquote(redis_password) + "@" + netloc
         path = ""
         if redis_master_name:
             path += "/%s" % urlquote(redis_master_name)
