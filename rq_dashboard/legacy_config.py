@@ -15,7 +15,7 @@ LEGACY_CONFIG_OPTIONS = {
 }
 
 warning_template = (
-    "Configuration option {old_name} is depricated and will be removed in future versions. "
+    "Configuration option {old_name} is deprecated and will be removed in future versions. "
     "Please use {new_name} instead."
 )
 
