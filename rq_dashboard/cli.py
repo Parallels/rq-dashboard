@@ -134,7 +134,7 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
 )
 @click.option(
     "--extra-path",
-    default=".",
+    default=["."],
     multiple=True,
     help="Append specified directories to sys.path",
 )
