@@ -31,6 +31,7 @@ from flask import (
     send_from_directory,
     url_for,
 )
+from redis.exceptions import ConnectionError as RedisConnectionError
 from redis_sentinel_url import connect as from_url
 from rq import (
     VERSION as rq_version,
@@ -249,21 +250,26 @@ def escape_format_instance_list(url_list):
 @blueprint.route("/<int:instance_number>/view")
 @blueprint.route("/<int:instance_number>/view/queues")
 def queues_overview(instance_number):
-    r = make_response(
-        render_template(
-            "rq_dashboard/queues.html",
-            current_instance=instance_number,
-            instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
-            queues=Queue.all(),
-            rq_url_prefix=url_for(".queues_overview"),
-            rq_dashboard_version=rq_dashboard_version,
-            rq_version=rq_version,
-            active_tab="queues",
-            deprecation_options_usage=current_app.config.get(
-                "DEPRECATED_OPTIONS", False
-            ),
+    try:
+        r = make_response(
+            render_template(
+                "rq_dashboard/queues.html",
+                current_instance=instance_number,
+                instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
+                queues=Queue.all(),
+                rq_url_prefix=url_for(".queues_overview"),
+                rq_dashboard_version=rq_dashboard_version,
+                rq_version=rq_version,
+                active_tab="queues",
+                deprecation_options_usage=current_app.config.get(
+                    "DEPRECATED_OPTIONS", False
+                ),
+            )
         )
-    )
+    except RedisConnectionError:
+        r = make_response(
+            "<h1>Connection Error</h1>"
+        )
     r.headers.set("Cache-Control", "no-store")
     return r
 
