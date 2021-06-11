@@ -383,21 +383,13 @@ def empty_queue(queue_name, registry_name):
         q = Queue(queue_name)
         q.empty()
     elif registry_name == "failed":
-        ids = FailedJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        FailedJobRegistry(queue_name).empty()
     elif registry_name == "deferred":
-        ids = DeferredJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        DeferredJobRegistry(queue_name).empty()
     elif registry_name == "started":
-        ids = StartedJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        StartedJobRegistry(queue_name).empty()
     elif registry_name == "finished":
-        ids = FinishedJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        FinishedJobRegistry(queue_name).empty()
     return dict(status="OK")
 
 
