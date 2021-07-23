@@ -107,6 +107,22 @@ class BasicTestCase(unittest.TestCase):
         w.register_death()
 
 
+class CustomRqClassTestCase(BasicTestCase):
+    def setUp(self):
+        super().setUp()
+        self.app.config['RQ_DASHBOARD_JOB_CLASS'] = 'rq.job.Job'
+
+    def test_invalid_job_class(self):
+        self.app.config['RQ_DASHBOARD_JOB_CLASS'] = 'rq.job.NotAJobClass'
+
+        with self.assertRaises(AttributeError) as ae:
+            self.client.get('/0/data/queues.json')
+
+        self.assertIn('NotAJobClass', str(ae.exception))
+
+
+
 __all__ = [
     'BasicTestCase',
+    'CustomRqClassTestCase'
 ]

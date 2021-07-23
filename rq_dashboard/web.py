@@ -32,21 +32,14 @@ from flask import (
     url_for,
 )
 from redis_sentinel_url import connect as from_url
-from rq import (
-    VERSION as rq_version,
-    Queue,
-    Worker,
-    pop_connection,
-    push_connection,
-    requeue_job,
-)
-from rq.job import Job
+from rq import VERSION as rq_version, Queue, Worker, pop_connection, push_connection
 from rq.registry import (
     DeferredJobRegistry,
     FailedJobRegistry,
     FinishedJobRegistry,
     StartedJobRegistry,
 )
+from rq.utils import import_attribute
 from six import string_types
 
 from .legacy_config import upgrade_config
@@ -86,6 +79,10 @@ def push_rq_connection():
         new_instance = current_app.redis_conn
     push_connection(new_instance)
     current_app.redis_conn = new_instance
+    job_class = current_app.config.get("RQ_DASHBOARD_JOB_CLASS", "rq.job.Job")
+    if isinstance(job_class, string_types):
+        job_class = import_attribute(job_class)
+    current_app.job_class = job_class
 
 
 @blueprint.teardown_request
@@ -117,7 +114,9 @@ def serialize_queues(instance_number, queues):
                 per_page="8",
                 page="1",
             ),
-            failed_job_registry_count=FailedJobRegistry(q.name).count,
+            failed_job_registry_count=FailedJobRegistry(
+                q.name, job_class=current_app.job_class
+            ).count,
             failed_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -126,7 +125,9 @@ def serialize_queues(instance_number, queues):
                 per_page="8",
                 page="1",
             ),
-            started_job_registry_count=StartedJobRegistry(q.name).count,
+            started_job_registry_count=StartedJobRegistry(
+                q.name, job_class=current_app.job_class
+            ).count,
             started_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -135,7 +136,9 @@ def serialize_queues(instance_number, queues):
                 per_page="8",
                 page="1",
             ),
-            deferred_job_registry_count=DeferredJobRegistry(q.name).count,
+            deferred_job_registry_count=DeferredJobRegistry(
+                q.name, job_class=current_app.job_class
+            ).count,
             deferred_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -144,7 +147,9 @@ def serialize_queues(instance_number, queues):
                 per_page="8",
                 page="1",
             ),
-            finished_job_registry_count=FinishedJobRegistry(q.name).count,
+            finished_job_registry_count=FinishedJobRegistry(
+                q.name, job_class=current_app.job_class
+            ).count,
             finished_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -212,19 +217,27 @@ def favicon():
 
 
 def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
-    queue = Queue(queue_name)
+    queue = Queue(queue_name, job_class=current_app.job_class)
     if registry_name != "queued":
         if per_page >= 0:
             per_page = offset + (per_page - 1)
 
         if registry_name == "failed":
-            current_queue = FailedJobRegistry(queue_name)
+            current_queue = FailedJobRegistry(
+                queue_name, job_class=current_app.job_class
+            )
         elif registry_name == "deferred":
-            current_queue = DeferredJobRegistry(queue_name)
+            current_queue = DeferredJobRegistry(
+                queue_name, job_class=current_app.job_class
+            )
         elif registry_name == "started":
-            current_queue = StartedJobRegistry(queue_name)
+            current_queue = StartedJobRegistry(
+                queue_name, job_class=current_app.job_class
+            )
         elif registry_name == "finished":
-            current_queue = FinishedJobRegistry(queue_name)
+            current_queue = FinishedJobRegistry(
+                queue_name, job_class=current_app.job_class
+            )
     else:
         current_queue = queue
     total_items = current_queue.count
@@ -254,7 +267,7 @@ def queues_overview(instance_number):
             "rq_dashboard/queues.html",
             current_instance=instance_number,
             instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
-            queues=Queue.all(),
+            queues=Queue.all(job_class=current_app.job_class),
             rq_url_prefix=url_for(".queues_overview"),
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
@@ -275,7 +288,7 @@ def workers_overview(instance_number):
             "rq_dashboard/workers.html",
             current_instance=instance_number,
             instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
-            workers=Worker.all(),
+            workers=Worker.all(job_class=current_app.job_class),
             rq_url_prefix=url_for(".queues_overview"),
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
@@ -303,15 +316,15 @@ def workers_overview(instance_number):
 )
 def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
     if queue_name is None:
-        queue = Queue()
+        queue = Queue(job_class=current_app.job_class)
     else:
-        queue = Queue(queue_name)
+        queue = Queue(queue_name, job_class=current_app.job_class)
     r = make_response(
         render_template(
             "rq_dashboard/jobs.html",
             current_instance=instance_number,
             instance_list=current_app.config.get("RQ_DASHBOARD_REDIS_URL"),
-            queues=Queue.all(),
+            queues=Queue.all(job_class=current_app.job_class),
             queue=queue,
             per_page=per_page,
             page=page,
@@ -331,7 +344,7 @@ def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
 
 @blueprint.route("/<int:instance_number>/view/job/<job_id>")
 def job_view(instance_number, job_id):
-    job = Job.fetch(job_id)
+    job = current_app.job_class.fetch(job_id)
     r = make_response(
         render_template(
             "rq_dashboard/job.html",
@@ -353,7 +366,7 @@ def job_view(instance_number, job_id):
 @blueprint.route("/job/<job_id>/delete", methods=["POST"])
 @jsonify
 def delete_job_view(job_id):
-    job = Job.fetch(job_id)
+    job = current_app.job_class.fetch(job_id)
     job.delete()
     return dict(status="OK")
 
@@ -361,18 +374,20 @@ def delete_job_view(job_id):
 @blueprint.route("/job/<job_id>/requeue", methods=["POST"])
 @jsonify
 def requeue_job_view(job_id):
-    requeue_job(job_id, connection=current_app.redis_conn)
+    job = current_app.job_class.fetch(job_id, connection=current_app.redis_conn)
+    job.requeue()
     return dict(status="OK")
 
 
 @blueprint.route("/requeue/<queue_name>", methods=["GET", "POST"])
 @jsonify
 def requeue_all(queue_name):
-    fq = Queue(queue_name).failed_job_registry
+    fq = Queue(queue_name, job_class=current_app.job_class).failed_job_registry
     job_ids = fq.get_job_ids()
     count = len(job_ids)
     for job_id in job_ids:
-        requeue_job(job_id, connection=current_app.redis_conn)
+        job = current_app.job_class.fetch(job_id, connection=current_app.redis_conn)
+        job.requeue()
     return dict(status="OK", count=count)
 
 
@@ -380,22 +395,30 @@ def requeue_all(queue_name):
 @jsonify
 def empty_queue(queue_name, registry_name):
     if registry_name == "queued":
-        q = Queue(queue_name)
+        q = Queue(queue_name, job_class=current_app.job_class)
         q.empty()
     elif registry_name == "failed":
-        ids = FailedJobRegistry(queue_name).get_job_ids()
+        ids = FailedJobRegistry(
+            queue_name, job_class=current_app.job_class
+        ).get_job_ids()
         for id in ids:
             delete_job_view(id)
     elif registry_name == "deferred":
-        ids = DeferredJobRegistry(queue_name).get_job_ids()
+        ids = DeferredJobRegistry(
+            queue_name, job_class=current_app.job_class
+        ).get_job_ids()
         for id in ids:
             delete_job_view(id)
     elif registry_name == "started":
-        ids = StartedJobRegistry(queue_name).get_job_ids()
+        ids = StartedJobRegistry(
+            queue_name, job_class=current_app.job_class
+        ).get_job_ids()
         for id in ids:
             delete_job_view(id)
     elif registry_name == "finished":
-        ids = FinishedJobRegistry(queue_name).get_job_ids()
+        ids = FinishedJobRegistry(
+            queue_name, job_class=current_app.job_class
+        ).get_job_ids()
         for id in ids:
             delete_job_view(id)
     return dict(status="OK")
@@ -404,7 +427,7 @@ def empty_queue(queue_name, registry_name):
 @blueprint.route("/queue/<queue_name>/compact", methods=["POST"])
 @jsonify
 def compact_queue(queue_name):
-    q = Queue(queue_name)
+    q = Queue(queue_name, job_class=current_app.job_class)
     q.compact()
     return dict(status="OK")
 
@@ -412,7 +435,9 @@ def compact_queue(queue_name):
 @blueprint.route("/<int:instance_number>/data/queues.json")
 @jsonify
 def list_queues(instance_number):
-    queues = serialize_queues(instance_number, sorted(Queue.all()))
+    queues = serialize_queues(
+        instance_number, sorted(Queue.all(job_class=current_app.job_class)),
+    )
     return dict(queues=queues)
 
 
@@ -512,7 +537,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
 @blueprint.route("/<int:instance_number>/data/job/<job_id>.json")
 @jsonify
 def job_info(instance_number, job_id):
-    job = Job.fetch(job_id)
+    job = current_app.job_class.fetch(job_id)
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
@@ -542,7 +567,7 @@ def list_workers(instance_number):
                 version=getattr(worker, "version", ""),
                 python_version=getattr(worker, "python_version", ""),
             )
-            for worker in Worker.all()
+            for worker in Worker.all(job_class=current_app.job_class)
         ),
         key=lambda w: (w["state"], w["queues"], w["name"]),
     )

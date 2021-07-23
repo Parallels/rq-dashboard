@@ -32,6 +32,7 @@ environment variables with prefix `RQ_DASHBOARD_*`:
     - RQ_DASHBOARD_REDIS_URL=redis://<redis:6379>
     - RQ_DASHBOARD_USERNAME=rq
     - RQ_DASHBOARD_PASSWORD=password
+    - RQ_DASHBOARD_JOB_CLASS=mypackage.CustomJobClass
 
 See more info on how to pass environment variables in [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file)
 
@@ -79,6 +80,8 @@ Options:
                                   path)
   -u, --redis-url TEXT            Redis URL. Can be specified multiple times.
                                   Default: redis://127.0.0.1:6379
+  -j, --job-class TEXT            RQ Job class to use. It will be imported at
+                                  runtime, so it must be installed.
   --poll-interval, --interval INTEGER
                                   Refresh interval in ms
   --extra-path TEXT               Append specified directories to sys.path
