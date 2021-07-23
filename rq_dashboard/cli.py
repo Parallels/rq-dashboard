@@ -113,6 +113,12 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
     help="Redis URL. Can be specified multiple times. Default: redis://127.0.0.1:6379",
 )
 @click.option(
+    "-j",
+    "--job-class",
+    default=None,
+    help="RQ Job class to use. It will be imported at runtime, so it must be installed.",
+)
+@click.option(
     "--redis-sentinels",
     default=None,
     hidden=True,
@@ -166,6 +172,7 @@ def run(
     redis_password,
     redis_database,
     redis_url,
+    job_class,
     redis_sentinels,
     redis_master_name,
     poll_interval,
@@ -196,6 +203,8 @@ def run(
         app.config["RQ_DASHBOARD_REDIS_URL"] = redis_url
     else:
         app.config["RQ_DASHBOARD_REDIS_URL"] = "redis://127.0.0.1:6379"
+    if job_class:
+        app.config["RQ_DASHBOARD_JOB_CLASS"] = job_class
     if redis_host:
         app.config["DEPRECATED_OPTIONS"].append("--redis-host")
     if redis_port:
