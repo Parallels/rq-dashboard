@@ -108,7 +108,7 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
 @click.option(
     "-u",
     "--redis-url",
-    default=None,
+    default=[],
     multiple=True,
     help="Redis URL. Can be specified multiple times. Default: redis://127.0.0.1:6379",
 )
@@ -134,7 +134,7 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
 )
 @click.option(
     "--extra-path",
-    default=".",
+    default=["."],
     multiple=True,
     help="Append specified directories to sys.path",
 )
