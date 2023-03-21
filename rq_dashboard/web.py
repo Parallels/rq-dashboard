@@ -75,6 +75,21 @@ def setup_rq_connection(state):
 
 
 @blueprint.before_request
+def basic_http_auth(*args, **kwargs):
+    username, password = current_app.config.get('RQ_DASHBOARD_BASIC_AUTH', (None, None))
+    if username is None or password is None:
+        return
+
+    auth = request.authorization
+    if auth is None or auth.password != password or auth.username != username:
+        return Response(
+            "Please login",
+            401,
+            {"WWW-Authenticate": 'Basic realm="{}"'.format("RQ Dashboard")},
+        )
+
+
+@blueprint.before_request
 def push_rq_connection():
     new_instance_number = request.view_args.get("instance_number")
     if new_instance_number is not None:
