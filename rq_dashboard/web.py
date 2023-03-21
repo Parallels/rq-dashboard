@@ -28,6 +28,7 @@ from flask import (
     make_response,
     render_template,
     request,
+    Response,
     send_from_directory,
     url_for,
 )
@@ -58,17 +59,17 @@ blueprint = Blueprint(
 )
 
 
-@blueprint.before_app_first_request
-def setup_rq_connection():
+@blueprint.record_once
+def setup_rq_connection(state):
     # we need to do It here instead of cli, since It may be embeded
-    upgrade_config(current_app)
+    upgrade_config(state.app)
     # Getting Redis connection parameters for RQ
-    redis_url = current_app.config.get("RQ_DASHBOARD_REDIS_URL")
+    redis_url = state.app.config.get("RQ_DASHBOARD_REDIS_URL")
     if isinstance(redis_url, string_types):
-        current_app.config["RQ_DASHBOARD_REDIS_URL"] = (redis_url,)
-        _, current_app.redis_conn = from_url((redis_url,)[0])
+        state.app.config["RQ_DASHBOARD_REDIS_URL"] = (redis_url,)
+        _, state.app.redis_conn = from_url((redis_url,)[0])
     elif isinstance(redis_url, (tuple, list)):
-        _, current_app.redis_conn = from_url(redis_url[0])
+        _, state.app.redis_conn = from_url(redis_url[0])
     else:
         raise RuntimeError("No Redis configuration!")
 
