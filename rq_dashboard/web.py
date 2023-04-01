@@ -229,7 +229,6 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
         current_queue = queue
     total_items = current_queue.count
 
-    #patch
     current_queue_jobs = []
     job_ids = current_queue.get_job_ids(offset, per_page)
     for job_id in job_ids:
