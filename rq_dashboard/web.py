@@ -58,8 +58,8 @@ blueprint = Blueprint(
 )
 
 
-@blueprint.before_app_first_request
-def setup_rq_connection():
+# @blueprint.before_app_first_request
+def setup_rq_connection(current_app):
     # we need to do It here instead of cli, since It may be embeded
     upgrade_config(current_app)
     # Getting Redis connection parameters for RQ
