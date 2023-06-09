@@ -10,7 +10,7 @@ click==7.1.2
 flask==1.1.2
 itsdangerous==1.1.0       # via flask
 jinja2==2.11.2            # via flask
-markupsafe==1.1.1         # via jinja2
+markupsafe==2.1.3         # via jinja2
 python-dateutil==2.8.1    # via arrow
 redis==4.5.5
 rq==1.15.0
