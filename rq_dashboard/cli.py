@@ -9,7 +9,7 @@ from flask import Flask, Response, request
 
 from . import default_settings
 from .version import VERSION
-from .web import blueprint
+from .web import blueprint, setup_rq_connection
 
 
 def add_basic_auth(blueprint, username, password, realm="RQ Dashboard"):
@@ -134,7 +134,7 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
 )
 @click.option(
     "--extra-path",
-    default=".",
+    default=["."],
     multiple=True,
     help="Append specified directories to sys.path",
 )
@@ -247,6 +247,7 @@ def run(
         )
         app.config["RQ_DASHBOARD_REDIS_URL"] = url
 
+    setup_rq_connection(app)
     app.run(host=bind, port=port, debug=debug)
 
 

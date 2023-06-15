@@ -21,19 +21,12 @@ Installing with Docker
 
 You can also run the dashboard inside of docker:
 
-``` {.console}
-$ docker pull eoranged/rq-dashboard
-$ docker run -p 9181:9181 eoranged/rq-dashboard
-```
+* copy the ```docker-compose.yml``` file from the root of the repository to ```docker-compose.override.yml``` and change the environment variables to your liking.
+* run the following command:
 
-and you can then run the image. You can pass additional options using
-environment variables with prefix `RQ_DASHBOARD_*`:
-
-    - RQ_DASHBOARD_REDIS_URL=redis://<redis:6379>
-    - RQ_DASHBOARD_USERNAME=rq
-    - RQ_DASHBOARD_PASSWORD=password
-
-See more info on how to pass environment variables in [Docker documentation](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file)
+  ``` {.console}
+  $ docker-compose up
+  ```
 
 Installing from PyPI
 --------------------
