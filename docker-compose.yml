@@ -1,0 +1,9 @@
+version: '3'
+name: rq-dashboard
+services:
+  rq-dashboard:
+    build: .
+    ports:
+      - '9181:9181'
+    environment:
+      RQ_DASHBOARD_REDIS_URL: redis://host.docker.internal:6379
