@@ -15,7 +15,7 @@ LEGACY_CONFIG_OPTIONS = {
 }
 
 warning_template = (
-    "Configuration option {old_name} is depricated and will be removed in future versions. "
+    "Configuration option {old_name} is deprecated and will be removed in future versions. "
     "Please use {new_name} instead."
 )
 
@@ -25,7 +25,7 @@ def upgrade_config(app):
     Updates old configuration options with new ones throwing warnings to those who haven't upgraded yet.
     """
     for old_name, new_name in LEGACY_CONFIG_OPTIONS.items():
-        if old_name in app.config:
+        if old_name in app.config and new_name not in app.config:
             warnings.warn(
                 warning_template.format(old_name=old_name, new_name=new_name),
                 UserWarning,
