@@ -15,6 +15,7 @@ Maturity notes
 --------------
 
 The RQ dashboard is currently being developed and is in beta stage.
+How migrate to version 1.0 you can find [here](https://github.com/Parallels/rq-dashboard/wiki/How-to-migrate-to-1.0)
 
 Installing with Docker
 ----------------------

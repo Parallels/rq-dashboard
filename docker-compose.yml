@@ -6,4 +6,6 @@ services:
     ports:
       - '9181:9181'
     environment:
-      RQ_DASHBOARD_REDIS_URL: redis://host.docker.internal:6379
+      RQ_DASHBOARD_REDIS_URL: redis://:p@ssw0rd@host.docker.internal:6379 # or redis+sentinel://[:password@]host:port[,host2:port2,...][/service_name[/db]][?param1=value1[&param2=value=2&...]]
+      # RQ_DASHBOARD_USERNAME: rq
+      # RQ_DASHBOARD_PASSWORD: p@ssw0rd
