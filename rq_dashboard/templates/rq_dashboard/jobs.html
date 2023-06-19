@@ -85,7 +85,7 @@
         </tr>
     </script>
 
-    <span class="input-group" style="width: fit-content; float: right;">
+    <span class="input-group" style="">
         <span class="input-group-prepend">
             <div class="input-group-text">On page:</div>
         </span>
@@ -93,10 +93,9 @@
             <input title="Jobs per page" class="form-control" type="number" id="select-per-page" min="1" max="200" value="{{ per_page }}">
         </span>
     </span>
-
-    <div id="page-selection" class="pagination justify-content-center">
-        <ul class="pagination justify-content-center">
-        </ul>
+    <br />
+    <div id="page-selection" class="pagination">
+        <ul class="pagination"></ul>
     </div>
 
     <script name="first-page-link" type="text/template">
