@@ -1,0 +1,86 @@
+name: Publish Release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - version.json
+
+jobs:
+  check-version-change:
+    outputs:
+      changed: ${{ steps.check-version.outputs.result }}
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check if version has changed
+        id: check-version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const version = '${{ github.event.inputs.version }}' || require('./version.json').version;
+            // Find a release for that version
+            const release = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: `release-v${version}`,
+            }).catch(() => null);
+
+            // If the release exists, the version has not changed
+            if (release) {
+              console.log(`Version ${version} has an existing release`);
+              console.log(release.data.html_url);
+              core.summary.addLink(`Release v${version}`, release.data.html_url);
+              await core.summary.write();
+              return "false";
+            }
+            console.log(`Version ${version} does not have a release`);
+            return true;
+
+  release:
+    needs: check-version-change
+    if: ${{ needs.check-version-change.outputs.changed == 'true' }}
+    
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      packages: read
+
+    env:
+      EXT_VERSION: "" # will be set in the workflow
+
+    outputs:
+      version: ${{ env.EXT_VERSION }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Parse version from package.json
+        run: |
+          echo "EXT_VERSION=$(cat version.json | jq -r '.version')" >> $GITHUB_ENV
+
+      # - name: Build Docker image
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: cjlapao/rq-dashboard:latest
+      #     username: ${{ secrets.DOCKER_USERNAME }}
+      #     password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.EXT_VERSION }}
+          release_name: Release v${{ env.EXT_VERSION }}
+          body: |
+            Release v${{ env.EXT_VERSION }}
+          draft: false
+          prerelease: false

@@ -1,0 +1,58 @@
+name: Create release PR
+
+run-name: Create release PR for new ${{ github.event.inputs.version }} version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        type: choice
+        description: "What type of release is this"
+        options:
+          - "major"
+          - "minor"
+          - "patch"
+
+jobs:
+  create-release-pr:
+    name: Create release PR
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Bump version and push
+        run: |
+          git config --global user.email "cjlapao@gmail.com"
+          git config --global user.name "cjlapao"
+
+          NEW_VERSION=$(./script/workflows/increment-version.sh ${{ inputs.version }})
+
+          git checkout -b release/$NEW_VERSION
+
+          echo "{ \"version\": \"$NEW_VERSION\" }" > version.json
+
+          git add version.json
+          git commit -m "Release extension version $NEW_VERSION"
+
+          git push --set-upstream origin release/$NEW_VERSION
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Create PR
+        run: |
+          LAST_PR=$(gh pr list --repo ${{ github.repository }} --limit 1 --state merged --search "Release version" --json number | jq -r '.[0].number')
+          ./script/workflows/generate-release-notes.sh $LAST_PR ${{ env.new_version }}
+          gh pr create \
+            --title "Release version ${{ env.new_version }}" \
+            --body-file releasenotes.md \
+            --base main \
+            --head release/${{ env.new_version }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
