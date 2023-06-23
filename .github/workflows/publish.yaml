@@ -76,7 +76,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: cjlapao/rq-dashboard:{{ env.EXT_VERSION }}, cjlapao/rq-dashboard:latest
+          tags: cjlapao/rq-dashboard:${{ env.EXT_VERSION }},cjlapao/rq-dashboard:latest
 
       - name: Create GitHub release
         uses: actions/create-release@v1
