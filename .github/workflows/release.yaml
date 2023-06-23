@@ -32,7 +32,7 @@ jobs:
           git config --global user.email "cjlapao@gmail.com"
           git config --global user.name "cjlapao"
 
-          NEW_VERSION=$(./scripts/workflows/increment-version.sh ${{ inputs.version }})
+          NEW_VERSION=$(./scripts/workflows/increment_version.sh ${{ inputs.version }})
 
           git checkout -b release/$NEW_VERSION
 
@@ -48,7 +48,7 @@ jobs:
       - name: Create PR
         run: |
           LAST_PR=$(gh pr list --repo ${{ github.repository }} --limit 1 --state merged --search "Release version" --json number | jq -r '.[0].number')
-          ./scripts/workflows/generate-release-notes.sh $LAST_PR ${{ env.new_version }}
+          ./scripts/workflows/generate_release_notes.sh $LAST_PR ${{ env.new_version }}
           gh pr create \
             --title "Release version ${{ env.new_version }}" \
             --body-file releasenotes.md \
