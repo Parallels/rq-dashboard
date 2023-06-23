@@ -5,8 +5,8 @@ Introduction
 [Flask](https://flask.palletsprojects.com/)-based web front-end to monitor your
 [RQ](http://python-rq.org/) queues, jobs, and workers in realtime.
 
-[![Build
-Status](https://travis-ci.org/Parallels/rq-dashboard.svg?branch=master)](https://travis-ci.org/Parallels/rq-dashboard)
+[![Build Pull Request](https://github.com/Parallels/rq-dashboard/actions/workflows/pr.yaml/badge.svg)](https://github.com/Parallels/rq-dashboard/actions/workflows/pr.yaml)
+[![Publish Release](https://github.com/Parallels/rq-dashboard/actions/workflows/publish.yaml/badge.svg)](https://github.com/Parallels/rq-dashboard/actions/workflows/publish.yaml)
 [![Python
 Support](https://img.shields.io/pypi/pyversions/rq-dashboard.svg)](https://pypi.python.org/pypi/rq-dashboard)
 ![PyPI Downloads](https://img.shields.io/pypi/dw/rq-dashboard)
@@ -16,6 +16,8 @@ Maturity notes
 
 The RQ dashboard is currently being developed and is in beta stage.
 How migrate to version 1.0 you can find [here](https://github.com/Parallels/rq-dashboard/wiki/How-to-migrate-to-1.0)
+
+You can find help  in the discussion page in [github]([http](https://github.com/Parallels/rq-dashboard)) or join our [discord server](https://discord.gg/reuhvMFT)
 
 Installing with Docker
 ----------------------
@@ -28,6 +30,8 @@ You can also run the dashboard inside of docker:
   ``` {.console}
   $ docker-compose up
   ```
+
+You can also find the official image on cjlapao/rq-dashboard:latest
 
 Installing from PyPI
 --------------------
