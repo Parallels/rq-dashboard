@@ -52,7 +52,7 @@ jobs:
           gh pr create \
             --title "Release version ${{ env.new_version }}" \
             --body-file releasenotes.md \
-            --base main \
+            --base master \
             --head release/${{ env.new_version }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
