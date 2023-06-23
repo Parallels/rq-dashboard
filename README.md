@@ -31,6 +31,8 @@ You can also run the dashboard inside of docker:
   $ docker-compose up
   ```
 
+You can also find the official image on cjlapao/rq-dashboard:latest
+
 Installing from PyPI
 --------------------
 
