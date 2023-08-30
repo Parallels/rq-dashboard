@@ -98,7 +98,6 @@ jobs:
         with:
           password: ${{ secrets.PYPI_TOKEN }}
           repository-url: https://pypi.org/project/rq-dashboard/
-          packages-dir: /dist
 
       - name: Create GitHub release
         uses: actions/create-release@v1
