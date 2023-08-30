@@ -40,6 +40,7 @@ jobs:
           ./scripts/workflows/change_version.sh ./rq_dashboard/version.py $NEW_VERSION
 
           git add version.json
+          git add rq_dashboard/version.py
           git commit -m "Release extension version $NEW_VERSION"
 
           git push --set-upstream origin release/$NEW_VERSION
