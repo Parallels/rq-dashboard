@@ -37,6 +37,7 @@ jobs:
           git checkout -b release/$NEW_VERSION
 
           echo "{ \"version\": \"$NEW_VERSION\" }" > version.json
+          ./scripts/workflows/change_version.sh ./rq_dashboard/version.py $NEW_VERSION
 
           git add version.json
           git commit -m "Release extension version $NEW_VERSION"

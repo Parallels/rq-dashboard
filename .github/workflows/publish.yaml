@@ -61,6 +61,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install Packge builder
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade build
+          pip install -r requirements.txt
+
       - name: Parse version from package.json
         run: |
           echo "EXT_VERSION=$(cat version.json | jq -r '.version')" >> $GITHUB_ENV
@@ -77,6 +88,17 @@ jobs:
           context: .
           push: true
           tags: cjlapao/rq-dashboard:${{ env.EXT_VERSION }},cjlapao/rq-dashboard:latest
+
+      - name: Build Python package
+        run: |
+          python -m build --sdist --wheel
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}
+          repository-url: https://pypi.org/project/rq-dashboard/
+          packages-dir: /dist
 
       - name: Create GitHub release
         uses: actions/create-release@v1
