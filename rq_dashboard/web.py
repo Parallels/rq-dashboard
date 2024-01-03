@@ -238,7 +238,7 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
 
     job_ids = current_queue.get_job_ids(offset, per_page)
     current_queue_jobs = [queue.fetch_job(job_id) for job_id in job_ids]
-    jobs = [serialize_job(job) for job in current_queue_jobs]
+    jobs = [serialize_job(job) for job in current_queue_jobs if job]
 
     return (total_items, jobs)
 
