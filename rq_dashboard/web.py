@@ -53,11 +53,17 @@ from six import string_types
 from .legacy_config import upgrade_config
 from .version import VERSION as rq_dashboard_version
 
+from rq.serializers import DefaultSerializer
+
 
 blueprint = Blueprint(
     "rq_dashboard", __name__, template_folder="templates", static_folder="static",
 )
 
+class Config:
+    serializer = DefaultSerializer
+
+config: Config = Config()
 
 # @blueprint.before_app_first_request
 def setup_rq_connection(current_app):
@@ -213,7 +219,7 @@ def favicon():
 
 
 def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
-    queue = Queue(queue_name)
+    queue = Queue(queue_name, serializer=config.serializer)
     if registry_name != "queued":
         if per_page >= 0:
             per_page = offset + (per_page - 1)
@@ -309,9 +315,9 @@ def workers_overview(instance_number):
 )
 def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
     if queue_name is None:
-        queue = Queue()
+        queue = Queue(serializer=config.serializer)
     else:
-        queue = Queue(queue_name)
+        queue = Queue(queue_name, serializer=config.serializer)
     r = make_response(
         render_template(
             "rq_dashboard/jobs.html",
@@ -374,7 +380,7 @@ def requeue_job_view(job_id):
 @blueprint.route("/requeue/<queue_name>", methods=["GET", "POST"])
 @jsonify
 def requeue_all(queue_name):
-    fq = Queue(queue_name).failed_job_registry
+    fq = Queue(queue_name, serializer=config.serializer).failed_job_registry
     job_ids = fq.get_job_ids()
     count = len(job_ids)
     for job_id in job_ids:
@@ -386,7 +392,7 @@ def requeue_all(queue_name):
 @jsonify
 def empty_queue(queue_name, registry_name):
     if registry_name == "queued":
-        q = Queue(queue_name)
+        q = Queue(queue_name, serializer=config.serializer)
         q.empty()
     elif registry_name == "failed":
         ids = FailedJobRegistry(queue_name).get_job_ids()
@@ -410,7 +416,7 @@ def empty_queue(queue_name, registry_name):
 @blueprint.route("/queue/<queue_name>/compact", methods=["POST"])
 @jsonify
 def compact_queue(queue_name):
-    q = Queue(queue_name)
+    q = Queue(queue_name, serializer=config.serializer)
     q.compact()
     return dict(status="OK")
 
@@ -518,7 +524,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
 @blueprint.route("/<int:instance_number>/data/job/<job_id>.json")
 @jsonify
 def job_info(instance_number, job_id):
-    job = Job.fetch(job_id)
+    job = Job.fetch(job_id, serializer=config.serializer)
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
