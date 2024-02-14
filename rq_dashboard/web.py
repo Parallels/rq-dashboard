@@ -41,6 +41,7 @@ from rq import (
     push_connection,
     requeue_job,
 )
+from rq.exceptions import NoSuchJobError
 from rq.job import Job
 from rq.registry import (
     DeferredJobRegistry,
@@ -389,9 +390,15 @@ def job_view(instance_number, job_id):
 
 @blueprint.route("/job/<job_id>/delete", methods=["POST"])
 @jsonify
-def delete_job_view(job_id):
-    job = Job.fetch(job_id)
-    job.delete()
+def delete_job_view(job_id, registry=None):
+    try:
+        job = Job.fetch(job_id)
+        job.delete()
+    except NoSuchJobError:
+        if registry:
+            registry.remove(job_id)
+        return dict(status="ERROR")
+
     return dict(status="OK")
 
 
@@ -420,29 +427,30 @@ def empty_queue(queue_name, registry_name):
         q = Queue(queue_name, serializer=config.serializer)
         q.empty()
     elif registry_name == "failed":
-        ids = FailedJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        registry = FailedJobRegistry(queue_name)
+        for id in registry.get_job_ids():
+            delete_job_view(id, registry)
     elif registry_name == "deferred":
-        ids = DeferredJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        registry = DeferredJobRegistry(queue_name)
+        for id in registry.get_job_ids():
+            delete_job_view(id, registry)
     elif registry_name == "started":
-        ids = StartedJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        registry = StartedJobRegistry(queue_name)
+        for id in registry.get_job_ids():
+            delete_job_view(id, registry)
     elif registry_name == "finished":
-        ids = FinishedJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        registry = FinishedJobRegistry(queue_name)
+        for id in registry.get_job_ids():
+            delete_job_view(id, registry)
     elif registry_name == "canceled":
-        ids = CanceledJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        registry = CanceledJobRegistry(queue_name)
+        for id in registry.get_job_ids():
+            delete_job_view(id, registry)
     elif registry_name == "scheduled":
-        ids = ScheduledJobRegistry(queue_name).get_job_ids()
-        for id in ids:
-            delete_job_view(id)
+        registry = ScheduledJobRegistry(queue_name)
+        for id in registry.get_job_ids():
+            delete_job_view(id, registry)
+
     return dict(status="OK")
 
 
