@@ -114,6 +114,13 @@ def jsonify(f):
 
     return _wrapped
 
+def check_delete_enable(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if current_app.config.get("RQ_DASHBOARD_DISABLE_DELETE"):
+            return dict(status="DISABLED")
+        return f(*args, **kwargs)
+    return wrapper
 
 def serialize_queues(instance_number, queues):
     return [
@@ -361,6 +368,7 @@ def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
             deprecation_options_usage=current_app.config.get(
                 "DEPRECATED_OPTIONS", False
             ),
+            enable_delete=not current_app.config.get("RQ_DASHBOARD_DISABLE_DELETE"),
         )
     )
     r.headers.set("Cache-Control", "no-store")
@@ -382,6 +390,7 @@ def job_view(instance_number, job_id):
             deprecation_options_usage=current_app.config.get(
                 "DEPRECATED_OPTIONS", False
             ),
+            enable_delete=not current_app.config.get("RQ_DASHBOARD_DISABLE_DELETE"),
         )
     )
     r.headers.set("Cache-Control", "no-store")
@@ -389,6 +398,7 @@ def job_view(instance_number, job_id):
 
 
 @blueprint.route("/job/<job_id>/delete", methods=["POST"])
+@check_delete_enable
 @jsonify
 def delete_job_view(job_id, registry=None):
     try:
@@ -421,6 +431,7 @@ def requeue_all(queue_name):
 
 
 @blueprint.route("/queue/<queue_name>/<registry_name>/empty", methods=["POST"])
+@check_delete_enable
 @jsonify
 def empty_queue(queue_name, registry_name):
     if registry_name == "queued":

@@ -152,6 +152,9 @@ def make_flask_app(config, username, password, url_prefix, compatibility_mode=Tr
     hidden=True,
     help="[DEPRECATED] Delete jobs instead of cancel",
 )
+@click.option(
+    "--disable-delete", is_flag=True, default=False, help="Disable delete jobs, clean up registries"
+)
 @click.option("--debug/--normal", default=False, help="Enter DEBUG mode")
 @click.option(
     "-v", "--verbose", is_flag=True, default=False, help="Enable verbose logging"
@@ -178,6 +181,7 @@ def run(
     web_background,
     debug,
     delete_jobs,
+    disable_delete,
     verbose,
     json,
 ):
@@ -252,7 +256,9 @@ def run(
             url,
         )
         app.config["RQ_DASHBOARD_REDIS_URL"] = url
-        
+
+    app.config["RQ_DASHBOARD_DISABLE_DELETE"] = disable_delete
+
     if json:
         service_config.serializer = JSONSerializer
 
