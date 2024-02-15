@@ -80,9 +80,10 @@ Options:
   --poll-interval, --interval INTEGER
                                   Refresh interval in ms
   --extra-path TEXT               Append specified directories to sys.path
-  -j, --json                      Use JSONSerializer
+  --disable-delete                Disable delete jobs, clean up registries
   --debug / --normal              Enter DEBUG mode
   -v, --verbose                   Enable verbose logging
+  -j, --json                      Enable JSONSerializer
   --help                          Show this message and exit.
 ```
 
