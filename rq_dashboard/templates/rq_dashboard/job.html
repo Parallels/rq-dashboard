@@ -6,14 +6,16 @@
         <span class="col-10">
             <h2><strong>Job ID</strong>: {{ id }}</h2>
         </span>
-            
+
         <span class="col-2">
             <button id="requeue-job-btn" class="btn btn-outline-warning btn-sm" style="display: none">Requeue</button>
+            {% if enable_delete %}
             <button id="delete-job-btn" class="btn btn-outline-danger btn-sm">Delete</button>
+            {% endif %}
         </span>
     </div>
     <div id="job-data" class="row"></div>
-    
+
 
     <script name="job-info" type="text/template">
 
