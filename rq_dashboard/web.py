@@ -278,9 +278,9 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
 
 def escape_format_instance_list(url_list):
     if isinstance(url_list, (list, tuple)):
-        url_list = [re.sub(r"://:[^@]*@", "://:***@", x) for x in url_list]
+        url_list = [re.sub(r":\/\/[^@]*@", "://***:***@", x) for x in url_list]
     elif isinstance(url_list, string_types):
-        url_list = [re.sub(r"://:[^@]*@", "://:***@", url_list)]
+        url_list = [re.sub(r":\/\/[^@]*@", "://***:***@", url_list)]
     return url_list
 
 
