@@ -5,6 +5,7 @@ import redis
 from rq import Queue, Worker, pop_connection, push_connection
 
 from rq_dashboard.cli import make_flask_app
+from rq_dashboard.web import escape_format_instance_list
 
 
 HTTP_OK = 200
@@ -105,6 +106,20 @@ class BasicTestCase(unittest.TestCase):
         else:
             self.assertEqual('', data['workers'][0]['version'])
         w.register_death()
+
+
+    def test_instance_escaping(self):
+        expected_redis_instance = "redis://***:***@redis.example.com:6379"
+        self.assertEqual(
+            escape_format_instance_list(
+                [
+                    "redis://myuser:secretpassword@redis.example.com:6379",
+                    "redis://:secretpassword@redis.example.com:6379",
+                    "redis://:@redis.example.com:6379",
+                ]
+            ),
+            [expected_redis_instance, expected_redis_instance, expected_redis_instance],
+        )
 
 
 __all__ = [
