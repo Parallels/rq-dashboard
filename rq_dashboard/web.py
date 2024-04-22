@@ -584,7 +584,7 @@ def job_info(instance_number, job_id):
         ended_at=serialize_date(job.ended_at),
         origin=job.origin,
         status=job.get_status(),
-        result=job._result,
+        result=job.return_value(),
         exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description,
     )
