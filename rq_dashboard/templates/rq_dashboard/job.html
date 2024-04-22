@@ -23,24 +23,18 @@
             <p class="ellipsify"><strong>Description</strong>:<br><%= d.description %></p>
             <p><strong>Origin queue</strong>:<br><%= d.origin %></p>
             <p><strong>Status</strong>:<br><%= d.status %></p>
-            <% if (d.result) { %>
             <p><strong>Result</strong>:<br><%= d.result %></p>
-            <% } %>
         </span>
 
         <span class="col-6">
             <p><strong>Created at</strong>:<br> <%= d.created_at %></p>
             <p><strong>Enqueued at</strong>:<br> <%= d.enqueued_at %></p>
-            <% if (d.exc_info) { %>
             <p><strong>Ended at</strong>:<br> <%= d.ended_at %></p>
-            <% } %>
         </span>
 
-        <% if (d.exc_info) { %>
         <div class = "row col-12">
             <pre class="exc_info col-12"><%= d.exc_info %></pre>
         </div>
-        <% } %>
     </script>
 </div>
 
