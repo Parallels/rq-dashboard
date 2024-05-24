@@ -16,6 +16,7 @@ As a quick-and-dirty convenience, the command line invocation in ``cli.py``
 provides the option to require HTTP Basic Auth in a few lines of code.
 
 """
+import json
 import os
 import re
 from functools import wraps
@@ -577,7 +578,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
 @jsonify
 def job_info(instance_number, job_id):
     job = Job.fetch(job_id, serializer=config.serializer)
-    return dict(
+    result = dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
         enqueued_at=serialize_date(job.enqueued_at),
@@ -587,7 +588,20 @@ def job_info(instance_number, job_id):
         result=job.return_value(),
         exc_info=str(job.exc_info) if job.exc_info else None,
         description=job.description,
+        metadata=json.dumps(job.get_meta()),
     )
+    dep_ids = [di.decode("utf-8").split(':')[-1].strip() for di in job.dependency_ids]
+    if len(dep_ids) > 0:
+        result["depends_on"] = dep_ids
+        status = []
+        for dep_id in dep_ids:
+            try:
+                _ = Job.fetch(dep_id, serializer=config.serializer)
+                status.append('active')
+            except NoSuchJobError:
+                status.append('expired')
+        result["depends_on_status"] = status
+    return result
 
 
 @blueprint.route("/<int:instance_number>/data/workers.json")

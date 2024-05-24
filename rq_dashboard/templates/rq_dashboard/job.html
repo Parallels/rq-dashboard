@@ -18,23 +18,39 @@
 
 
     <script name="job-info" type="text/template">
+        <div class = "row col-12">
+            <pre class="exc_info col-12"><%= d.exc_info %></pre>
+        </div>
 
         <span class="col-6">
             <p class="ellipsify"><strong>Description</strong>:<br><%= d.description %></p>
             <p><strong>Origin queue</strong>:<br><%= d.origin %></p>
             <p><strong>Status</strong>:<br><%= d.status %></p>
             <p><strong>Result</strong>:<br><%= d.result %></p>
+            <p><strong>Metadata</strong>:<br><%= d.metadata %></p>
+            <p><strong>Depends on</strong>:</p>
+                <% if (d.depends_on) { %>
+                    <ul>
+                        <%
+                            for (var i = 0; i < d.depends_on.length; i++) {
+                                var jobId = d.depends_on[i].trim();
+                                var status = d.depends_on_status[i].trim();
+                        %>
+                            <% if (status === "active") { %>
+                                <li><a href="<%= url_for_single_job_view(jobId) %>"><%= jobId %></a></li>
+                            <% } else { %>
+                                <li><%= jobId %> (Expired)</li>
+                            <% } %>
+                        <% } %>
+                    </ul>
+                <% } %>
         </span>
-
         <span class="col-6">
             <p><strong>Created at</strong>:<br> <%= d.created_at %></p>
             <p><strong>Enqueued at</strong>:<br> <%= d.enqueued_at %></p>
             <p><strong>Ended at</strong>:<br> <%= d.ended_at %></p>
         </span>
 
-        <div class = "row col-12">
-            <pre class="exc_info col-12"><%= d.exc_info %></pre>
-        </div>
     </script>
 </div>
 
