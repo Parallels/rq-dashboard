@@ -18,10 +18,6 @@
 
 
     <script name="job-info" type="text/template">
-        <div class = "row col-12">
-            <pre class="exc_info col-12"><%= d.exc_info %></pre>
-        </div>
-
         <span class="col-6">
             <p class="ellipsify"><strong>Description</strong>:<br><%= d.description %></p>
             <p><strong>Origin queue</strong>:<br><%= d.origin %></p>
@@ -49,6 +45,10 @@
             <p><strong>Created at</strong>:<br> <%= d.created_at %></p>
             <p><strong>Enqueued at</strong>:<br> <%= d.enqueued_at %></p>
             <p><strong>Ended at</strong>:<br> <%= d.ended_at %></p>
+        </span>
+        <span class = "row col-12">
+            <p><strong>Execution Info</strong>:</p>
+            <pre class="exc_info col-12"><%= d.exc_info %></pre>
         </span>
 
     </script>
