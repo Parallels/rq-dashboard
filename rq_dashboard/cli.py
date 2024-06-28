@@ -202,10 +202,11 @@ def run(
     click.echo("RQ Dashboard version {}".format(VERSION))
     app = make_flask_app(config, username, password, url_prefix)
     app.config["DEPRECATED_OPTIONS"] = []
-    if redis_url:
-        app.config["RQ_DASHBOARD_REDIS_URL"] = redis_url
-    else:
-        app.config["RQ_DASHBOARD_REDIS_URL"] = "redis://127.0.0.1:6379"
+    if app.config.get("RQ_DASHBOARD_REDIS_URL") is None:
+        if redis_url:
+            app.config["RQ_DASHBOARD_REDIS_URL"] = redis_url
+        else:
+            app.config["RQ_DASHBOARD_REDIS_URL"] = "redis://127.0.0.1:6379"
     if redis_host:
         app.config["DEPRECATED_OPTIONS"].append("--redis-host")
     if redis_port:
