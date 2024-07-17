@@ -15,5 +15,5 @@ python-dateutil==2.8.2    # via arrow
 redis==4.6.0
 rq==1.15.1
 six==1.16.0
-werkzeug==2.3.7
+werkzeug==3.0.1
 Redis-Sentinel-Url==1.0.1
