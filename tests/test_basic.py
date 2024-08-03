@@ -51,9 +51,9 @@ class BasicTestCase(unittest.TestCase):
     def test_queued_jobs_list(self):
         response_dashboard = self.client.get('/0/view/jobs')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
-        response_queued = self.client.get('/0/view/jobs/default/queued/8/1')
+        response_queued = self.client.get('/0/view/jobs/default/queued/8/asc/1')
         self.assertEqual(response_queued.status_code, HTTP_OK)
-        response = self.client.get('/0/data/jobs/default/queued/8/1.json')
+        response = self.client.get('/0/data/jobs/default/queued/8/asc/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
@@ -79,7 +79,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response_del.status_code, HTTP_OK)
 
     def test_registry_jobs_list(self):
-        response = self.client.get('/0/data/jobs/default/failed/8/1.json')
+        response = self.client.get('/0/data/jobs/default/failed/8/asc/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
