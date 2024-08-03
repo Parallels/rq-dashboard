@@ -513,7 +513,6 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, order, page)
     total_items, jobs = get_queue_registry_jobs_count(
         queue_name, registry_name, offset, per_page, order
     )
-    print(f"Jobs: {jobs}")
 
     pages_numbers_in_window = pagination_window(total_items, current_page, per_page)
     pages_in_window = [
