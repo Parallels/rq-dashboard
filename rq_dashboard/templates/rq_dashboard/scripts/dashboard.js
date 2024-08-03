@@ -16,13 +16,13 @@ document.querySelectorAll('.ellipsify').forEach(function (elem) {
     }
 });
 
-var url_for_jobs_data = function(queue_name, registry_name, per_page, page) {
-    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/data/jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page) + '.json';
+var url_for_jobs_data = function(queue_name, registry_name, per_page, order, page) {
+    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/data/jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/'+ encodeURIComponent(order) + '/' + encodeURIComponent(page) + '.json';
     return url;
 };
 
-var url_for_jobs_view = function(queue_name, registry_name, per_page, page) {
-    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/view/jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/' + encodeURIComponent(page);
+var url_for_jobs_view = function(queue_name, registry_name, per_page, order, page) {
+    var url = {{ rq_url_prefix|tojson|safe }} + {{ current_instance|tojson|safe }} + '/view/jobs/' + encodeURIComponent(queue_name) + '/' + encodeURIComponent(registry_name) + '/' + encodeURIComponent(per_page) + '/'+ encodeURIComponent(order) + '/' + encodeURIComponent(page);
     return url;
 };
 
@@ -74,8 +74,8 @@ var api = {
         });
     },
 
-    getJobs: function(queue_name, registry_name, per_page, page, cb) {
-        $.getJSON(url_for_jobs_data(queue_name, registry_name, per_page, page), function(data) {
+    getJobs: function(queue_name, registry_name, per_page, order, page, cb) {
+        $.getJSON(url_for_jobs_data(queue_name, registry_name, per_page, order, page), function(data) {
             var jobs = data.jobs;
             var pagination = data.pagination;
             cb(jobs, pagination);

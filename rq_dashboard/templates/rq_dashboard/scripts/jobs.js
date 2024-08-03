@@ -22,7 +22,7 @@
         $placeholderEl.show();
 
         // Fetch the available jobs on the queue
-        api.getJobs({{ queue.name|tojson|safe }}, {{registry_name|tojson|safe}}, {{ per_page|tojson|safe}}, {{ page|tojson|safe }}, function(jobs, pagination, err) {
+        api.getJobs({{ queue.name|tojson|safe }}, {{registry_name|tojson|safe}}, {{ per_page|tojson|safe}}, {{ order|tojson|safe }}, {{ page|tojson|safe }}, function(jobs, pagination, err) {
             // Return immediately in case of error
             if (err) {
                 return done();
@@ -210,7 +210,7 @@
             if (!queue_name) {
                 queue_name = 'default'
             }
-            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), $('#select-sort-order').val(), 1)
             $(location).attr('href', url);
          });
     });
@@ -221,7 +221,18 @@
             if (!queue_name) {
                 queue_name = 'default'
             }
-            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), $('#select-sort-order').val(), 1)
+            $(location).attr('href', url);
+         });
+    });
+
+    $('#select-sort-order').change(function() {
+        $(document).ready( function() {
+            queue_name = $('#select-queue').val();
+            if (!queue_name) {
+                queue_name = 'default'
+            }
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), $('#select-sort-order').val(), 1)
             $(location).attr('href', url);
          });
     });
@@ -232,7 +243,7 @@
             if (!queue_name) {
                 queue_name = 'default'
             }
-            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), 1)
+            var url = url_for_jobs_view(queue_name, $('#select-registry').val(), $('#select-per-page').val(), $('#select-sort-order').val(), 1)
             $(location).attr('href', url);
          });
     });

@@ -26,6 +26,13 @@
             <option {% if registry_name == 'failed' %} selected {% endif %}>failed</option>
             <option {% if registry_name == 'canceled' %} selected {% endif %}>canceled</option>
         </select>
+        <div class="input-group-prepend input-group-append">
+            <span class="input-group-text">Sort Order:</span>
+        </div>
+        <select class="custom-select" id="select-sort-order" title="Job Sort Order">
+            <option {% if order == 'asc' %} selected {% endif %} value="asc">Ascending</option>
+            <option {% if order == 'dsc' %} selected {% endif %} value="dsc">Descending</option>
+        </select>
     </div>
 
     <p class="intro">
@@ -43,8 +50,7 @@
         <a href="{{ url_for('rq_dashboard.requeue_all', queue_name=queue.name) }}" id="requeue-all-btn" class="btn btn-outline-warning btn-sm"
             style="float: right; margin-right: 8px;">Requeue All</a>
         {% endif %}
-        This list below contains all the queued jobs on queue <strong>{{ queue.name }}</strong>, sorted by
-        age (oldest on top).</p>
+        This list below contains all the queued jobs on queue <strong>{{ queue.name }}</strong>.</p>
 
         <div class="table-responsive">
             <table id="jobs" class="table table-bordered">
