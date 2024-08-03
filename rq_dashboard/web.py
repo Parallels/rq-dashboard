@@ -255,7 +255,7 @@ def favicon():
     )
 
 
-def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
+def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page, order):
     queue = Queue(queue_name, serializer=config.serializer)
     if registry_name != "queued":
         if per_page >= 0:
@@ -277,7 +277,18 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
         current_queue = queue
     total_items = current_queue.count
 
-    job_ids = current_queue.get_job_ids(offset, per_page)
+
+    if order == 'dsc':
+        end = total_items - offset
+        start = max(0, end - per_page)
+    else:
+        start = offset
+        end = start + per_page
+
+    job_ids = current_queue.get_job_ids(start, end)
+    if order == 'dsc':
+        job_ids.reverse()
+
     current_queue_jobs = [queue.fetch_job(job_id) for job_id in job_ids]
     jobs = [serialize_job(job) for job in current_queue_jobs if job]
 
@@ -497,13 +508,12 @@ def list_queues(instance_number):
 def list_jobs(instance_number, queue_name, registry_name, per_page, order, page):
     current_page = int(page)
     per_page = int(per_page)
-    if order == "asc":
-        offset = (current_page - 1) * per_page
-    else:
-        offset = (-1 - current_page) * per_page
+    offset = (current_page - 1) * per_page
+
     total_items, jobs = get_queue_registry_jobs_count(
-        queue_name, registry_name, offset, per_page
+        queue_name, registry_name, offset, per_page, order
     )
+    print(f"Jobs: {jobs}")
 
     pages_numbers_in_window = pagination_window(total_items, current_page, per_page)
     pages_in_window = [
