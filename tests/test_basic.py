@@ -1,4 +1,5 @@
 import json
+import time
 import unittest
 
 import redis
@@ -27,6 +28,8 @@ class BasicTestCase(unittest.TestCase):
         self.client = self.app.test_client()
 
     def tearDown(self):
+        q = Queue(connection=self.app.redis_conn)
+        q.empty()
         pop_connection()
 
     def test_dashboard_ok(self):
@@ -120,6 +123,26 @@ class BasicTestCase(unittest.TestCase):
             ),
             [expected_redis_instance, expected_redis_instance, expected_redis_instance],
         )
+    
+    def test_job_sort_order(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job_ids = []
+        for _ in range(3):
+            job = q.enqueue(some_work)
+            job_ids.append(job.id)
+            time.sleep(2)
+
+        response_asc = self.client.get('/0/data/jobs/default/queued/3/asc/1.json')
+        self.assertEqual(response_asc.status_code, HTTP_OK)
+        data_asc = json.loads(response_asc.data.decode('utf8'))
+        self.assertEqual(job_ids, [job['id'] for job in data_asc['jobs']])
+
+        response_dsc = self.client.get('/0/data/jobs/default/queued/10/dsc/1.json')
+        self.assertEqual(response_dsc.status_code, HTTP_OK)
+        data_dsc = json.loads(response_dsc.data.decode('utf8'))
+        self.assertEqual(job_ids[::-1], [job['id'] for job in data_dsc['jobs']])
 
 
 __all__ = [
