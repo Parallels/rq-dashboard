@@ -134,6 +134,7 @@ def serialize_queues(instance_number, queues):
                 queue_name=q.name,
                 registry_name="queued",
                 per_page="8",
+                order="asc",
                 page="1",
             ),
             failed_job_registry_count=FailedJobRegistry(q.name).count,
@@ -143,6 +144,7 @@ def serialize_queues(instance_number, queues):
                 queue_name=q.name,
                 registry_name="failed",
                 per_page="8",
+                order="asc",
                 page="1",
             ),
             started_job_registry_count=StartedJobRegistry(q.name).count,
@@ -152,6 +154,7 @@ def serialize_queues(instance_number, queues):
                 queue_name=q.name,
                 registry_name="started",
                 per_page="8",
+                order="asc",
                 page="1",
             ),
             deferred_job_registry_count=DeferredJobRegistry(q.name).count,
@@ -161,6 +164,7 @@ def serialize_queues(instance_number, queues):
                 queue_name=q.name,
                 registry_name="deferred",
                 per_page="8",
+                order="asc",
                 page="1",
             ),
             finished_job_registry_count=FinishedJobRegistry(q.name).count,
@@ -170,6 +174,7 @@ def serialize_queues(instance_number, queues):
                 queue_name=q.name,
                 registry_name="finished",
                 per_page="8",
+                order="asc",
                 page="1",
             ),
             canceled_job_registry_count=CanceledJobRegistry(q.name).count,
@@ -179,6 +184,7 @@ def serialize_queues(instance_number, queues):
                 queue_name=q.name,
                 registry_name="canceled",
                 per_page="8",
+                order="asc",
                 page="1",
             ),
             scheduled_job_registry_count=ScheduledJobRegistry(q.name).count,
@@ -188,6 +194,7 @@ def serialize_queues(instance_number, queues):
                 queue_name=q.name,
                 registry_name="scheduled",
                 per_page="8",
+                order="asc",
                 page="1",
             ),
         )
@@ -248,7 +255,7 @@ def favicon():
     )
 
 
-def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
+def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page, order):
     queue = Queue(queue_name, serializer=config.serializer)
     if registry_name != "queued":
         if per_page >= 0:
@@ -270,7 +277,18 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page):
         current_queue = queue
     total_items = current_queue.count
 
-    job_ids = current_queue.get_job_ids(offset, per_page)
+
+    if order == 'dsc':
+        end = total_items - offset
+        start = max(0, end - per_page)
+    else:
+        start = offset
+        end = start + per_page
+
+    job_ids = current_queue.get_job_ids(start, end)
+    if order == 'dsc':
+        job_ids.reverse()
+
     current_queue_jobs = [queue.fetch_job(job_id) for job_id in job_ids]
     jobs = [serialize_job(job) for job in current_queue_jobs if job]
 
@@ -341,13 +359,14 @@ def workers_overview(instance_number):
         "queue_name": None,
         "registry_name": "queued",
         "per_page": "8",
+        "order": "asc",
         "page": "1",
     },
 )
 @blueprint.route(
-    "/<int:instance_number>/view/jobs/<queue_name>/<registry_name>/<int:per_page>/<int:page>"
+    "/<int:instance_number>/view/jobs/<queue_name>/<registry_name>/<int:per_page>/<order>/<int:page>"
 )
-def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
+def jobs_overview(instance_number, queue_name, registry_name, per_page, order, page):
     if queue_name is None:
         queue = Queue(serializer=config.serializer)
     else:
@@ -360,6 +379,7 @@ def jobs_overview(instance_number, queue_name, registry_name, per_page, page):
             queues=Queue.all(),
             queue=queue,
             per_page=per_page,
+            order=order,
             page=page,
             registry_name=registry_name,
             rq_url_prefix=url_for(".queues_overview"),
@@ -482,15 +502,16 @@ def list_queues(instance_number):
 
 
 @blueprint.route(
-    "/<int:instance_number>/data/jobs/<queue_name>/<registry_name>/<per_page>/<page>.json"
+    "/<int:instance_number>/data/jobs/<queue_name>/<registry_name>/<per_page>/<order>/<page>.json"
 )
 @jsonify
-def list_jobs(instance_number, queue_name, registry_name, per_page, page):
+def list_jobs(instance_number, queue_name, registry_name, per_page, order, page):
     current_page = int(page)
     per_page = int(per_page)
     offset = (current_page - 1) * per_page
+
     total_items, jobs = get_queue_registry_jobs_count(
-        queue_name, registry_name, offset, per_page
+        queue_name, registry_name, offset, per_page, order
     )
 
     pages_numbers_in_window = pagination_window(total_items, current_page, per_page)
@@ -503,6 +524,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
                 queue_name=queue_name,
                 registry_name=registry_name,
                 per_page=per_page,
+                order=order,
                 page=p,
             ),
         )
@@ -519,6 +541,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
                 queue_name=queue_name,
                 registry_name=registry_name,
                 per_page=per_page,
+                order=order,
                 page=(current_page - 1),
             )
         )
@@ -532,6 +555,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
                 queue_name=queue_name,
                 registry_name=registry_name,
                 per_page=per_page,
+                order=order,
                 page=(current_page + 1),
             )
         )
@@ -543,6 +567,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
             queue_name=queue_name,
             registry_name=registry_name,
             per_page=per_page,
+            order=order,
             page=1,
         )
     )
@@ -553,6 +578,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, page):
             queue_name=queue_name,
             registry_name=registry_name,
             per_page=per_page,
+            order=order,
             page=last_page,
         )
     )

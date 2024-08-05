@@ -1,4 +1,5 @@
 import json
+import time
 import unittest
 
 import redis
@@ -21,12 +22,14 @@ class BasicTestCase(unittest.TestCase):
     def setUp(self):
         self.app = make_flask_app(None, None, None, '')
         self.app.testing = True
-        self.app.config['RQ_DASHBOARD_REDIS_URL'] = 'redis://127.0.0.1'
+        self.app.config['RQ_DASHBOARD_REDIS_URL'] = ['redis://127.0.0.1']
         self.app.redis_conn = self.get_redis_client()
         push_connection(self.get_redis_client())
         self.client = self.app.test_client()
 
     def tearDown(self):
+        q = Queue(connection=self.app.redis_conn)
+        q.empty()
         pop_connection()
 
     def test_dashboard_ok(self):
@@ -51,9 +54,9 @@ class BasicTestCase(unittest.TestCase):
     def test_queued_jobs_list(self):
         response_dashboard = self.client.get('/0/view/jobs')
         self.assertEqual(response_dashboard.status_code, HTTP_OK)
-        response_queued = self.client.get('/0/view/jobs/default/queued/8/1')
+        response_queued = self.client.get('/0/view/jobs/default/queued/8/asc/1')
         self.assertEqual(response_queued.status_code, HTTP_OK)
-        response = self.client.get('/0/data/jobs/default/queued/8/1.json')
+        response = self.client.get('/0/data/jobs/default/queued/8/asc/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
@@ -79,7 +82,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response_del.status_code, HTTP_OK)
 
     def test_registry_jobs_list(self):
-        response = self.client.get('/0/data/jobs/default/failed/8/1.json')
+        response = self.client.get('/0/data/jobs/default/failed/8/asc/1.json')
         self.assertEqual(response.status_code, HTTP_OK)
         data = json.loads(response.data.decode('utf8'))
         self.assertIsInstance(data, dict)
@@ -120,6 +123,26 @@ class BasicTestCase(unittest.TestCase):
             ),
             [expected_redis_instance, expected_redis_instance, expected_redis_instance],
         )
+    
+    def test_job_sort_order(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job_ids = []
+        for _ in range(3):
+            job = q.enqueue(some_work)
+            job_ids.append(job.id)
+            time.sleep(2)
+
+        response_asc = self.client.get('/0/data/jobs/default/queued/3/asc/1.json')
+        self.assertEqual(response_asc.status_code, HTTP_OK)
+        data_asc = json.loads(response_asc.data.decode('utf8'))
+        self.assertEqual(job_ids, [job['id'] for job in data_asc['jobs']])
+
+        response_dsc = self.client.get('/0/data/jobs/default/queued/10/dsc/1.json')
+        self.assertEqual(response_dsc.status_code, HTTP_OK)
+        data_dsc = json.loads(response_dsc.data.decode('utf8'))
+        self.assertEqual(job_ids[::-1], [job['id'] for job in data_dsc['jobs']])
 
 
 __all__ = [
