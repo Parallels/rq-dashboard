@@ -204,12 +204,13 @@ def serialize_date(dt):
     return arrow.get(dt).to("UTC").datetime.isoformat()
 
 
-def serialize_job(job):
+def serialize_job(job: Job):
+    latest_result = job.latest_result()
     return dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
         ended_at=serialize_date(job.ended_at),
-        exc_info=str(job.exc_info) if job.exc_info else None,
+        exc_info=str(latest_result.exc_string) if latest_result else None,
         description=job.description,
     )
 
