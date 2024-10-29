@@ -3,7 +3,7 @@ import time
 import unittest
 
 import redis
-from rq import Queue, Worker, pop_connection, push_connection
+from rq import Queue, Worker
 
 from rq_dashboard.cli import make_flask_app
 from rq_dashboard.web import escape_format_instance_list
@@ -24,13 +24,12 @@ class BasicTestCase(unittest.TestCase):
         self.app.testing = True
         self.app.config['RQ_DASHBOARD_REDIS_URL'] = ['redis://127.0.0.1']
         self.app.redis_conn = self.get_redis_client()
-        push_connection(self.get_redis_client())
         self.client = self.app.test_client()
 
     def tearDown(self):
         q = Queue(connection=self.app.redis_conn)
         q.empty()
-        pop_connection()
+
 
     def test_dashboard_ok(self):
         response = self.client.get('/')
@@ -89,7 +88,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertIn('jobs', data)
 
     def test_worker_python_version_field(self):
-        w = Worker(['q'])
+        w = Worker(['q'], connection=self.app.redis_conn)
         w.register_birth()
         response = self.client.get('/0/data/workers.json')
         data = json.loads(response.data.decode('utf8'))
@@ -100,7 +99,7 @@ class BasicTestCase(unittest.TestCase):
         w.register_death()
 
     def test_worker_version_field(self):
-        w = Worker(['q'])
+        w = Worker(['q'], connection=self.app.redis_conn)
         w.register_birth()
         response = self.client.get('/0/data/workers.json')
         data = json.loads(response.data.decode('utf8'))
