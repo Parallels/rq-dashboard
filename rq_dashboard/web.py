@@ -210,7 +210,7 @@ def serialize_job(job: Job):
         id=job.id,
         created_at=serialize_date(job.created_at),
         ended_at=serialize_date(job.ended_at),
-        exc_info=str(latest_result.exc_string) if latest_result else None,
+        exc_info=latest_result.exc_string if latest_result else None,
         description=job.description,
     )
 
@@ -601,6 +601,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, order, page)
 @jsonify
 def job_info(instance_number, job_id):
     job = Job.fetch(job_id, serializer=config.serializer, connection=current_app.redis_conn)
+    latest_result = job.latest_result()
     result = dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
@@ -609,7 +610,7 @@ def job_info(instance_number, job_id):
         origin=job.origin,
         status=job.get_status(),
         result=job.return_value(),
-        exc_info=str(job.exc_info) if job.exc_info else None,
+        exc_info=latest_result.exc_string if latest_result else None,
         description=job.description,
         metadata=json.dumps(job.get_meta()),
     )
