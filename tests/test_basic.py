@@ -10,7 +10,7 @@ from rq_dashboard.web import escape_format_instance_list
 
 
 HTTP_OK = 200
-
+REGISTRY_NAMES = ["failed", "deferred", "scheduled", "queued", "started", "finished", "canceled"]
 class BasicTestCase(unittest.TestCase):
     redis_client = None
 
@@ -81,11 +81,12 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response_del.status_code, HTTP_OK)
 
     def test_registry_jobs_list(self):
-        response = self.client.get('/0/data/jobs/default/failed/8/asc/1.json')
-        self.assertEqual(response.status_code, HTTP_OK)
-        data = json.loads(response.data.decode('utf8'))
-        self.assertIsInstance(data, dict)
-        self.assertIn('jobs', data)
+        for registry_name in REGISTRY_NAMES:
+            response = self.client.get(f'/0/data/jobs/default/{registry_name}/8/asc/1.json')
+            self.assertEqual(response.status_code, HTTP_OK)
+            data = json.loads(response.data.decode('utf8'))
+            self.assertIsInstance(data, dict)
+            self.assertIn('jobs', data)
 
     def test_worker_python_version_field(self):
         w = Worker(['q'], connection=self.app.redis_conn)
@@ -143,6 +144,58 @@ class BasicTestCase(unittest.TestCase):
         data_dsc = json.loads(response_dsc.data.decode('utf8'))
         self.assertEqual(job_ids[::-1], [job['id'] for job in data_dsc['jobs']])
 
+    def test_job_info(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job = q.enqueue(some_work)
+        job_info_url = f'/0/data/job/{job.id}.json'
+        response_info = self.client.get(job_info_url)
+        self.assertEqual(response_info.status_code, HTTP_OK)
+
+    def test_compact_queue(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        q.enqueue(some_work)
+        compact_queue_url = f"/queue/{q.name}/compact"
+        response_compact = self.client.post(compact_queue_url)
+        self.assertEqual(response_compact.status_code, HTTP_OK)
+
+    def test_empty_queue(self):
+        for registry_name in REGISTRY_NAMES:
+            response = self.client.post(f'/queue/default/{registry_name}/empty')
+            self.assertEqual(response.status_code, HTTP_OK)
+
+    def test_requeue_all(self):
+        def some_failing_work():
+            raise Exception
+        q = Queue(connection=self.app.redis_conn)
+        job = q.enqueue(some_failing_work)
+        worker = Worker([q], connection=self.app.redis_conn)
+        worker.execute_job(job, q)
+        requeue_all_url = f"/requeue/{q.name}"
+        for method in (self.client.post, self.client.get):
+            response = method(requeue_all_url)
+            self.assertEqual(response.status_code, HTTP_OK)
+
+    def test_requeue_one(self):
+        def some_failing_work():
+            raise Exception
+        q = Queue(connection=self.app.redis_conn)
+        job = q.enqueue(some_failing_work)
+        worker = Worker([q], connection=self.app.redis_conn)
+        worker.execute_job(job, q)
+        requeue_one_url = f"/job/{job.id}/requeue"
+        response = self.client.post(requeue_one_url)
+        self.assertEqual(response.status_code, HTTP_OK)
+
+    def test_workers_overview(self):
+        workers_overview_url = "/0/view/workers"
+        response = self.client.get(workers_overview_url)
+        self.assertEqual(response.status_code, HTTP_OK)
+        
+        
 
 __all__ = [
     'BasicTestCase',
