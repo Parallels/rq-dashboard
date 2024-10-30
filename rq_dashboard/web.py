@@ -210,7 +210,7 @@ def serialize_job(job: Job):
         id=job.id,
         created_at=serialize_date(job.created_at),
         ended_at=serialize_date(job.ended_at),
-        exc_info=str(latest_result.exc_string) if latest_result else None,
+        exc_info=latest_result.exc_string if latest_result else None,
         description=job.description,
     )
 
@@ -336,7 +336,7 @@ def workers_overview(instance_number):
             "rq_dashboard/workers.html",
             current_instance=instance_number,
             instance_list=escape_format_instance_list(current_app.config.get("RQ_DASHBOARD_REDIS_URL")),
-            workers=Worker.all(),
+            workers=Worker.all(connection=current_app.redis_conn),
             rq_url_prefix=url_for(".queues_overview"),
             rq_dashboard_version=rq_dashboard_version,
             rq_version=rq_version,
@@ -440,7 +440,7 @@ def requeue_job_view(job_id):
 @blueprint.route("/requeue/<queue_name>", methods=["GET", "POST"])
 @jsonify
 def requeue_all(queue_name):
-    fq = Queue(queue_name, serializer=config.serializer).failed_job_registry
+    fq = Queue(queue_name, serializer=config.serializer, connection=current_app.redis_conn).failed_job_registry
     job_ids = fq.get_job_ids()
     count = len(job_ids)
     for job_id in job_ids:
@@ -453,30 +453,30 @@ def requeue_all(queue_name):
 @jsonify
 def empty_queue(queue_name, registry_name):
     if registry_name == "queued":
-        q = Queue(queue_name, serializer=config.serializer)
+        q = Queue(queue_name, serializer=config.serializer, connection=current_app.redis_conn)
         q.empty()
     elif registry_name == "failed":
-        registry = FailedJobRegistry(queue_name)
+        registry = FailedJobRegistry(queue_name, connection=current_app.redis_conn)
         for id in registry.get_job_ids():
             delete_job_view(id, registry)
     elif registry_name == "deferred":
-        registry = DeferredJobRegistry(queue_name)
+        registry = DeferredJobRegistry(queue_name, connection=current_app.redis_conn)
         for id in registry.get_job_ids():
             delete_job_view(id, registry)
     elif registry_name == "started":
-        registry = StartedJobRegistry(queue_name)
+        registry = StartedJobRegistry(queue_name, connection=current_app.redis_conn)
         for id in registry.get_job_ids():
             delete_job_view(id, registry)
     elif registry_name == "finished":
-        registry = FinishedJobRegistry(queue_name)
+        registry = FinishedJobRegistry(queue_name, connection=current_app.redis_conn)
         for id in registry.get_job_ids():
             delete_job_view(id, registry)
     elif registry_name == "canceled":
-        registry = CanceledJobRegistry(queue_name)
+        registry = CanceledJobRegistry(queue_name, connection=current_app.redis_conn)
         for id in registry.get_job_ids():
             delete_job_view(id, registry)
     elif registry_name == "scheduled":
-        registry = ScheduledJobRegistry(queue_name)
+        registry = ScheduledJobRegistry(queue_name, connection=current_app.redis_conn)
         for id in registry.get_job_ids():
             delete_job_view(id, registry)
 
@@ -486,7 +486,7 @@ def empty_queue(queue_name, registry_name):
 @blueprint.route("/queue/<queue_name>/compact", methods=["POST"])
 @jsonify
 def compact_queue(queue_name):
-    q = Queue(queue_name, serializer=config.serializer)
+    q = Queue(queue_name, serializer=config.serializer, connection=current_app.redis_conn)
     q.compact()
     return dict(status="OK")
 
@@ -600,7 +600,8 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, order, page)
 @blueprint.route("/<int:instance_number>/data/job/<job_id>.json")
 @jsonify
 def job_info(instance_number, job_id):
-    job = Job.fetch(job_id, serializer=config.serializer)
+    job = Job.fetch(job_id, serializer=config.serializer, connection=current_app.redis_conn)
+    latest_result = job.latest_result()
     result = dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
@@ -609,7 +610,7 @@ def job_info(instance_number, job_id):
         origin=job.origin,
         status=job.get_status(),
         result=job.return_value(),
-        exc_info=str(job.exc_info) if job.exc_info else None,
+        exc_info=latest_result.exc_string if latest_result else None,
         description=job.description,
         metadata=json.dumps(job.get_meta()),
     )
