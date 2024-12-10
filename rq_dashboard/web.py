@@ -620,7 +620,7 @@ def job_info(instance_number, job_id):
         status = []
         for dep_id in dep_ids:
             try:
-                _ = Job.fetch(dep_id, serializer=config.serializer)
+                _ = Job.fetch(dep_id, serializer=config.serializer, connection=current_app.redis_conn)
                 status.append('active')
             except NoSuchJobError:
                 status.append('expired')
