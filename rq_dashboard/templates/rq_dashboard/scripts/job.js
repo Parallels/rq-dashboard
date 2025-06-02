@@ -8,7 +8,7 @@
     var reload_job_info = function(done) {
         api.getJob({{ id|tojson|safe }}, function(job, err) {
             if (err) {
-                return done();
+                return;
             }
             onJobLoaded(job, done);
         });
