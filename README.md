@@ -156,6 +156,130 @@ PrivateTmp=no
 * `--debug`,`-v` are optional -- they will write `stdout` to your specified files.
 * `rq_settings_dashboard` is a Python file, with settings defined. You can use options that are available as environmental variables. (EX. `RQ_DASHBOARD_REDIS_PASSWORD = password`)
 
+
+Running as Container in Docker Compose
+--------------------------------------
+
+Running the dashboard as an isolated service can be easier than embedding the
+blueprint inside an existing Flask application. You can:
+
+- update the UI independently of your main project—mount the repo into the
+  container and a `git pull` refreshes the running dashboard;
+- keep Python dependencies for the dashboard separate from the rest of your
+  stack;
+- front the dashboard with any reverse proxy (Caddy, Nginx, Traefik, etc.)
+  without touching your core application code.
+
+### Why `rq_dashboard/app.py` exists
+
+The upstream project exposes only a Flask blueprint. The application factory in
+`rq_dashboard/app.py` wraps that blueprint so that:
+
+- Gunicorn (or any other WSGI server) can import a callable
+  `rq_dashboard.app:create_app()` just like the rest of your services;
+- static assets resolve under `/rq-dashboard/static`, which is required when
+  the service sits behind a reverse proxy that adds a URL prefix;
+- Redis credentials and other `RQ_DASHBOARD_*` settings are centralised so they
+  can be supplied via environment variables.
+
+Skip `app.py` and you lose the callable for Gunicorn and the static URLs break
+as soon as the app is mounted anywhere other than `/`.
+
+### Dockerfile
+
+Build the image from a minimal Dockerfile that installs the published
+requirements and Gunicorn. Copying only `requirements.txt` keeps the build
+cache small while the bind mount supplies live source code:
+
+```Dockerfile
+# docker/Dockerfile.rq-dashboard
+FROM python:3.8-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    RQ_DASHBOARD_URL_PREFIX=/rq-dashboard
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        bash \
+        gcc \
+        libc-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /rq-dashboard
+
+COPY rq-dashboard/requirements.txt /tmp/rq-dashboard-requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/rq-dashboard-requirements.txt \
+    && pip3 install --no-cache-dir gunicorn
+
+EXPOSE 9181
+```
+
+### Compose service
+
+Add the dashboard as a standalone service that installs the local checkout in
+editable mode and starts Gunicorn with the application factory. The example
+below assumes the repository is mounted at `./rq-dashboard` relative to the
+compose file and that a `redis` service already exists:
+
+```yaml
+  rq-dashboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.rq-dashboard
+    container_name: rq-dashboard
+    environment:
+      RQ_DASHBOARD_REDIS_URL: redis://redis:6379/0
+      RQ_DASHBOARD_URL_PREFIX: /rq-dashboard
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    volumes:
+      - ../rq-dashboard:/rq-dashboard
+    working_dir: /rq-dashboard
+    command:
+      - gunicorn
+      - --bind
+      - 0.0.0.0:9181
+      - --workers
+      - "2"
+      - --threads
+      - "2"
+      - --timeout
+      - "30"
+      - --log-level
+      - info
+      - rq_dashboard.app:create_app()
+    expose:
+      - "9181"
+    depends_on:
+      redis:
+        condition: service_started
+```
+
+- Mounting the source directory lets you update the dashboard with `git pull`
+  and have the change reflected immediately.
+- `RQ_DASHBOARD_URL_PREFIX` keeps URL generation aligned with the reverse
+  proxy. When using Caddy/NGINX/Traefik, forward `X-Forwarded-Prefix` so the
+  app recognises its mount point.
+- The editable install happens at container startup. If you need faster boots,
+  bake `pip install -e /rq-dashboard` (or `python setup.py develop`) into a
+  custom image instead of doing it at runtime.
+
+### Reverse proxy (Caddy example)
+
+A reverse proxy should forward the original host, protocol, and URL prefix so
+the dashboard emits correct links. A minimal Caddy stanza that publishes the
+service under `/rq-dashboard/` looks like this:
+
+```Caddyfile
+handle /rq-dashboard* {
+    reverse_proxy rq-dashboard:9181 {
+        header_up X-Forwarded-Prefix /rq-dashboard
+        header_up X-Forwarded-Proto {scheme}
+        header_up Host {host}
+    }
+}
+```
+
+Mirror those headers if you are using Nginx, Traefik, or another proxy.
+
 Developing
 ----------
 
