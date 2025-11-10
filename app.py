@@ -8,28 +8,15 @@ from rq_dashboard.web import blueprint as rq_dashboard_blueprint
 
 OIDC_CLIENT_ID = os.environ.get('OIDC_CLIENT_ID')
 OIDC_CLIENT_SECRET = os.environ.get('OIDC_CLIENT_SECRET')
-
-
-# Пример для Google:
-#   'https://accounts.google.com/.well-known/openid-configuration'
-# Пример для Keycloak (realm 'my-realm' на localhost):
-#   'http://localhost:8080/realms/my-realm/.well-known/openid-configuration'
-# Пример для Auth0:
-#   'https://YOUR_DOMAIN.auth0.com/.well-known/openid-configuration'
-# ----------------------------------------------------
 OIDC_SERVER_METADATA_URL = os.environ.get('OIDC_SERVER_METADATA_URL')
 
-# Простая проверка, что все переменные установлены
 if not all([OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_SERVER_METADATA_URL]):
     raise RuntimeError(
         "Ошибка: OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, и OIDC_SERVER_METADATA_URL "
         "должны быть установлены как переменные окружения."
     )
 
-# --- 2. Инициализация Flask и Authlib ---
 app = Flask(__name__)
-# Обязательно установите свой секретный ключ!
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', '!a-very-secret-key-placeholder!')
 
 app.config['RQ_DASHBOARD_REDIS_URL'] = [os.environ.get('RQ_REDIS_URL')]
 
