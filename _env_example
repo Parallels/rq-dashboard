@@ -1,0 +1,4 @@
+OIDC_CLIENT_ID=
+OIDC_CLIENT_SECRET=
+OIDC_SERVER_METADATA_URL=http://localhost:8080/realms/master/.well-known/openid-configuration
+RQ_REDIS_URL='redis://localhost:6379/0'

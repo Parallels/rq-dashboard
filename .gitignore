@@ -13,3 +13,4 @@ dump.rdb
 .python-version
 venv/
 .pytest_cache/
+.env
