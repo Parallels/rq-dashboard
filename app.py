@@ -67,6 +67,6 @@ def require_auth():
 rq_dashboard_blueprint.before_request(require_auth)
 app.register_blueprint(rq_dashboard_blueprint, url_prefix="/dashboard")
 
-# --- 5. Запуск приложения ---
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host='0.0.0.0')
