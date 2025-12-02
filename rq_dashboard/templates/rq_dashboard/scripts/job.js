@@ -25,6 +25,11 @@
         } else {
             job.enqueued_at = '-'
         }
+        if (job.started_at !== null) {
+            job.started_at = toRelative(Date.create(job.started_at)) + ' / ' + toShort(Date.create(job.started_at));
+        } else {
+            job.started_at = '-'
+        }
         if (job.ended_at !== null) {
             job.ended_at = toRelative(Date.create(job.ended_at)) + ' / ' + toShort(Date.create(job.ended_at));
         } else {
