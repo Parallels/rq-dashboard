@@ -133,7 +133,7 @@ def serialize_queues(instance_number, queues):
                 order="asc",
                 page="1",
             ),
-            failed_job_registry_count=FailedJobRegistry(q.name, connection=q.connection).count,
+            failed_job_registry_count=FailedJobRegistry(q.name, connection=q.connection).get_job_count(cleanup=False),
             failed_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -143,7 +143,7 @@ def serialize_queues(instance_number, queues):
                 order="asc",
                 page="1",
             ),
-            started_job_registry_count=StartedJobRegistry(q.name, connection=q.connection).count,
+            started_job_registry_count=StartedJobRegistry(q.name, connection=q.connection).get_job_count(cleanup=False),
             started_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -153,7 +153,7 @@ def serialize_queues(instance_number, queues):
                 order="asc",
                 page="1",
             ),
-            deferred_job_registry_count=DeferredJobRegistry(q.name, connection=q.connection).count,
+            deferred_job_registry_count=DeferredJobRegistry(q.name, connection=q.connection).get_job_count(cleanup=False),
             deferred_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -163,7 +163,7 @@ def serialize_queues(instance_number, queues):
                 order="asc",
                 page="1",
             ),
-            finished_job_registry_count=FinishedJobRegistry(q.name, connection=q.connection).count,
+            finished_job_registry_count=FinishedJobRegistry(q.name, connection=q.connection).get_job_count(cleanup=False),
             finished_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -173,7 +173,7 @@ def serialize_queues(instance_number, queues):
                 order="asc",
                 page="1",
             ),
-            canceled_job_registry_count=CanceledJobRegistry(q.name, connection=q.connection).count,
+            canceled_job_registry_count=CanceledJobRegistry(q.name, connection=q.connection).get_job_count(cleanup=False),
             canceled_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
@@ -183,7 +183,7 @@ def serialize_queues(instance_number, queues):
                 order="asc",
                 page="1",
             ),
-            scheduled_job_registry_count=ScheduledJobRegistry(q.name, connection=q.connection).count,
+            scheduled_job_registry_count=ScheduledJobRegistry(q.name, connection=q.connection).get_job_count(cleanup=False),
             scheduled_url=url_for(
                 ".jobs_overview",
                 instance_number=instance_number,
