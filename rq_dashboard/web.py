@@ -610,6 +610,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, order, page)
 def job_info(instance_number, job_id):
     job = Job.fetch(job_id, serializer=config.serializer, connection=current_app.redis_conn)
     latest_result = job.latest_result()
+    json_encoder = current_app.config.get("RQ_DASHBOARD_JSON_ENCODER", json.JSONEncoder)
     result = dict(
         id=job.id,
         created_at=serialize_date(job.created_at),
@@ -621,7 +622,7 @@ def job_info(instance_number, job_id):
         result=job.return_value(),
         exc_info=latest_result.exc_string if latest_result else None,
         description=job.description,
-        metadata=json.dumps(job.get_meta()),
+        metadata=json.dumps(job.get_meta(), cls=json_encoder)
     )
     dep_ids = [di.decode("utf-8").split(':')[-1].strip() for di in job.dependency_ids]
     if len(dep_ids) > 0:
