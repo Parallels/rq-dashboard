@@ -1,6 +1,7 @@
 import json
 import time
 import unittest
+from unittest.mock import patch
 
 import redis
 from rq import Queue, Worker
@@ -195,7 +196,20 @@ class BasicTestCase(unittest.TestCase):
         response = self.client.get(workers_overview_url)
         self.assertEqual(response.status_code, HTTP_OK)
         
-        
+    def test_registry_cleanup_not_triggered(self):
+        """Verify that the dashboard doesn't trigger registry cleanup.
+
+        Cleanup can cause signal errors in threaded contexts. See:
+        https://github.com/Parallels/rq-dashboard/issues/486
+        """
+        with patch(
+            "rq_dashboard.web.BaseRegistry.get_job_count", return_value=0
+        ) as mock_get_job_count:
+            self.client.get("/0/data/queues.json")
+
+            self.assertTrue(mock_get_job_count.called)
+            for call in mock_get_job_count.call_args_list:
+                self.assertEqual(call.kwargs.get("cleanup"), False)
 
 __all__ = [
     'BasicTestCase',
