@@ -89,6 +89,27 @@ class BasicTestCase(unittest.TestCase):
             self.assertIsInstance(data, dict)
             self.assertIn('jobs', data)
 
+    def test_list_jobs_includes_corrupt_jobs_count(self):
+        """List jobs response includes corrupt_jobs_count (skipped missing/corrupt jobs)."""
+        response = self.client.get('/0/data/jobs/default/queued/8/asc/1.json')
+        self.assertEqual(response.status_code, HTTP_OK)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertIn('corrupt_jobs_count', data)
+        self.assertIsInstance(data['corrupt_jobs_count'], int)
+        self.assertGreaterEqual(data['corrupt_jobs_count'], 0)
+
+    def test_list_jobs_corrupt_jobs_count_value(self):
+        """When get_queue_registry_jobs_count reports skipped jobs, response exposes the count."""
+        with patch(
+            'rq_dashboard.web.get_queue_registry_jobs_count',
+            return_value=(10, [], 3),
+        ):
+            response = self.client.get('/0/data/jobs/default/queued/8/asc/1.json')
+        self.assertEqual(response.status_code, HTTP_OK)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertEqual(data['corrupt_jobs_count'], 3)
+        self.assertEqual(data['jobs'], [])
+
     def test_worker_python_version_field(self):
         w = Worker(['q'], connection=self.app.redis_conn)
         w.register_birth()

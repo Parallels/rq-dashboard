@@ -40,7 +40,7 @@ from rq import (
     Worker,
     requeue_job,
 )
-from rq.exceptions import NoSuchJobError
+from rq.exceptions import DeserializationError, NoSuchJobError
 from rq.job import Job
 from rq.registry import (
     BaseRegistry,
@@ -271,6 +271,8 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page, o
             current_queue = ScheduledJobRegistry(queue_name, connection=connection)
         elif registry_name == "canceled":
             current_queue = CanceledJobRegistry(queue_name, connection=connection)
+        else:
+            current_queue = queue
     else:
         current_queue = queue
 
@@ -278,7 +280,6 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page, o
         total_items = current_queue.get_job_count(cleanup=False)
     else:
         total_items = current_queue.count
-
 
     if order == 'dsc':
         end = total_items - offset
@@ -294,10 +295,18 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page, o
     if order == 'dsc':
         job_ids.reverse()
 
-    current_queue_jobs = [queue.fetch_job(job_id) for job_id in job_ids]
-    jobs = [serialize_job(job) for job in current_queue_jobs if job]
+    corrupt_count = 0
+    current_queue_jobs = []
+    for job_id in job_ids:
+        try:
+            job = queue.fetch_job(job_id)
+            if job:
+                current_queue_jobs.append(job)
+        except (NoSuchJobError, DeserializationError):
+            corrupt_count += 1
+    jobs = [serialize_job(job) for job in current_queue_jobs]
 
-    return (total_items, jobs)
+    return (total_items, jobs, corrupt_count)
 
 
 def escape_format_instance_list(url_list):
@@ -515,7 +524,7 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, order, page)
     per_page = int(per_page)
     offset = (current_page - 1) * per_page
 
-    total_items, jobs = get_queue_registry_jobs_count(
+    total_items, jobs, corrupt_count = get_queue_registry_jobs_count(
         queue_name, registry_name, offset, per_page, order, current_app.redis_conn
     )
 
@@ -601,7 +610,11 @@ def list_jobs(instance_number, queue_name, registry_name, per_page, order, page)
     )
 
     return dict(
-        name=queue_name, registry_name=registry_name, jobs=jobs, pagination=pagination
+        name=queue_name,
+        registry_name=registry_name,
+        jobs=jobs,
+        pagination=pagination,
+        corrupt_jobs_count=corrupt_count,
     )
 
 
