@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import patch
 
 import redis
+from rq.exceptions import DeserializationError, NoSuchJobError
 from rq import Queue, Worker
 
 from rq_dashboard.cli import make_flask_app
@@ -80,6 +81,34 @@ class BasicTestCase(unittest.TestCase):
         job_del_url = '/job/' + job.id + '/delete'
         response_del = self.client.post(job_del_url)
         self.assertEqual(response_del.status_code, HTTP_OK)
+
+    def test_delete_nonexistent_job_returns_404(self):
+        """Delete missing job returns 404 with job_not_found (not 500 or 200 ERROR)."""
+        response = self.client.post('/job/nonexistent-job-id/delete')
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertEqual(data, {'error': 'job_not_found'})
+
+    def test_view_nonexistent_job_returns_404(self):
+        """HTML job view for missing job returns 404."""
+        response = self.client.get('/0/view/job/nonexistent-job-id')
+        self.assertEqual(response.status_code, 404)
+
+    def test_job_info_nonexistent_returns_404(self):
+        """JSON job info for missing job returns 404 with job_not_found."""
+        response = self.client.get('/0/data/job/nonexistent-job-id.json')
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertEqual(data, {'error': 'job_not_found'})
+
+    def test_job_info_deserialization_error_returns_409(self):
+        """Corrupt job data returns 409 with job_deserialization_failed."""
+        with patch('rq_dashboard.web.Job') as mock_job:
+            mock_job.fetch.side_effect = DeserializationError()
+            response = self.client.get('/0/data/job/any-id.json')
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data.decode('utf8'))
+        self.assertEqual(data, {'error': 'job_deserialization_failed'})
 
     def test_registry_jobs_list(self):
         for registry_name in REGISTRY_NAMES:

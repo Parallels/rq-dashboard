@@ -40,7 +40,7 @@ from rq import (
     Worker,
     requeue_job,
 )
-from rq.exceptions import NoSuchJobError
+from rq.exceptions import DeserializationError, NoSuchJobError
 from rq.job import Job
 from rq.registry import (
     BaseRegistry,
@@ -67,6 +67,27 @@ class Config:
     serializer = DefaultSerializer
 
 config: Config = Config()
+
+
+@blueprint.errorhandler(NoSuchJobError)
+def handle_no_such_job(exc):
+    """Return 404 so missing/expired jobs do not result in 500."""
+    return make_response(
+        json.dumps(dict(error="job_not_found")),
+        404,
+        {"Content-Type": "application/json", "Cache-Control": "no-store"},
+    )
+
+
+@blueprint.errorhandler(DeserializationError)
+def handle_deserialization_error(exc):
+    """Return 409 so corrupt job data does not result in 500."""
+    return make_response(
+        json.dumps(dict(error="job_deserialization_failed")),
+        409,
+        {"Content-Type": "application/json", "Cache-Control": "no-store"},
+    )
+
 
 # @blueprint.before_app_first_request
 def setup_rq_connection(current_app):
@@ -427,14 +448,8 @@ def job_view(instance_number, job_id):
 @check_delete_enable
 @jsonify
 def delete_job_view(job_id, registry=None):
-    try:
-        job = Job.fetch(job_id, connection=current_app.redis_conn)
-        job.delete()
-    except NoSuchJobError:
-        if registry:
-            registry.remove(job_id)
-        return dict(status="ERROR")
-
+    job = Job.fetch(job_id, connection=current_app.redis_conn)
+    job.delete()
     return dict(status="OK")
 
 
