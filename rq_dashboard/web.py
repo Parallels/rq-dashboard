@@ -634,7 +634,10 @@ def job_info(instance_number, job_id):
         description=format_job_description(job),
         metadata=json.dumps(job.get_meta(), cls=json_encoder)
     )
-    dep_ids = [di.decode("utf-8").split(':')[-1].strip() for di in job.dependency_ids]
+    dep_ids = [
+        (di.decode("utf-8") if isinstance(di, bytes) else di).split(':')[-1].strip()
+        for di in job.dependency_ids
+    ]
     if len(dep_ids) > 0:
         result["depends_on"] = dep_ids
         status = []

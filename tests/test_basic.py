@@ -1,7 +1,7 @@
 import json
 import time
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 
 import redis
 from rq import Queue, Worker
@@ -153,6 +153,32 @@ class BasicTestCase(unittest.TestCase):
         job_info_url = f'/0/data/job/{job.id}.json'
         response_info = self.client.get(job_info_url)
         self.assertEqual(response_info.status_code, HTTP_OK)
+
+    def test_job_info_with_dependency(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job1 = q.enqueue(some_work)
+        job2 = q.enqueue(some_work, depends_on=job1)
+        job_info_url = f'/0/data/job/{job2.id}.json'
+        response_info = self.client.get(job_info_url)
+        self.assertEqual(response_info.status_code, HTTP_OK)
+
+    def test_job_info_with_dependency_str(self):
+        """Simulate rq >= 2.6, where dependency_ids returns str, not bytes."""
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job1 = q.enqueue(some_work)
+        job2 = q.enqueue(some_work, depends_on=job1)
+        with patch(
+                'rq.job.Job.dependency_ids',
+                new_callable=PropertyMock,
+                return_value=[f'{job1.id}'],
+        ):
+            job_info_url = f'/0/data/job/{job2.id}.json'
+            response_info = self.client.get(job_info_url)
+            self.assertEqual(response_info.status_code, HTTP_OK)
 
     def test_compact_queue(self):
         def some_work():
