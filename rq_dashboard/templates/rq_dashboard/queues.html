@@ -31,7 +31,7 @@
 
     <script name="queue-row" type="text/template">
         <tr data-role="queue">
-        <td><%= d.name %></td>
+        <td><%= $('<div/>').text(d.name).html() %></td>
         <td class="narrow"> <a href="<%= d.queued_url %>"><%= d.count %></a></td>
         <td class="narrow"> <a href="<%= d.deferred_url %>"><%= d.deferred_job_registry_count %></a></td>
         <td class="narrow"> <a href="<%= d.scheduled_url %>"><%= d.scheduled_job_registry_count %></a></td>

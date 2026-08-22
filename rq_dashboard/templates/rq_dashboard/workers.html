@@ -29,21 +29,21 @@
 
     <script name="worker-row" type="text/template">
         <tr data-role="worker">
-            <td <% if (d.version && d.python_version) { %>title ="RQ <%= d.version %> / Python <%= d.python_version %>" <% } %>>
-                <%= d.name %>
+            <td <% if (d.version && d.python_version) { %>title ="RQ <%= _.escape(d.version) %> / Python <%= _.escape(d.python_version) %>" <% } %>>
+                <%= $('<div/>').text(d.name).html() %>
             </td>
             
             <% if (d.current_job !== 'idle') { %>
-            <td title="Job ID: <%= d.current_job.job_id %>&#013;&#010;Description: <% if (d.current_job.description){ %> <%- d.current_job.description %> <% } %>&#013;&#010;Created at: <%= toRelative(d.current_job.created_at) %>&#013;&#010;">
+            <td title="Job ID: <%= _.escape(d.current_job.job_id) %>&#013;&#010;Description: <% if (d.current_job.description){ %> <%= $('<div/>').text(d.current_job.description).html() %> <% } %>&#013;&#010;Created at: <%= toRelative(d.current_job.created_at) %>&#013;&#010;">
                 <a href="<%= url_for_single_job_view(d.current_job.job_id) %>">
-                    <%= d.current_job.call_string %>
+                    <%= $('<div/>').text(d.current_job.call_string).html() %>
                 </a>
             </td>
             <% } else { %>
             <td><%= d.current_job %></td>
             <% } %>
 
-            <td><%= d.queues.join(', ') %></td>
+            <td><%= $('<div/>').text(d.queues.join(', ')).html() %></td>
         </tr>
     </script>
 
