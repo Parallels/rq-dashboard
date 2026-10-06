@@ -20,12 +20,12 @@
     <script name="job-info" type="text/template">
         <span class="col-6">
             <p><strong>Description</strong>:<br>
-                <div class="description-scroll"><%= d.description %></div>
+                <div class="description-scroll"><%= $('<div/>').text(d.description).html() %></div>
             </p>
-            <p><strong>Origin queue</strong>:<br><%= d.origin %></p>
-            <p><strong>Status</strong>:<br><%= d.status %></p>
-            <p><strong>Result</strong>:<br><pre><%= JSON.stringify(d.result, null, 2) %></pre></p>
-            <p><strong>Metadata</strong>:<br><%= d.metadata %></p>
+            <p><strong>Origin queue</strong>:<br><%= $('<div/>').text(d.origin).html() %></p>
+            <p><strong>Status</strong>:<br><%= $('<div/>').text(d.status).html() %></p>
+            <p><strong>Result</strong>:<br><pre><%= $('<div/>').text(JSON.stringify(d.result, null, 2)).html() %></pre></p>
+            <p><strong>Metadata</strong>:<br><%= $('<div/>').text(d.metadata).html() %></p>
             <p><strong>Depends on</strong>:</p>
                 <% if (d.depends_on) { %>
                     <ul>
@@ -35,9 +35,9 @@
                                 var status = d.depends_on_status[i].trim();
                         %>
                             <% if (status === "active") { %>
-                                <li><a href="<%= url_for_single_job_view(jobId) %>"><%= jobId %></a></li>
+                                <li><a href="<%= url_for_single_job_view(jobId) %>"><%= $('<div/>').text(jobId).html() %></a></li>
                             <% } else { %>
-                                <li><%= jobId %> (Expired)</li>
+                                <li><%= $('<div/>').text(jobId).html() %> (Expired)</li>
                             <% } %>
                         <% } %>
                     </ul>
@@ -51,7 +51,7 @@
         </span>
         <span class = "row col-12">
             <p><strong>Exception Info</strong>:</p>
-            <pre class="exc_info col-12"><%= d.exc_info %></pre>
+            <pre class="exc_info col-12"><%= $('<div/>').text(d.exc_info).html() %></pre>
         </span>
 
     </script>

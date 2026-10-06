@@ -72,6 +72,23 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, HTTP_OK)
         job.delete()
 
+    def test_single_job_view_escaping(self):
+        def some_work():
+            return
+        q = Queue(connection=self.app.redis_conn)
+        job = q.enqueue(some_work, description="<script>alert('xss')</script>")
+        job_url = '/0/view/job/' + job.id
+        response = self.client.get(job_url)
+        self.assertEqual(response.status_code, HTTP_OK)
+        content = response.data.decode('utf8')
+        self.assertIn("$('<div/>').text(d.description).html()", content)
+        self.assertIn("$('<div/>').text(d.exc_info).html()", content)
+        self.assertIn("$('<div/>').text(d.metadata).html()", content)
+        self.assertNotIn("<%= d.description %>", content)
+        self.assertNotIn("<%= d.exc_info %>", content)
+        self.assertNotIn("<%= d.metadata %>", content)
+        job.delete()
+
     def test_del_job_mechanism(self):
         def some_work():
             return
