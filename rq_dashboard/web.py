@@ -52,7 +52,6 @@ from rq.registry import (
     ScheduledJobRegistry,
     StartedJobRegistry,
 )
-from six import string_types
 
 from .legacy_config import upgrade_config
 from .version import VERSION as rq_dashboard_version
@@ -75,7 +74,7 @@ def setup_rq_connection(current_app):
     upgrade_config(current_app)
     # Getting Redis connection parameters for RQ
     redis_url = current_app.config.get("RQ_DASHBOARD_REDIS_URL")
-    if isinstance(redis_url, string_types):
+    if isinstance(redis_url, str):
         current_app.config["RQ_DASHBOARD_REDIS_URL"] = (redis_url,)
         _, current_app.redis_conn = from_url((redis_url,)[0], sentinel_options={'password': current_app.config.get('RQ_DASHBOARD_REDIS_SENTINEL_PASSWORD')}, client_options={'password': current_app.config.get('RQ_DASHBOARD_REDIS_PASSWORD')})
     elif isinstance(redis_url, (tuple, list)):
@@ -313,7 +312,7 @@ def get_queue_registry_jobs_count(queue_name, registry_name, offset, per_page, o
 def escape_format_instance_list(url_list):
     if isinstance(url_list, (list, tuple)):
         url_list = [re.sub(r":\/\/[^@]*@", "://***:***@", x) for x in url_list]
-    elif isinstance(url_list, string_types):
+    elif isinstance(url_list, str):
         url_list = [re.sub(r":\/\/[^@]*@", "://***:***@", url_list)]
     return url_list
 
