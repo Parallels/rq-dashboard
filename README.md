@@ -99,6 +99,13 @@ import rq_dashboard
 app = Flask(__name__)
 app.config.from_object(rq_dashboard.default_settings)
 rq_dashboard.web.setup_rq_connection(app)
+# Optional: require HTTP Basic Auth for the dashboard (e.g. from app config or env)
+if app.config.get("RQ_DASHBOARD_USERNAME"):
+    rq_dashboard.add_basic_auth(
+        rq_dashboard.blueprint,
+        app.config["RQ_DASHBOARD_USERNAME"],
+        app.config["RQ_DASHBOARD_PASSWORD"],
+    )
 app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
 
 @app.route("/")
